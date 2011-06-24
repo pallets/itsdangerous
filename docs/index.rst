@@ -20,6 +20,13 @@ BSD licensed and written by Armin Ronacher though most of the copyright
 for the design and implementation goes to Simon Willison and the other
 amazing Django people that made this library possible.
 
+Installation
+------------
+
+You can get the library directly from PyPI::
+
+    pip install itsdangerous
+
 Signing Interface
 -----------------
 
