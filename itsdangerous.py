@@ -202,11 +202,12 @@ class Serializer(object):
         """Loads the encoded object.  This implementation uses simplejson."""
         return simplejson.loads(payload)
 
-    def dump_payload(self, obj):
+    def dump_payload(self, obj, **kw):
         """Dumps the encoded object into a bytestring.  This implementation
-        uses simplejson.
+        uses simplejson.  Additional keyword arguments are passed to
+        simplejson.
         """
-        return simplejson.dumps(obj)
+        return simplejson.dumps(obj, **kw)
 
     def make_signer(self):
         """A method that creates a new instance of the signer to be used.
@@ -214,7 +215,7 @@ class Serializer(object):
         """
         return Signer(self.secret_key, self.salt)
 
-    def dumps(self, obj):
+    def dumps(self, obj, **kw):
         """Returns URL-safe, sha1 signed base64 compressed JSON string.
 
         If compress is True (the default) checks if compressing using zlib can
@@ -223,12 +224,17 @@ class Serializer(object):
 
         Salt can be used to further salt the hash, in case you're worried
         that the NSA might try to brute-force your SHA-1 protected secret.
+        
+        Additional keyword arguments are passed to dump_payload, then on to
+        simplejson.
         """
-        return self.make_signer().sign(self.dump_payload(obj))
+        return self.make_signer().sign(self.dump_payload(obj, **kw))
 
-    def dump(self, obj, f):
-        """Like :meth:`dumps` but dumps into a file."""
-        f.write(self.dumps(obj))
+    def dump(self, obj, f, **kw):
+        """Like :meth:`dumps` but dumps into a file.
+        
+        Additional keyword arguments are passed along to simplejson."""
+        f.write(self.dumps(obj, **kw))
 
     def loads(self, s):
         """Reverse of :meth:`dumps`, raises :exc:`BadSignature` if the
