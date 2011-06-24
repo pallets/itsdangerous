@@ -27,6 +27,19 @@ You can get the library directly from PyPI::
 
     pip install itsdangerous
 
+Example Use Cases
+-----------------
+
+-   You can serialize and sign a user ID for unsubscribing of newsletters
+    into URLs.  This way you don't need to generate one-time tokens and
+    store them in the database.
+-   Signed objects can be stored in cookies or other untrusted sources
+    which means you don't need to have sessions stored on the server which
+    reduces the number of necessary database queries.
+-   Signed information can safely do a roundtrip between server and client
+    in general which makes them useful for passing server-side state to a
+    client and then back.
+
 Signing Interface
 -----------------
 
