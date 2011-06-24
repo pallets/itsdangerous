@@ -140,8 +140,6 @@ Exceptions
 Useful Helpers
 ~~~~~~~~~~~~~~
 
-.. autoexception:: SignatureExpired
-
 .. autofunction:: base64_encode
 
 .. autofunction:: base64_decode
