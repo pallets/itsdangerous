@@ -27,7 +27,6 @@ except ImportError:
         import json as simplejson
 
 
-BASE62ALPHA = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 EPOCH = time.mktime((2011, 1, 1, 0, 0, 0, 0, 0, 0))
 
 
