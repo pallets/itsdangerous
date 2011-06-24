@@ -77,7 +77,7 @@ class URLSafeSerializerTestCase(URLSafeSerializerMixin, SerializerTestCase):
     serializer_class = idmod.URLSafeSerializer
 
 
-class URLSafeSerializerTestCase(URLSafeSerializerMixin, SerializerTestCase):
+class URLSafeTimedSerializerTestCase(URLSafeSerializerMixin, TimedSerializerTestCase):
     serializer_class = idmod.URLSafeTimedSerializer
 
 
