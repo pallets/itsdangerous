@@ -306,7 +306,7 @@ class URLSafeTimedSerializer(URLSafeSerializerMixin, TimedSerializer):
     """
 
 
-def marrow_render(data, template=None, content_type='text/plain', i18n=None, key=None, salt='itsdangerous', timed=False, safe=False):
+def marrow_render(data, template=None, content_type='text/plain', i18n=None, key=None, salt='itsdangerous', timed=False, safe=False, **kw):
     """Serialization API adapter for ``marrow.templating``.
     
     Expected arguments:
@@ -318,6 +318,8 @@ def marrow_render(data, template=None, content_type='text/plain', i18n=None, key
         salt: hash salting value
         timed: utilize the TimedSerializer if ``True``
         safe: utilize the URLSafeSerializerMixin if ``True``
+    
+    Additional keyword arguments are passed to the underlying serializer.
     
     Sample usage:
     
@@ -342,4 +344,4 @@ def marrow_render(data, template=None, content_type='text/plain', i18n=None, key
     
     serializer = serializers[int(timed)][int(safe)](key, salt)
     
-    return content_type, serializer.dumps(data)
+    return content_type, serializer.dumps(data, **kw)
