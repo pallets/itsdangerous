@@ -34,7 +34,9 @@ EPOCH = time.mktime((2011, 1, 1, 0, 0, 0, 0, 0, 0))
 def constant_time_compare(val1, val2):
     """Returns True if the two strings are equal, False otherwise.
 
-    The time taken is independent of the number of characters that match.
+    The time taken is independent of the number of characters that match.  Do
+    not use this function for anything else than comparision with known
+    length targets.
     """
     if len(val1) != len(val2):
         return False
@@ -45,7 +47,7 @@ def constant_time_compare(val1, val2):
 
 
 class BadSignature(Exception):
-    """Signature does not match"""
+    """This error is raised if a signature does not match"""
 
 
 class SignatureExpired(BadSignature):
@@ -114,6 +116,15 @@ class Signer(object):
             return value
         raise BadSignature('Signature "%s" does not match' % sig)
 
+    def validate(self, signed_value):
+        """Just validates the given signed value.  Returns `True` if the
+        signature exists and is valid, `False` otherwise."""
+        try:
+            self.unsign(signed_value)
+            return True
+        except BadSignature:
+            return False
+
 
 class TimestampSigner(Signer):
     """Works like the regular :class:`Signer` but also records the time
@@ -162,6 +173,15 @@ class TimestampSigner(Signer):
         if return_timestamp:
             return value, self.timestamp_to_datetime(timestamp)
         return value
+
+    def validate(self, signed_value, max_age=None):
+        """Just validates the given signed value.  Returns `True` if the
+        signature exists and is valid, `False` otherwise."""
+        try:
+            self.unsign(signed_value, max_age=max_age)
+            return True
+        except BadSignature:
+            return False
 
 
 class Serializer(object):
