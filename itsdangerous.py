@@ -298,3 +298,42 @@ class URLSafeTimedSerializer(URLSafeSerializerMixin, TimedSerializer):
     safe string consisting of the upper and lowercase character of the
     alphabet as well as ``'_'``, ``'-'`` and ``'.'``.
     """
+
+
+def marrow_render(data, template=None, content_type='text/plain', i18n=None, key=None, salt='itsdangerous', timed=False, safe=False):
+    """Serialization API adapter for ``marrow.templating``.
+    
+    Expected arguments:
+    
+        key: the secret key to use
+    
+    Optional arguments:
+    
+        salt: hash salting value
+        timed: utilize the TimedSerializer if ``True``
+        safe: utilize the URLSafeSerializerMixin if ``True``
+    
+    Sample usage:
+    
+        >>> from marrow.templating.core import Engines
+        >>> render = Engines()
+        >>> render.dangerous(dict(hello="world"), key="test")
+        ('text/plain', '{"hello": "world"}.i7oUbyl26mYKMMfaU-yNLWGSInc')
+    
+    With additional options:
+        
+        >>> from marrow.templating.core import Engines
+        >>> Engines().dangerous(dict(hello="world"), key="test", salt="foo", timed=True, safe=True)
+        ('text/plain', 'eyJoZWxsbyI6IndvcmxkIn0.5hp-.AGgqxapfM5TXZ4bPYkD75usBakE')
+        
+    """
+    
+    if key is None:
+        raise ValueError('You must specify a private key')
+    
+    serializers = [[Serializer,      URLSafeSerializer],
+                   [TimedSerializer, URLSafeTimedSerializer]]
+    
+    serializer = serializers[int(timed)][int(safe)](key, salt)
+    
+    return content_type, serializer.dumps(data)
