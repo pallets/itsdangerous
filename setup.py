@@ -16,5 +16,10 @@ setup(
     classifiers=[
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python'
-    ]
+    ],
+    entry_points={
+        'marrow.templating': [
+            'dangerous = itsdangerous:marrow_render'
+        ]
+    }
 )
