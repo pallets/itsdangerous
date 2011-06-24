@@ -32,7 +32,8 @@ Example Use Cases
 
 -   You can serialize and sign a user ID for unsubscribing of newsletters
     into URLs.  This way you don't need to generate one-time tokens and
-    store them in the database.
+    store them in the database.  Same thing with any kind of activation
+    link for accounts and similar things.
 -   Signed objects can be stored in cookies or other untrusted sources
     which means you don't need to have sessions stored on the server which
     reduces the number of necessary database queries.
