@@ -107,7 +107,7 @@ class Signer(object):
     def unsign(self, signed_value):
         """Unsigns the given string."""
         if isinstance(signed_value, unicode):
-            value = signed_value.encode('utf-8')
+            signed_value = signed_value.encode('utf-8')
         if self.sep not in signed_value:
             raise BadSignature('No "%s" found in value' % self.sep)
         value, sig = signed_value.rsplit(self.sep, 1)

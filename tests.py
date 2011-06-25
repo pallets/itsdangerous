@@ -33,6 +33,15 @@ class SerializerTestCase(unittest.TestCase):
             self.assertRaises(
                 idmod.BadSignature, s.loads, transform(encoded))
 
+    def test_accepts_unicode(self):
+        objects = (['a', 'list'], 'a string', u'a unicode string \u2019',
+                   {'a': 'dictionary'}, 42, 42.5)
+        s = self.serializer_class('Test')
+        for o in objects:
+            value = s.dumps(o)
+            self.assertNotEqual(o, value)
+            self.assertEqual(o, s.loads(unicode(value)))
+
 
 class TimedSerializerTestCase(SerializerTestCase):
     serializer_class = idmod.TimedSerializer
