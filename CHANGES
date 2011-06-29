@@ -1,0 +1,10 @@
+It's Dangerous Changelog
+------------------------
+
+Version 0.10
+~~~~~~~~~~~~
+
+- Refactored interface that the underlying serializers can be swapped by
+  passing in a module instead of having to override the payload loaders
+  and dumpers.  This makes the interface more compatible with Django's
+  recent changes.
