@@ -84,6 +84,15 @@ def bytes_to_int(bytes):
 class Signer(object):
     """This class can sign a string and unsign it and validate the
     signature provided.
+
+    Salt can be used to namespace the hash, so that a signed string is only
+    valid for a given namespace.  Leaving this at the default value or re-using
+    a salt value across different parts of your application where the same
+    signed value in one part can mean something different in another part
+    is a security risk.
+
+    See :ref:`the-salt` for an example of what the salt is doing and how you
+    can utilize it.
     """
 
     def __init__(self, secret_key, salt=None, sep='.'):
@@ -220,9 +229,6 @@ class Serializer(object):
         If compress is True (the default) checks if compressing using zlib can
         save some space. Prepends a '.' to signify compression. This is included
         in the signature, to protect against zip bombs.
-
-        Salt can be used to further salt the hash, in case you're worried
-        that the NSA might try to brute-force your SHA-1 protected secret.
         """
         return self.make_signer().sign(self.dump_payload(obj))
 

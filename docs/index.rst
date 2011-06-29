@@ -119,6 +119,46 @@ this, itsdangerous also provides URL safe serializers:
 >>> s.loads('WzEsMiwzLDRd.wSPHqC0gR7VUqivlSukJ0IeTDgo')
 [1, 2, 3, 4]
 
+.. _the-salt:
+
+The Salt
+--------
+
+All classes also accept a salt argument.  The name might me misleading
+because usually if you think of salts in cryptography you would expect the
+salt to be something that is stored alongside the resulting signed string
+as a way to prevent rainbow table lookups.  Such salts are usually public.
+
+In “itsdangerous” like in the original Django implementation, the salt
+serves a different purpose.  You could describe it as namespacing.  It's
+still not critical if you disclose it because without the secret key it
+does not help an attacker.
+
+Let's assume that you have to links you want to sign.  You have the
+activation link on your system which can activate a user account and then
+you have an upgrade link that can upgrade a user's account to a paid
+account which you send out via email.  If in both cases all you sign is
+the user ID a user could reuse the variable part in the URL from the
+activation link to upgrade the account.  Now you could either put more
+information in there which you sign (like the intention: upgrade or
+activate), but you could also use different salts:
+
+>>> s1 = URLSafeSerializer('secret-key', salt='activate-salt')
+>>> s1.dumps(42)
+'NDI.kubVFOOugP5PAIfEqLJbXQbfTxs'
+>>> s2 = URLSafeSerializer('secret-key', salt='upgrade-salt')
+>>> s2.dumps(42)
+'NDI.7lx-N1P-z2veJ7nT1_2bnTkjGTE'
+>>> s2.loads(s1.dumps(42))
+Traceback (most recent call last):
+  ...
+itsdangerous.BadSignature: Signature "kubVFOOugP5PAIfEqLJbXQbfTxs" does not match
+
+Only the serializer with the same salt can load the value:
+
+>>> s2.loads(s2.dumps(42))
+42
+
 API
 ---
 
