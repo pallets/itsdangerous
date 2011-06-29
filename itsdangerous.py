@@ -201,21 +201,27 @@ class Serializer(object):
     :meth:`dump_payload` functions.
 
     This implementation uses simplejson for dumping and loading.
-    """
 
-    def __init__(self, secret_key, salt='itsdangerous'):
+    .. versionchanged:: 0.
+    """
+    default_serializer = simplejson
+
+    def __init__(self, secret_key, salt='itsdangerous', serializer=None):
         self.secret_key = secret_key
         self.salt = salt
+        if serializer is None:
+            serializer = self.default_serializer
+        self.serializer = serializer
 
     def load_payload(self, payload):
         """Loads the encoded object.  This implementation uses simplejson."""
-        return simplejson.loads(payload)
+        return self.serializer.loads(payload)
 
     def dump_payload(self, obj):
         """Dumps the encoded object into a bytestring.  This implementation
         uses simplejson.
         """
-        return simplejson.dumps(obj)
+        return self.serializer.dumps(obj)
 
     def make_signer(self):
         """A method that creates a new instance of the signer to be used.
@@ -268,6 +274,10 @@ class TimedSerializer(Serializer):
 
 
 class URLSafeSerializerMixin(object):
+    """Mixed in with a regular serializer it will attempt to zlib compress
+    the string to make it shorter if necessary.  It will also base64 encode
+    the string so that it can safely be placed in a URL.
+    """
 
     def load_payload(self, payload):
         decompress = False
@@ -277,10 +287,10 @@ class URLSafeSerializerMixin(object):
         json = base64_decode(payload)
         if decompress:
             json = zlib.decompress(json)
-        return simplejson.loads(json)
+        return super(URLSafeSerializerMixin, self).load_payload(json)
 
     def dump_payload(self, obj):
-        json = simplejson.dumps(obj, separators=(',', ':'))
+        json = super(URLSafeSerializerMixin, self).dump_payload(obj)
         is_compressed = False
         compressed = zlib.compress(json)
         if len(compressed) < (len(json) - 1):
@@ -292,11 +302,26 @@ class URLSafeSerializerMixin(object):
         return base64d
 
 
+class _CompactJSON(object):
+    """Wrapper around simplejson that strips whitespace.
+    """
+
+    def loads(self, payload):
+        return simplejson.loads(payload)
+
+    def dumps(self, obj):
+        return simplejson.dumps(obj, separators=(',', ':'))
+
+
+compact_json = _CompactJSON()
+
+
 class URLSafeSerializer(URLSafeSerializerMixin, Serializer):
     """Works like :class:`Serializer` but dumps and loads into a URL
     safe string consisting of the upper and lowercase character of the
     alphabet as well as ``'_'``, ``'-'`` and ``'.'``.
     """
+    default_serializer = compact_json
 
 
 class URLSafeTimedSerializer(URLSafeSerializerMixin, TimedSerializer):
@@ -304,3 +329,4 @@ class URLSafeTimedSerializer(URLSafeSerializerMixin, TimedSerializer):
     safe string consisting of the upper and lowercase character of the
     alphabet as well as ``'_'``, ``'-'`` and ``'.'``.
     """
+    default_serializer = compact_json

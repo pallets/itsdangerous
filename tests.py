@@ -1,4 +1,5 @@
 import time
+import pickle
 import unittest
 import itsdangerous as idmod
 
@@ -6,10 +7,13 @@ import itsdangerous as idmod
 class SerializerTestCase(unittest.TestCase):
     serializer_class = idmod.Serializer
 
+    def make_serializer(self, *args, **kwargs):
+        return self.serializer_class(*args, **kwargs)
+
     def test_dumps_loads(self):
         objects = (['a', 'list'], 'a string', u'a unicode string \u2019',
                    {'a': 'dictionary'}, 42, 42.5)
-        s = self.serializer_class('Test')
+        s = self.make_serializer('Test')
         for o in objects:
             value = s.dumps(o)
             self.assertNotEqual(o, value)
@@ -26,7 +30,7 @@ class SerializerTestCase(unittest.TestCase):
             'foo': 'bar',
             'baz': 1,
         }
-        s = self.serializer_class('Test')
+        s = self.make_serializer('Test')
         encoded = s.dumps(value)
         self.assertEqual(value, s.loads(encoded))
         for transform in transforms:
@@ -36,7 +40,7 @@ class SerializerTestCase(unittest.TestCase):
     def test_accepts_unicode(self):
         objects = (['a', 'list'], 'a string', u'a unicode string \u2019',
                    {'a': 'dictionary'}, 42, 42.5)
-        s = self.serializer_class('Test')
+        s = self.make_serializer('Test')
         for o in objects:
             value = s.dumps(o)
             self.assertNotEqual(o, value)
@@ -52,7 +56,7 @@ class TimedSerializerTestCase(SerializerTestCase):
         _time = time.time
         time.time = lambda: idmod.EPOCH
         try:
-            s = self.serializer_class(secret_key)
+            s = self.make_serializer(secret_key)
             ts = s.dumps(value)
             self.assertNotEqual(ts, idmod.Serializer(secret_key).dumps(value))
 
@@ -74,12 +78,19 @@ class URLSafeSerializerMixin(object):
                             'ABCDEFGHIJKLMNOPQRSTUVWXYZ_-.')
         objects = (['a', 'list'], 'a string', u'a unicode string \u2019',
                    {'a': 'dictionary'}, 42, 42.5)
-        s = self.serializer_class('Test')
+        s = self.make_serializer('Test')
         for o in objects:
             value = s.dumps(o)
             self.assert_(set(value).issubset(set(allowed)))
             self.assertNotEqual(o, value)
             self.assertEqual(o, s.loads(value))
+
+
+class PickleSerializerMixin(object):
+
+    def make_serializer(self, *args, **kwargs):
+        kwargs.setdefault('serializer', pickle)
+        return super(PickleSerializerMixin, self).make_serializer(*args, **kwargs)
 
 
 class URLSafeSerializerTestCase(URLSafeSerializerMixin, SerializerTestCase):
@@ -88,6 +99,22 @@ class URLSafeSerializerTestCase(URLSafeSerializerMixin, SerializerTestCase):
 
 class URLSafeTimedSerializerTestCase(URLSafeSerializerMixin, TimedSerializerTestCase):
     serializer_class = idmod.URLSafeTimedSerializer
+
+
+class PickleSerializerTestCase(PickleSerializerMixin, SerializerTestCase):
+    pass
+
+
+class PickleTimedSerializerTestCase(PickleSerializerMixin, TimedSerializerTestCase):
+    pass
+
+
+class PickleURLSafeSerializerTestCase(PickleSerializerMixin, URLSafeSerializerTestCase):
+    pass
+
+
+class PickleTimedSerializerTestCase(PickleSerializerMixin, URLSafeTimedSerializerTestCase):
+    pass
 
 
 if __name__ == '__main__':
