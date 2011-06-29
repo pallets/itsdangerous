@@ -113,7 +113,7 @@ class PickleURLSafeSerializerTestCase(PickleSerializerMixin, URLSafeSerializerTe
     pass
 
 
-class PickleTimedSerializerTestCase(PickleSerializerMixin, URLSafeTimedSerializerTestCase):
+class PickleURLSafeTimedSerializerTestCase(PickleSerializerMixin, URLSafeTimedSerializerTestCase):
     pass
 
 
