@@ -159,6 +159,8 @@ Only the serializer with the same salt can load the value:
 >>> s2.loads(s2.dumps(42))
 42
 
+.. include:: ../CHANGES
+
 API
 ---
 
