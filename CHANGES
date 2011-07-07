@@ -1,6 +1,11 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.11
+~~~~~~~~~~~~
+
+- Fixed an uncought value error.
+
 Version 0.10
 ~~~~~~~~~~~~
 

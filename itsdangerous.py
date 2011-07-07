@@ -170,6 +170,8 @@ class TimestampSigner(Signer):
         :class:`datetime.datetime` object in UTC.
         """
         result = Signer.unsign(self, value)
+        if not self.sep in result:
+            raise BadSignature('timestamp missing')
         value, timestamp = result.rsplit(self.sep, 1)
         timestamp = bytes_to_int(base64_decode(timestamp))
         if max_age is not None:
