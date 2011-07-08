@@ -59,7 +59,7 @@ validate the string, use the :meth:`~Signer.unsign` method:
 'my string'
 
 If unicode strings are provided, an implicit encoding to utf-8 happens.
-However after unsigning you don't be able to tell if it was unicode or
+However after unsigning you won't be able to tell if it was unicode or
 a bytestring.
 
 If the unsining fails you will get an exception:
