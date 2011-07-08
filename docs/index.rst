@@ -134,7 +134,7 @@ serves a different purpose.  You could describe it as namespacing.  It's
 still not critical if you disclose it because without the secret key it
 does not help an attacker.
 
-Let's assume that you have to links you want to sign.  You have the
+Let's assume that you have two links you want to sign.  You have the
 activation link on your system which can activate a user account and then
 you have an upgrade link that can upgrade a user's account to a paid
 account which you send out via email.  If in both cases all you sign is
