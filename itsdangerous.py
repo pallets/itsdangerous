@@ -271,8 +271,12 @@ class TimedSerializer(Serializer):
         which is a subclass of :exc:`BadSignature`.  All arguments are
         forwarded to the signer's :meth:`~TimestampSigner.unsign` method.
         """
-        base64d = self.make_signer().unsign(s, max_age, return_timestamp)
-        return self.load_payload(base64d)
+        if return_timestamp:
+            base64d, timestamp = self.make_signer().unsign(s, max_age, return_timestamp)
+            return self.load_payload(base64d), timestamp
+        else:
+            base64d = self.make_signer().unsign(s, max_age, return_timestamp)
+            return self.load_payload(base64d)
 
 
 class URLSafeSerializerMixin(object):

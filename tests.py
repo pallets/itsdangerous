@@ -1,6 +1,7 @@
 import time
 import pickle
 import unittest
+from datetime import datetime
 import itsdangerous as idmod
 
 
@@ -50,25 +51,37 @@ class SerializerTestCase(unittest.TestCase):
 class TimedSerializerTestCase(SerializerTestCase):
     serializer_class = idmod.TimedSerializer
 
+    def setUp(self):
+        self._time = time.time
+        time.time = lambda: idmod.EPOCH
+
+    def tearDown(self):
+        time.time = self._time        
+
     def test_decode_with_timeout(self):
         secret_key = 'predictable-key'
         value = u'hello'
-        _time = time.time
-        time.time = lambda: idmod.EPOCH
-        try:
-            s = self.make_serializer(secret_key)
-            ts = s.dumps(value)
-            self.assertNotEqual(ts, idmod.Serializer(secret_key).dumps(value))
 
-            self.assertEqual(s.loads(ts), value)
-            time.time = lambda: idmod.EPOCH + 10
-            self.assertEqual(s.loads(ts, max_age=11), value)
-            self.assertEqual(s.loads(ts, max_age=10), value)
-            self.assertRaises(
-                idmod.SignatureExpired, s.loads, ts, max_age=9)
-        finally:
-            time.time = _time
+        s = self.make_serializer(secret_key)
+        ts = s.dumps(value)
+        self.assertNotEqual(ts, idmod.Serializer(secret_key).dumps(value))
 
+        self.assertEqual(s.loads(ts), value)
+        time.time = lambda: idmod.EPOCH + 10
+        self.assertEqual(s.loads(ts, max_age=11), value)
+        self.assertEqual(s.loads(ts, max_age=10), value)
+        self.assertRaises(
+            idmod.SignatureExpired, s.loads, ts, max_age=9)
+
+    def test_decode_return_timestamp(self):
+        secret_key = 'predictable-key'
+        value = u'hello'
+
+        s = self.make_serializer(secret_key)
+        ts = s.dumps(value)
+        loaded, timestamp = s.loads(ts, return_timestamp=True)
+        self.assertEqual(loaded, value)
+        self.assertEqual(timestamp, datetime.utcfromtimestamp(time.time()))
 
 
 class URLSafeSerializerMixin(object):
