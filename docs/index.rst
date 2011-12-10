@@ -124,7 +124,7 @@ this, itsdangerous also provides URL safe serializers:
 The Salt
 --------
 
-All classes also accept a salt argument.  The name might me misleading
+All classes also accept a salt argument.  The name might be misleading
 because usually if you think of salts in cryptography you would expect the
 salt to be something that is stored alongside the resulting signed string
 as a way to prevent rainbow table lookups.  Such salts are usually public.
