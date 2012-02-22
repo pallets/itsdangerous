@@ -15,6 +15,7 @@ import hmac
 import zlib
 import time
 from itertools import izip, imap
+from calendar import timegm
 from datetime import datetime
 
 
@@ -27,7 +28,7 @@ except ImportError:
         import json as simplejson
 
 
-EPOCH = time.mktime((2011, 1, 1, 0, 0, 0, 0, 0, 0))
+EPOCH = timegm(datetime(2011, 1, 1).utctimetuple())
 
 
 def constant_time_compare(val1, val2):
