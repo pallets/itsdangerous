@@ -27,7 +27,8 @@ except ImportError:
         import json as simplejson
 
 
-EPOCH = time.mktime((2011, 1, 1, 0, 0, 0, 0, 0, 0))
+# 2011/01/01 in UTC
+EPOCH = 1293840000
 
 
 def constant_time_compare(val1, val2):

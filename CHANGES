@@ -1,6 +1,14 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.12
+~~~~~~~~~~~~
+
+- Fixed a problem with the local timezone being used for the epoch
+  calculation.  This might invalidate some of your signatures if you
+  were not running in UTC timezone.  You can revert to the old behavior
+  by monkey patching itsdangerous.EPOCH.
+
 Version 0.11
 ~~~~~~~~~~~~
 
