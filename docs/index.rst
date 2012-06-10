@@ -4,10 +4,10 @@ itsdangerous
 .. module:: itsdangerous
 
 Sometimes you just want to send some data to untrusted environments.  But
-how to do this?  The trick involves signing.  Given a key only you know
-and some random data, you can cryptographically sign them and, hand it
-over to someone else, and when you get the data back you can easily ensure
-that nobody tampered with it.
+how to do this safely?  The trick involves signing.  Given a key only you
+know, you can cryptographically sign your data and hand it over to someone
+else.  When you get the data back you can easily ensure that nobody tampered
+with it.
 
 Granted, the receiver can decode the contents and look into the package,
 but they can not modify the contents unless they also have your secret
@@ -35,7 +35,7 @@ Example Use Cases
     store them in the database.  Same thing with any kind of activation
     link for accounts and similar things.
 -   Signed objects can be stored in cookies or other untrusted sources
-    which means you don't need to have sessions stored on the server which
+    which means you don't need to have sessions stored on the server, which
     reduces the number of necessary database queries.
 -   Signed information can safely do a roundtrip between server and client
     in general which makes them useful for passing server-side state to a
@@ -44,7 +44,7 @@ Example Use Cases
 Signing Interface
 -----------------
 
-The most basic interface is the signing interface.  With :class:`Signer`
+The most basic interface is the signing interface.  The :class:`Signer` class
 can be used to attach a signature to a specific string:
 
 >>> from itsdangerous import Signer
@@ -73,8 +73,8 @@ Signatures with Timestamps
 --------------------------
 
 If you want to expire signatures you can use the :class:`TimestampSigner`
-which will additionally put a timestamp information in and sign this.
-On unsigning you can validate if the timestamp did not expire:
+class which will additionally put in a timestamp information and sign it.
+On unsigning you can validate that the timestamp did not expire:
 
 >>> from itsdangerous import TimestampSigner
 >>> s = TimestampSigner('secret-key')
@@ -88,9 +88,9 @@ Serialization
 -------------
 
 Because strings are hard to handle this module also provides a
-serilization interface similar to json/pickle and others.  Internally
-it does in fact use simplejson by default which however can be changed
-if you subclass.  The :class:`Serializer` class implements that:
+serialization interface similar to json/pickle and others.  (Internally
+it uses simplejson by default, however this can be changed by subclassing.)
+The :class:`Serializer` class implements that:
 
 >>> from itsdangerous import Serializer
 >>> s = Serializer('secret-key')
@@ -129,7 +129,7 @@ because usually if you think of salts in cryptography you would expect the
 salt to be something that is stored alongside the resulting signed string
 as a way to prevent rainbow table lookups.  Such salts are usually public.
 
-In “itsdangerous” like in the original Django implementation, the salt
+In “itsdangerous”, like in the original Django implementation, the salt
 serves a different purpose.  You could describe it as namespacing.  It's
 still not critical if you disclose it because without the secret key it
 does not help an attacker.
