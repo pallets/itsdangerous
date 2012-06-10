@@ -96,6 +96,12 @@ class Signer(object):
     can utilize it.
     """
 
+    #: The digest method to use for the signer.  This defaults to sha1 but can
+    #: be changed for any other function in the hashlib module.
+    #:
+    #: .. versionadded:: 0.13
+    digest_method = staticmethod(hashlib.sha1)
+
     def __init__(self, secret_key, salt=None, sep='.'):
         self.secret_key = secret_key
         self.sep = sep
@@ -104,8 +110,8 @@ class Signer(object):
 
     def get_signature(self, value):
         """Returns the signature for the given value"""
-        key = hashlib.sha1(self.salt + 'signer' + self.secret_key).digest()
-        mac = hmac.new(key, msg=value, digestmod=hashlib.sha1)
+        key = self.digest_method(self.salt + 'signer' + self.secret_key).digest()
+        mac = hmac.new(key, msg=value, digestmod=self.digest_method)
         return base64_encode(mac.digest())
 
     def sign(self, value):
@@ -233,7 +239,7 @@ class Serializer(object):
         return Signer(self.secret_key, self.salt)
 
     def dumps(self, obj):
-        """Returns URL-safe, sha1 signed base64 compressed JSON string.
+        """Returns URL-safe, signed base64 compressed JSON string.
 
         If compress is True (the default) checks if compressing using zlib can
         save some space. Prepends a '.' to signify compression. This is included
