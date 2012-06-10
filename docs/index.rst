@@ -88,7 +88,7 @@ Serialization
 -------------
 
 Because strings are hard to handle this module also provides a
-serilization interface similar to json/pickle and others.  Internally
+serialization interface similar to json/pickle and others.  Internally
 it does in fact use simplejson by default which however can be changed
 if you subclass.  The :class:`Serializer` class implements that:
 
