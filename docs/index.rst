@@ -13,8 +13,8 @@ Granted, the receiver can decode the contents and look into the package,
 but they can not modify the contents unless they also have your secret
 key.  So if you keep the key secret and complex, you will be fine.
 
-Internally it uses HMAC and SHA1 for signing and bases the implementation
-on the `Django signing module
+Internally itsdangerous uses HMAC and SHA1 for signing and bases the
+implementation on the `Django signing module
 <https://docs.djangoproject.com/en/dev/topics/signing/>`_.  The library is
 BSD licensed and written by Armin Ronacher though most of the copyright
 for the design and implementation goes to Simon Willison and the other
@@ -62,7 +62,7 @@ If unicode strings are provided, an implicit encoding to utf-8 happens.
 However after unsigning you won't be able to tell if it was unicode or
 a bytestring.
 
-If the unsining fails you will get an exception:
+If the unsigning fails you will get an exception:
 
 >>> s.unsign('my string.wh6tMHxLgJqB6oY1uT73iMlyrOX')
 Traceback (most recent call last):
