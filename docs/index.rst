@@ -10,15 +10,15 @@ else.  When you get the data back you can easily ensure that nobody tampered
 with it.
 
 Granted, the receiver can decode the contents and look into the package,
-but they can not modify the contents unless they also have your secret
-key.  So if you keep the key secret and complex, you will be fine.
+but they cannot modify the contents unless they also have your secret
+key.  So, if you keep the key secret and complex, you will be fine.
 
-Internally itsdangerous uses HMAC and SHA1 for signing and bases the
+Internally, itsdangerous uses HMAC and SHA1 for signing and bases the
 implementation on the `Django signing module
 <https://docs.djangoproject.com/en/dev/topics/signing/>`_.  The library is
-BSD licensed and written by Armin Ronacher though most of the copyright
+BSD-licensed and written by Armin Ronacher, though most of the copyright
 for the design and implementation goes to Simon Willison and the other
-amazing Django people that made this library possible.
+amazing Django people who made this library possible.
 
 Installation
 ------------
@@ -32,14 +32,14 @@ Example Use Cases
 
 -   You can serialize and sign a user ID for unsubscribing of newsletters
     into URLs.  This way you don't need to generate one-time tokens and
-    store them in the database.  Same thing with any kind of activation
-    link for accounts and similar things.
--   Signed objects can be stored in cookies or other untrusted sources
-    which means you don't need to have sessions stored on the server, which
-    reduces the number of necessary database queries.
+    store them in the web application's backend.  The same goes for any kind
+    of activation link for accounts and similar things.
+-   Signed objects can be stored in cookies or other untrusted sources. That
+    means you don't need to have sessions stored on the server, which can
+    reduce the number of necessary database queries.
 -   Signed information can safely do a roundtrip between server and client
-    in general which makes them useful for passing server-side state to a
-    client and then back.
+    in general which allows for for passing server-side state to a client and
+    back again.
 
 Signing Interface
 -----------------
@@ -59,10 +59,10 @@ validate the string, use the :meth:`~Signer.unsign` method:
 'my string'
 
 If unicode strings are provided, an implicit encoding to utf-8 happens.
-However after unsigning you won't be able to tell if it was unicode or
+However, after unsigning, you won't be able to tell if the input was unicode or
 a bytestring.
 
-If the unsigning fails you will get an exception:
+If unsigning fails, an exception is raised:
 
 >>> s.unsign('my string.wh6tMHxLgJqB6oY1uT73iMlyrOX')
 Traceback (most recent call last):
@@ -72,9 +72,9 @@ itsdangerous.BadSignature: Signature "wh6tMHxLgJqB6oY1uT73iMlyrOX" does not matc
 Signatures with Timestamps
 --------------------------
 
-If you want to expire signatures you can use the :class:`TimestampSigner`
-class which will additionally put in a timestamp information and sign it.
-On unsigning you can validate that the timestamp did not expire:
+If you want to expire signatures, you can use the :class:`TimestampSigner`
+class which will additionally put in timestamp information and sign it.
+On unsigning, you can validate that the timestamp did not expire:
 
 >>> from itsdangerous import TimestampSigner
 >>> s = TimestampSigner('secret-key')
@@ -87,10 +87,10 @@ itsdangerous.SignatureExpired: Signature age 15 > 5 seconds
 Serialization
 -------------
 
-Because strings are hard to handle this module also provides a
-serialization interface similar to json/pickle and others.  (Internally
-it uses simplejson by default, however this can be changed by subclassing.)
-The :class:`Serializer` class implements that:
+Because strings are hard to handle, this module also provides a
+serialization interface similar to those of the `json`, `pickle`, and other
+modules. (Internally, itsdangerous uses `simplejson` by default, but this
+can be changed by subclassing.) The :class:`Serializer` class implements that:
 
 >>> from itsdangerous import Serializer
 >>> s = Serializer('secret-key')
@@ -102,15 +102,15 @@ And it can of course also load:
 >>> s.loads('[1, 2, 3, 4].r7R9RhGgDPvvWl3iNzLuIIfELmo')
 [1, 2, 3, 4]
 
-If you want to have the timestamp attached you can use the
+If you want to have the timestamp attached, you can use the
 :class:`TimedSerializer`.
 
 URL Safe Serialization
 ----------------------
 
 Often it is helpful if you can pass these trusted strings to environments
-where you only have a limited set of characters available.  Because of
-this, itsdangerous also provides URL safe serializers:
+in which only a limited set of characters is available.  Because of this,
+itsdangerous also provides URL-safe serializers:
 
 >>> from itsdangerous import URLSafeSerializer
 >>> s = URLSafeSerializer('secret-key')
@@ -129,18 +129,18 @@ because usually if you think of salts in cryptography you would expect the
 salt to be something that is stored alongside the resulting signed string
 as a way to prevent rainbow table lookups.  Such salts are usually public.
 
-In “itsdangerous”, like in the original Django implementation, the salt
-serves a different purpose.  You could describe it as namespacing.  It's
-still not critical if you disclose it because without the secret key it
+In itsdangerous, like in the original Django implementation, the salt
+serves a different purpose;  you could describe it as namespacing.  It's
+still not critical if you disclose it because without the secret key, it
 does not help an attacker.
 
 Let's assume that you have two links you want to sign.  You have the
-activation link on your system which can activate a user account and then
+activation link on your system which can activate a user account, and
 you have an upgrade link that can upgrade a user's account to a paid
-account which you send out via email.  If in both cases all you sign is
-the user ID a user could reuse the variable part in the URL from the
+account which you send out via e-mail.  If, in both cases, all you sign is
+the user ID, a user could reuse the variable part in the URL from the
 activation link to upgrade the account.  Now you could either put more
-information in there which you sign (like the intention: upgrade or
+information in there which you then sign (like the intention: upgrade or
 activate), but you could also use different salts:
 
 >>> s1 = URLSafeSerializer('secret-key', salt='activate-salt')
