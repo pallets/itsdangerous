@@ -214,7 +214,8 @@ class Serializer(object):
     .. versionchanged:: 0.
     """
     default_serializer = simplejson
-
+    digest_method = None
+    
     def __init__(self, secret_key, salt='itsdangerous', serializer=None):
         self.secret_key = secret_key
         self.salt = salt
@@ -236,7 +237,10 @@ class Serializer(object):
         """A method that creates a new instance of the signer to be used.
         The default implementation uses the :class:`Signer` baseclass.
         """
-        return Signer(self.secret_key, self.salt)
+        signer = Signer(self.secret_key, self.salt)
+        if self.digest_method:
+            signer.digest_method = self.digest_method
+        return signer
 
     def dumps(self, obj):
         """Returns URL-safe, signed base64 compressed JSON string.
@@ -266,9 +270,11 @@ class TimedSerializer(Serializer):
     """Uses the :class:`TimestampSigner` instead of the default
     :meth:`Signer`.
     """
-
     def make_signer(self):
-        return TimestampSigner(self.secret_key, self.salt)
+        signer = TimestampSigner(self.secret_key, self.salt)
+        if self.digest_method:
+            signer.digest_method = self.digest_method
+        return signer
 
     def loads(self, s, max_age=None, return_timestamp=False):
         """Reverse of :meth:`dumps`, raises :exc:`BadSignature` if the
