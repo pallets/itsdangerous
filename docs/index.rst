@@ -159,6 +159,32 @@ Only the serializer with the same salt can load the value:
 >>> s2.loads(s2.dumps(42))
 42
 
+Responding to Failure
+---------------------
+
+Starting with itsdangerous 0.14 exceptions have helpful attributes which
+allow you to inspect payload if the signature check failed.  This has to
+be done with extra care because at that point you know that someone
+tampered with your data but it might be useful for debugging purposes.
+
+Example usage::
+
+    from itsdangerous import URLSafeSerializer, BadSignature
+    s = URLSafeSerializer('secret-key')
+    decoded_payload = None
+    try:
+        decoded_payload = s.loads(data)
+        # This payload is decoded and safe
+    except BadSignature, e:
+        encoded_payload = e.payload
+        if encoded_payload is not None:
+            decoded_payload = s.load_payload(encoded_payload)
+            # This payload is decoded but unsafe because someone
+            # tampered with the signature.  The decode (load_payload)
+            # step is explicit because it might be unsafe to unserialize
+            # the payload (think pickle instead of json!)
+
+
 .. include:: ../CHANGES
 
 API
@@ -190,8 +216,10 @@ Exceptions
 ~~~~~~~~~~
 
 .. autoexception:: BadSignature
+   :members:
 
 .. autoexception:: SignatureExpired
+   :members:
 
 Useful Helpers
 ~~~~~~~~~~~~~~

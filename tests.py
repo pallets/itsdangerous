@@ -47,6 +47,20 @@ class SerializerTestCase(unittest.TestCase):
             self.assertNotEqual(o, value)
             self.assertEqual(o, s.loads(unicode(value)))
 
+    def test_exception_attributes(self):
+        secret_key = 'predictable-key'
+        value = u'hello'
+
+        s = self.make_serializer(secret_key)
+        ts = s.dumps(value)
+        try:
+            s.loads(ts + 'x')
+        except idmod.BadSignature, e:
+            self.assertEqual(e.payload, ts.rsplit('.', 1)[0])
+            self.assertEqual(s.load_payload(e.payload), value)
+        else:
+            self.fail('Did not get bad signature')
+
 
 class TimedSerializerTestCase(SerializerTestCase):
     serializer_class = idmod.TimedSerializer
@@ -56,7 +70,7 @@ class TimedSerializerTestCase(SerializerTestCase):
         time.time = lambda: idmod.EPOCH
 
     def tearDown(self):
-        time.time = self._time        
+        time.time = self._time
 
     def test_decode_with_timeout(self):
         secret_key = 'predictable-key'
@@ -82,6 +96,22 @@ class TimedSerializerTestCase(SerializerTestCase):
         loaded, timestamp = s.loads(ts, return_timestamp=True)
         self.assertEqual(loaded, value)
         self.assertEqual(timestamp, datetime.utcfromtimestamp(time.time()))
+
+    def test_exception_attributes(self):
+        secret_key = 'predictable-key'
+        value = u'hello'
+
+        s = self.make_serializer(secret_key)
+        ts = s.dumps(value)
+        try:
+            s.loads(ts, max_age=-1)
+        except idmod.SignatureExpired, e:
+            self.assertEqual(e.date_signed,
+                datetime.utcfromtimestamp(time.time()))
+            self.assertEqual(e.payload, ts.rsplit('.', 2)[0])
+            self.assertEqual(s.load_payload(e.payload), value)
+        else:
+            self.fail('Did not get expiration')
 
 
 class URLSafeSerializerMixin(object):

@@ -1,6 +1,18 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.14
+~~~~~~~~~~~~
+
+- API refactoring to support different key derivations.
+- Added attributes to exceptions so that you can inspect the data even
+  if the signature check failed.
+
+Version 0.13
+~~~~~~~~~~~~
+
+- Small API change that enables customization of the digest module.
+
 Version 0.12
 ~~~~~~~~~~~~
 

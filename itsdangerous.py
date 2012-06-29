@@ -37,17 +37,43 @@ def constant_time_compare(val1, val2):
     The time taken is independent of the number of characters that match.  Do
     not use this function for anything else than comparision with known
     length targets.
+
+    This is should be implemented in C in order to get it completely right.
     """
-    if len(val1) != len(val2):
-        return False
-    result = 0
-    for x, y in izip(val1, val2):
+    len_eq = len(val1) == len(val2)
+    if len_eq:
+        result = 0
+        left = val1
+    else:
+        result = 1
+        left = val2
+    for x, y in izip(left, val2):
         result |= ord(x) ^ ord(y)
     return result == 0
 
 
 class BadSignature(Exception):
-    """This error is raised if a signature does not match"""
+    """This error is raised if a signature does not match.  As of
+    itsdangerous 0.14 there are helpful attributes on the exception
+    instances.
+    """
+    message = None
+
+    def __init__(self, message, payload=None):
+        Exception.__init__(self, message)
+        self.message = message
+        #: The payload that failed the signature test.  In some
+        #: situations you might still want to inspect this, even if
+        #: you know it was tampered with.
+        #:
+        #: .. versionadded:: 0.14
+        self.payload = payload
+
+    def __str__(self):
+        return self.message
+
+    def __unicode__(self):
+        return self.message.decode('utf-8')
 
 
 class SignatureExpired(BadSignature):
@@ -55,6 +81,15 @@ class SignatureExpired(BadSignature):
     subclass of :exc:`BadSignature` so you can use the baseclass for
     catching the error.
     """
+
+    def __init__(self, message, payload=None, date_signed=None):
+        BadSignature.__init__(self, message, payload)
+        #: If the signature expired this exposes the date of when the
+        #: signature was created.  This can be helpful in order to
+        #: tell the user how long a link has been gone stale.
+        #:
+        #: .. versionadded:: 0.14
+        self.date_signed = date_signed
 
 
 def base64_encode(string):
@@ -94,23 +129,60 @@ class Signer(object):
 
     See :ref:`the-salt` for an example of what the salt is doing and how you
     can utilize it.
+
+    .. versionadded:: 0.14
+       `key_derivation` and `digest_method` were added as arguments to the
+       class constructor.
     """
 
     #: The digest method to use for the signer.  This defaults to sha1 but can
     #: be changed for any other function in the hashlib module.
     #:
-    #: .. versionadded:: 0.13
-    digest_method = staticmethod(hashlib.sha1)
+    #: .. versionchanged:: 0.14
+    default_digest_method = staticmethod(hashlib.sha1)
 
-    def __init__(self, secret_key, salt=None, sep='.'):
+    #: Controls how the key is derived.  The default is Django style
+    #: concatenation.  Possible values are ``concat``, ``django-concat``
+    #: and ``hmac``.  This is used for deriving a key from the secret key
+    #: with an added salt.
+    #:
+    #: .. versionadded:: 0.14
+    default_key_derivation = 'django-concat'
+
+    def __init__(self, secret_key, salt=None, sep='.', key_derivation=None,
+                 digest_method=None):
         self.secret_key = secret_key
         self.sep = sep
-        self.salt = salt or ('%s.%s' %
-            (self.__class__.__module__, self.__class__.__name__))
+        self.salt = salt or 'itsdangerous.Signer'
+        if key_derivation is None:
+            key_derivation = self.default_key_derivation
+        self.key_derivation = key_derivation
+        if digest_method is None:
+            digest_method = self.default_digest_method
+        self.digest_method = digest_method
+
+    def derive_key(self):
+        """This method is called to derive the key.  If you're unhappy with
+        the default key derivation choices you can override them here.
+        Keep in mind that the key derivation in itsdangerous is not intended
+        to be used as a security method to make a complex key out of a short
+        password.  Instead you should use large random secret keys.
+        """
+        if self.key_derivation == 'concat':
+            return self.digest_method(self.salt + self.secret_key).digest()
+        elif self.key_derivation == 'django-concat':
+            return self.digest_method(self.salt + 'signer' +
+                self.secret_key).digest()
+        elif self.key_derivation == 'hmac':
+            mac = hmac.new(self.secret_key, digestmod=self.digest_mod)
+            mac.update(self.salt)
+            return mac.digest()
+        else:
+            raise TypeError('Unknown key derivation method')
 
     def get_signature(self, value):
         """Returns the signature for the given value"""
-        key = self.digest_method(self.salt + 'signer' + self.secret_key).digest()
+        key = self.derive_key()
         mac = hmac.new(key, msg=value, digestmod=self.digest_method)
         return base64_encode(mac.digest())
 
@@ -129,13 +201,14 @@ class Signer(object):
         value, sig = signed_value.rsplit(self.sep, 1)
         if constant_time_compare(sig, self.get_signature(value)):
             return value
-        raise BadSignature('Signature "%s" does not match' % sig)
+        raise BadSignature('Signature "%s" does not match' % sig,
+                           payload=value)
 
-    def validate(self, signed_value):
+    def validate(self, signed_value, salt=None):
         """Just validates the given signed value.  Returns `True` if the
         signature exists and is valid, `False` otherwise."""
         try:
-            self.unsign(signed_value)
+            self.unsign(signed_value, salt)
             return True
         except BadSignature:
             return False
@@ -186,7 +259,9 @@ class TimestampSigner(Signer):
             age = self.get_timestamp() - timestamp
             if age > max_age:
                 raise SignatureExpired(
-                    'Signature age %s > %s seconds' % (age, max_age))
+                    'Signature age %s > %s seconds' % (age, max_age),
+                    payload=value,
+                    date_signed=self.timestamp_to_datetime(timestamp))
         if return_timestamp:
             return value, self.timestamp_to_datetime(timestamp)
         return value
@@ -211,16 +286,39 @@ class Serializer(object):
 
     This implementation uses simplejson for dumping and loading.
 
-    .. versionchanged:: 0.
+    Starting with 0.14 you do not need to subclass this class in order
+    to switch out or customer the :class:`Signer`.  You can instead
+    also pass a different class to the constructor as well as
+    keyword arguments as dictionary that should be forwarded::
+
+        s = Serializer(signer_kwargs={'key_derivation': 'hmac'})
+
+    .. versionchanged:: 0.14:
+       The `signer` and `signer_kwargs` parameters were added to the
+       constructor.
     """
+
+    #: If a serializer module or class is not passed to the constructor
+    #: this one is picked up.  This currently defaults to :mod:`json`.
     default_serializer = simplejson
 
-    def __init__(self, secret_key, salt='itsdangerous', serializer=None):
+    #: The default :class:`Signer` class that is being used by this
+    #: serializer.
+    #:
+    #: .. versionadded:: 0.14
+    default_signer = Signer
+
+    def __init__(self, secret_key, salt='itsdangerous', serializer=None,
+                 signer=None, signer_kwargs=None):
         self.secret_key = secret_key
         self.salt = salt
         if serializer is None:
             serializer = self.default_serializer
         self.serializer = serializer
+        if signer is None:
+            signer = self.default_signer
+        self.signer = signer
+        self.signer_kwargs = signer_kwargs or {}
 
     def load_payload(self, payload):
         """Loads the encoded object.  This implementation uses simplejson."""
@@ -232,34 +330,36 @@ class Serializer(object):
         """
         return self.serializer.dumps(obj)
 
-    def make_signer(self):
+    def make_signer(self, salt=None):
         """A method that creates a new instance of the signer to be used.
         The default implementation uses the :class:`Signer` baseclass.
         """
-        return Signer(self.secret_key, self.salt)
+        if salt is None:
+            salt = self.salt
+        return self.signer(self.secret_key, salt=salt, **self.signer_kwargs)
 
-    def dumps(self, obj):
+    def dumps(self, obj, salt=None):
         """Returns URL-safe, signed base64 compressed JSON string.
 
         If compress is True (the default) checks if compressing using zlib can
         save some space. Prepends a '.' to signify compression. This is included
         in the signature, to protect against zip bombs.
         """
-        return self.make_signer().sign(self.dump_payload(obj))
+        return self.make_signer(salt).sign(self.dump_payload(obj))
 
-    def dump(self, obj, f):
+    def dump(self, obj, f, salt=None):
         """Like :meth:`dumps` but dumps into a file."""
-        f.write(self.dumps(obj))
+        f.write(self.dumps(obj, salt))
 
-    def loads(self, s):
+    def loads(self, s, salt=None):
         """Reverse of :meth:`dumps`, raises :exc:`BadSignature` if the
         signature validation fails.
         """
-        return self.load_payload(self.make_signer().unsign(s))
+        return self.load_payload(self.make_signer(salt).unsign(s))
 
-    def load(self, f):
+    def load(self, f, salt=None):
         """Like :meth:`loads` but loads from a file."""
-        return self.loads(f.read())
+        return self.loads(f.read(), salt)
 
 
 class TimedSerializer(Serializer):
@@ -267,8 +367,7 @@ class TimedSerializer(Serializer):
     :meth:`Signer`.
     """
 
-    def make_signer(self):
-        return TimestampSigner(self.secret_key, self.salt)
+    default_signer = TimestampSigner
 
     def loads(self, s, max_age=None, return_timestamp=False):
         """Reverse of :meth:`dumps`, raises :exc:`BadSignature` if the
