@@ -135,6 +135,8 @@ def base64_encode(string):
 
 def base64_decode(string):
     """base64 decodes a single string."""
+    if isinstance(string, unicode):
+        string = string.encode('ascii', 'ignore')
     return base64.urlsafe_b64decode(string + '=' * (-len(string) % 4))
 
 
@@ -390,6 +392,8 @@ class Serializer(object):
         valid.
         """
         try:
+            if isinstance(payload, unicode):
+                payload = payload.encode('utf-8')
             return self.serializer.loads(payload)
         except Exception, e:
             raise BadPayload(u'Could not load the payload because an '

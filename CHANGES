@@ -1,6 +1,12 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.16
+~~~~~~~~~~~~
+
+- made it possible to pass unicode values to `load_payload` to make it
+  easier to debug certain things.
+
 Version 0.15
 ~~~~~~~~~~~~
 
