@@ -71,6 +71,15 @@ class SerializerTestCase(unittest.TestCase):
         self.assertEqual(s.loads_unsafe(ts), (True, u'hello'))
         self.assertEqual(s.loads_unsafe(ts, salt='modified'), (False, u'hello'))
 
+    def test_load_unsafe_with_unicode_strings(self):
+        secret_key = 'predictable-key'
+        value = u'hello'
+
+        s = self.make_serializer(secret_key)
+        ts = unicode(s.dumps(value))
+        self.assertEqual(s.loads_unsafe(ts), (True, u'hello'))
+        self.assertEqual(s.loads_unsafe(ts, salt='modified'), (False, u'hello'))
+
 
 class TimedSerializerTestCase(SerializerTestCase):
     serializer_class = idmod.TimedSerializer
