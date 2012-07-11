@@ -52,22 +52,17 @@ def constant_time_compare(val1, val2):
     return result == 0
 
 
-class BadSignature(Exception):
-    """This error is raised if a signature does not match.  As of
-    itsdangerous 0.14 there are helpful attributes on the exception
-    instances.
+class BadData(Exception):
+    """Raised if bad data of any sort was encountered.  This is the
+    base for all exceptions that itsdangerous is currently using.
+
+    .. versionadded:: 0.15
     """
     message = None
 
-    def __init__(self, message, payload=None):
+    def __init__(self, message):
         Exception.__init__(self, message)
         self.message = message
-        #: The payload that failed the signature test.  In some
-        #: situations you might still want to inspect this, even if
-        #: you know it was tampered with.
-        #:
-        #: .. versionadded:: 0.14
-        self.payload = payload
 
     def __str__(self):
         return self.message
@@ -76,20 +71,59 @@ class BadSignature(Exception):
         return self.message.decode('utf-8')
 
 
-class SignatureExpired(BadSignature):
-    """Signature timestamp is older than required max_age.  This is a
-    subclass of :exc:`BadSignature` so you can use the baseclass for
-    catching the error.
+class BadPayload(BadData):
+    """This error is raised in situations when payload is loaded without
+    checking the signature first and an exception happend as a result of
+    that.  The original exception that caused that will be stored on the
+    exception as :attr:`original_error`.
+
+    .. versionadded:: 0.15
+    """
+
+    def __init__(self, message, original_error=None):
+        BadData.__init__(self, message)
+        #: If available, the error that indicates why the payload
+        #: was not valid.  This might be `None`.
+        self.original_error = original_error
+
+
+class BadSignature(BadData):
+    """This error is raised if a signature does not match.  As of
+    itsdangerous 0.14 there are helpful attributes on the exception
+    instances.  You can also catch down the baseclass :exc:`BadData`.
+    """
+
+    def __init__(self, message, payload=None):
+        BadData.__init__(self, message)
+        #: The payload that failed the signature test.  In some
+        #: situations you might still want to inspect this, even if
+        #: you know it was tampered with.
+        #:
+        #: .. versionadded:: 0.14
+        self.payload = payload
+
+
+class BadTimeSignature(BadSignature):
+    """Raised for time based signatures that fail.  This is a subclass
+    of :class:`BadSignature` so you can catch those down as well.
     """
 
     def __init__(self, message, payload=None, date_signed=None):
         BadSignature.__init__(self, message, payload)
+
         #: If the signature expired this exposes the date of when the
         #: signature was created.  This can be helpful in order to
         #: tell the user how long a link has been gone stale.
         #:
         #: .. versionadded:: 0.14
         self.date_signed = date_signed
+
+
+class SignatureExpired(BadTimeSignature):
+    """Signature timestamp is older than required max_age.  This is a
+    subclass of :exc:`BadTimeSignature` so you can use the baseclass for
+    catching the error.
+    """
 
 
 def base64_encode(string):
@@ -249,19 +283,49 @@ class TimestampSigner(Signer):
         the timestamp of the signature will be returned as naive
         :class:`datetime.datetime` object in UTC.
         """
-        result = Signer.unsign(self, value)
+        try:
+            result = Signer.unsign(self, value)
+            sig_error = None
+        except BadSignature, e:
+            sig_error = e
+            result = e.payload or ''
+
+        # If there is no timestamp in the result there is something
+        # seriously wrong.  In case there was a signature error, we raise
+        # that one directly, otherwise we have a weird situation in which
+        # we shouldn't have come except someone uses a time-based serializer
+        # on non-timestamp data, so catch that.
         if not self.sep in result:
-            raise BadSignature('timestamp missing')
+            if sig_error:
+                raise sig_error
+            raise BadTimeSignature('timestamp missing', payload=result)
+
         value, timestamp = result.rsplit(self.sep, 1)
-        timestamp = bytes_to_int(base64_decode(timestamp))
+        try:
+            timestamp = bytes_to_int(base64_decode(timestamp))
+        except Exception:
+            timestamp = None
+
+        # Signature is *not* okay.  Raise a proper error now that we have
+        # split the value and the timestamp.
+        if sig_error is not None:
+            raise BadTimeSignature(unicode(sig_error), payload=value,
+                                   date_signed=timestamp)
+
+        # Signature was okay but the timestamp is actually not there or
+        # malformed.  Should not happen, but well.  We handle it nonetheless
+        if timestamp is None:
+            raise BadTimeSignature(u'Malformed timestamp', payload=value)
+
+        # Check timestamp is not older than max_age
         if max_age is not None:
-            # Check timestamp is not older than max_age
             age = self.get_timestamp() - timestamp
             if age > max_age:
                 raise SignatureExpired(
                     'Signature age %s > %s seconds' % (age, max_age),
                     payload=value,
                     date_signed=self.timestamp_to_datetime(timestamp))
+
         if return_timestamp:
             return value, self.timestamp_to_datetime(timestamp)
         return value
@@ -321,8 +385,16 @@ class Serializer(object):
         self.signer_kwargs = signer_kwargs or {}
 
     def load_payload(self, payload):
-        """Loads the encoded object.  This implementation uses simplejson."""
-        return self.serializer.loads(payload)
+        """Loads the encoded object.  This implementation uses simplejson.
+        This function raises :class:`BadPayload` if the payload is not
+        valid.
+        """
+        try:
+            return self.serializer.loads(payload)
+        except Exception, e:
+            raise BadPayload(u'Could not load the payload because an '
+                u'exception ocurred on unserializing the data',
+                original_error=e)
 
     def dump_payload(self, obj):
         """Dumps the encoded object into a bytestring.  This implementation
@@ -361,6 +433,36 @@ class Serializer(object):
         """Like :meth:`loads` but loads from a file."""
         return self.loads(f.read(), salt)
 
+    def loads_unsafe(self, s, salt=None):
+        """Like :meth:`loads` but without verifying the signature.  This is
+        potentially very dangerous to use depending on how your serializer
+        works.  The return value is ``(signature_okay, payload)`` instead of
+        just the payload.  The first item will be a boolean that indicates
+        if the signature is okay (``True``) or if it failed.  This function
+        never fails.
+
+        Use it for debugging only and if you know that your serializer module
+        is not exploitable (eg: do not use it with a pickle serializer).
+
+        .. versionadded:: 0.15
+        """
+        try:
+            return True, self.loads(s, salt=salt)
+        except BadSignature, e:
+            if e.payload is None:
+                return False, None
+            try:
+                return False, self.load_payload(e.payload)
+            except BadPayload:
+                return False, None
+
+    def load_unsafe(self, f, salt=None):
+        """Like :meth:`loads_unsafe` but loads from a file.
+
+        .. versionadded:: 0.15
+        """
+        return self.loads_unsafe(f.read(), salt=salt)
+
 
 class TimedSerializer(Serializer):
     """Uses the :class:`TimestampSigner` instead of the default
@@ -369,7 +471,7 @@ class TimedSerializer(Serializer):
 
     default_signer = TimestampSigner
 
-    def loads(self, s, max_age=None, return_timestamp=False):
+    def loads(self, s, max_age=None, return_timestamp=False, salt=None):
         """Reverse of :meth:`dumps`, raises :exc:`BadSignature` if the
         signature validation fails.  If a `max_age` is provided it will
         ensure the signature is not older than that time in seconds.  In
@@ -377,12 +479,12 @@ class TimedSerializer(Serializer):
         which is a subclass of :exc:`BadSignature`.  All arguments are
         forwarded to the signer's :meth:`~TimestampSigner.unsign` method.
         """
+        base64d, timestamp = self.make_signer(salt) \
+            .unsign(s, max_age, return_timestamp=True)
+        payload = self.load_payload(base64d)
         if return_timestamp:
-            base64d, timestamp = self.make_signer().unsign(s, max_age, return_timestamp)
-            return self.load_payload(base64d), timestamp
-        else:
-            base64d = self.make_signer().unsign(s, max_age, return_timestamp)
-            return self.load_payload(base64d)
+            return payload, timestamp
+        return payload
 
 
 class URLSafeSerializerMixin(object):
@@ -396,9 +498,17 @@ class URLSafeSerializerMixin(object):
         if payload[0] == '.':
             payload = payload[1:]
             decompress = True
-        json = base64_decode(payload)
+        try:
+            json = base64_decode(payload)
+        except Exception, e:
+            raise BadPayload(u'Could not base64 decode the payload because of '
+                u'an exception', original_error=e)
         if decompress:
-            json = zlib.decompress(json)
+            try:
+                json = zlib.decompress(json)
+            except Exception, e:
+                raise BadPayload(u'Could not zlib decompress the payload before '
+                    u'decoding the payload', original_error=e)
         return super(URLSafeSerializerMixin, self).load_payload(json)
 
     def dump_payload(self, obj):

@@ -53,6 +53,7 @@ class SerializerTestCase(unittest.TestCase):
 
         s = self.make_serializer(secret_key)
         ts = s.dumps(value)
+
         try:
             s.loads(ts + 'x')
         except idmod.BadSignature, e:
@@ -60,6 +61,15 @@ class SerializerTestCase(unittest.TestCase):
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get bad signature')
+
+    def test_unsafe_load(self):
+        secret_key = 'predictable-key'
+        value = u'hello'
+
+        s = self.make_serializer(secret_key)
+        ts = s.dumps(value)
+        self.assertEqual(s.loads_unsafe(ts), (True, u'hello'))
+        self.assertEqual(s.loads_unsafe(ts, salt='modified'), (False, u'hello'))
 
 
 class TimedSerializerTestCase(SerializerTestCase):
@@ -127,6 +137,10 @@ class URLSafeSerializerMixin(object):
             self.assert_(set(value).issubset(set(allowed)))
             self.assertNotEqual(o, value)
             self.assertEqual(o, s.loads(value))
+
+    def test_invalid_base64_does_not_fail_load_payload(self):
+        s = idmod.URLSafeSerializer('aha!')
+        self.assertRaises(idmod.BadPayload, s.load_payload, 'kZ4m3du844lIN')
 
 
 class PickleSerializerMixin(object):

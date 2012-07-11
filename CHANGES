@@ -1,6 +1,17 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.15
+~~~~~~~~~~~~
+
+- made standalone `load_payload` more robust by raising one specific
+  error if something goes wrong.
+- refactored exceptions to catch more cases individually, added more
+  attributes.
+- fixed an issue that caused `load_payload` not work in some situations
+  with timestamp based serializers
+- added an `loads_unsafe` method.
+
 Version 0.14
 ~~~~~~~~~~~~
 

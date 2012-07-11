@@ -169,7 +169,7 @@ tampered with your data but it might be useful for debugging purposes.
 
 Example usage::
 
-    from itsdangerous import URLSafeSerializer, BadSignature
+    from itsdangerous import URLSafeSerializer, BadSignature, BadData
     s = URLSafeSerializer('secret-key')
     decoded_payload = None
     try:
@@ -178,11 +178,24 @@ Example usage::
     except BadSignature, e:
         encoded_payload = e.payload
         if encoded_payload is not None:
-            decoded_payload = s.load_payload(encoded_payload)
+            try:
+                decoded_payload = s.load_payload(encoded_payload)
+            except BadData:
+                pass
             # This payload is decoded but unsafe because someone
             # tampered with the signature.  The decode (load_payload)
             # step is explicit because it might be unsafe to unserialize
             # the payload (think pickle instead of json!)
+
+If you don't want to inspect attributes to figure out what exactly went
+wrong you can also use the unsafe loading::
+
+    from itsdangerous import URLSafeSerializer
+    s = URLSafeSerializer('secret-key')
+    sig_okay, payload = s.loads_unsafe(data)
+
+The first item in the returned tuple is a boolean that indicates if the
+signature was correct.
 
 
 .. include:: ../CHANGES
@@ -215,10 +228,19 @@ Serializers
 Exceptions
 ~~~~~~~~~~
 
+.. autoexception:: BadData
+   :members:
+
 .. autoexception:: BadSignature
    :members:
 
+.. autoexception:: BadTimeSignature
+   :members:
+
 .. autoexception:: SignatureExpired
+   :members:
+
+.. autoexception:: BadPayload
    :members:
 
 Useful Helpers
