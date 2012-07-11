@@ -80,6 +80,11 @@ class SerializerTestCase(unittest.TestCase):
         self.assertEqual(s.loads_unsafe(ts), (True, u'hello'))
         self.assertEqual(s.loads_unsafe(ts, salt='modified'), (False, u'hello'))
 
+        try:
+            s.loads(ts, salt='modified')
+        except idmod.BadSignature, e:
+            self.assertEqual(s.load_payload(unicode(e.payload)), u'hello')
+
 
 class TimedSerializerTestCase(SerializerTestCase):
     serializer_class = idmod.TimedSerializer
