@@ -1,6 +1,11 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.17
+~~~~~~~~~~~~
+
+- Fixed a name error when overriding the digest method.
+
 Version 0.16
 ~~~~~~~~~~~~
 

@@ -1,5 +1,6 @@
 import time
 import pickle
+import hashlib
 import unittest
 from datetime import datetime
 import itsdangerous as idmod
@@ -84,6 +85,16 @@ class SerializerTestCase(unittest.TestCase):
             s.loads(ts, salt='modified')
         except idmod.BadSignature, e:
             self.assertEqual(s.load_payload(unicode(e.payload)), u'hello')
+
+    def test_signer_kwargs(self):
+        secret_key = 'predictable-key'
+        value = 'hello'
+        s = self.make_serializer(secret_key, signer_kwargs=dict(
+            digest_method=hashlib.md5,
+            key_derivation='hmac'
+        ))
+        ts = unicode(s.dumps(value))
+        self.assertEqual(s.loads(ts), u'hello')
 
 
 class TimedSerializerTestCase(SerializerTestCase):

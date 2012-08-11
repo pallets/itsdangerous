@@ -210,7 +210,7 @@ class Signer(object):
             return self.digest_method(self.salt + 'signer' +
                 self.secret_key).digest()
         elif self.key_derivation == 'hmac':
-            mac = hmac.new(self.secret_key, digestmod=self.digest_mod)
+            mac = hmac.new(self.secret_key, digestmod=self.digest_method)
             mac.update(self.salt)
             return mac.digest()
         else:
