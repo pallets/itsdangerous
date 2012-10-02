@@ -146,7 +146,7 @@ def int_to_bytes(num):
     while num:
         rv.append(chr(num & 0xff))
         num >>= 8
-    return ''.join(reversed(rv))
+    return rv[::-1]
 
 
 def bytes_to_int(bytes):
