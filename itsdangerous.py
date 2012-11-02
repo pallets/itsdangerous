@@ -12,6 +12,7 @@
 import base64
 import hashlib
 import hmac
+import sys
 import zlib
 import time
 from itertools import izip, imap
@@ -26,6 +27,19 @@ except ImportError:
     except ImportError:
         import json as simplejson
 
+try:
+    bytes
+except NameError:
+    bytes = str  # Python < 2.6
+if sys.version_info > (3, ):
+    _b = lambda _: _.encode('ascii')
+    _bytes_chr = _bytes_ord = lambda _: _
+    _bytes_join = bytes
+else:
+    _b = str
+    _bytes_chr = chr
+    _bytes_ord = ord
+    _bytes_join = lambda _: ''.join(_)
 
 # 2011/01/01 in UTC
 EPOCH = 1293840000
@@ -48,7 +62,7 @@ def constant_time_compare(val1, val2):
         result = 1
         left = val2
     for x, y in izip(left, val2):
-        result |= ord(x) ^ ord(y)
+        result |= _bytes_ord(x) ^ _bytes_ord(y)
     return result == 0
 
 
@@ -130,27 +144,27 @@ def base64_encode(string):
     """base64 encodes a single string.  The resulting string is safe for
     putting into URLs.
     """
-    return base64.urlsafe_b64encode(string).strip('=')
+    return base64.urlsafe_b64encode(string).strip(_b('='))
 
 
 def base64_decode(string):
     """base64 decodes a single string."""
     if isinstance(string, unicode):
         string = string.encode('ascii', 'ignore')
-    return base64.urlsafe_b64decode(string + '=' * (-len(string) % 4))
+    return base64.urlsafe_b64decode(string + _b('=') * (-len(string) % 4))
 
 
 def int_to_bytes(num):
     assert num >= 0
     rv = []
     while num:
-        rv.append(chr(num & 0xff))
+        rv.append(_bytes_chr(num & 0xff))
         num >>= 8
-    return ''.join(reversed(rv))
+    return _bytes_join(reversed(rv))
 
 
 def bytes_to_int(bytes):
-    return reduce(lambda a, b: a << 8 | b, imap(ord, bytes), 0)
+    return reduce(lambda a, b: a << 8 | b, imap(_bytes_ord, bytes), 0)
 
 
 class Signer(object):
@@ -188,8 +202,14 @@ class Signer(object):
     def __init__(self, secret_key, salt=None, sep='.', key_derivation=None,
                  digest_method=None):
         self.secret_key = secret_key
+        if isinstance(self.secret_key, unicode):
+            self.secret_key = self.secret_key.encode('utf-8')
         self.sep = sep
+        if isinstance(self.sep, unicode):
+            self.sep = self.sep.encode('utf-8')
         self.salt = salt or 'itsdangerous.Signer'
+        if isinstance(self.salt, unicode):
+            self.salt = self.salt.encode('utf-8')
         if key_derivation is None:
             key_derivation = self.default_key_derivation
         self.key_derivation = key_derivation
@@ -207,7 +227,7 @@ class Signer(object):
         if self.key_derivation == 'concat':
             return self.digest_method(self.salt + self.secret_key).digest()
         elif self.key_derivation == 'django-concat':
-            return self.digest_method(self.salt + 'signer' +
+            return self.digest_method(self.salt + _b('signer') +
                 self.secret_key).digest()
         elif self.key_derivation == 'hmac':
             mac = hmac.new(self.secret_key, digestmod=self.digest_method)
@@ -226,12 +246,12 @@ class Signer(object):
         """Signs the given string."""
         if isinstance(value, unicode):
             value = value.encode('utf-8')
-        return '%s%s%s' % (value, self.sep, self.get_signature(value))
+        return value + self.sep + self.get_signature(value)
 
     def unsign(self, signed_value):
         """Unsigns the given string."""
         if isinstance(signed_value, unicode):
-            signed_value = signed_value.encode('utf-8')
+            signed_value = signed_value.encode('latin1')
         if self.sep not in signed_value:
             raise BadSignature('No "%s" found in value' % self.sep)
         value, sig = signed_value.rsplit(self.sep, 1)
@@ -273,10 +293,10 @@ class TimestampSigner(Signer):
     def sign(self, value):
         """Signs the given string and also attaches a time information."""
         timestamp = base64_encode(int_to_bytes(self.get_timestamp()))
-        value = '%s%s%s' % (value, self.sep, timestamp)
         if isinstance(value, unicode):
             value = value.encode('utf-8')
-        return '%s%s%s' % (value, self.sep, self.get_signature(value))
+        value = value + self.sep + timestamp
+        return value + self.sep + self.get_signature(value)
 
     def unsign(self, value, max_age=None, return_timestamp=False):
         """Works like the regular :meth:`~Signer.unsign` but can also
@@ -290,7 +310,7 @@ class TimestampSigner(Signer):
             sig_error = None
         except BadSignature, e:
             sig_error = e
-            result = e.payload or ''
+            result = e.payload or _b('')
 
         # If there is no timestamp in the result there is something
         # seriously wrong.  In case there was a signature error, we raise
@@ -381,6 +401,7 @@ class Serializer(object):
         if serializer is None:
             serializer = self.default_serializer
         self.serializer = serializer
+        self.is_bytes_serializer = isinstance(self.serializer.dumps({}), bytes)
         if signer is None:
             signer = self.default_signer
         self.signer = signer
@@ -392,8 +413,12 @@ class Serializer(object):
         valid.
         """
         try:
-            if isinstance(payload, unicode):
-                payload = payload.encode('utf-8')
+            if self.is_bytes_serializer:
+                if isinstance(payload, unicode):
+                    payload = payload.encode('latin1')
+            else:
+                if isinstance(payload, bytes):
+                    payload = payload.decode('latin1')
             return self.serializer.loads(payload)
         except Exception, e:
             raise BadPayload(u'Could not load the payload because an '
@@ -498,6 +523,8 @@ class URLSafeSerializerMixin(object):
     """
 
     def load_payload(self, payload):
+        if isinstance(payload, bytes):
+            payload = payload.decode('latin1')
         decompress = False
         if payload[0] == '.':
             payload = payload[1:]
@@ -517,6 +544,8 @@ class URLSafeSerializerMixin(object):
 
     def dump_payload(self, obj):
         json = super(URLSafeSerializerMixin, self).dump_payload(obj)
+        if isinstance(json, unicode):
+            json = json.encode('utf-8')
         is_compressed = False
         compressed = zlib.compress(json)
         if len(compressed) < (len(json) - 1):
@@ -524,7 +553,7 @@ class URLSafeSerializerMixin(object):
             is_compressed = True
         base64d = base64_encode(json)
         if is_compressed:
-            base64d = '.' + base64d
+            base64d = _b('.') + base64d
         return base64d
 
 

@@ -6,6 +6,8 @@ from datetime import datetime
 import itsdangerous as idmod
 
 
+_b = idmod._b
+
 class SerializerTestCase(unittest.TestCase):
     serializer_class = idmod.Serializer
 
@@ -24,9 +26,9 @@ class SerializerTestCase(unittest.TestCase):
     def test_decode_detects_tampering(self):
         transforms = (
             lambda s: s.upper(),
-            lambda s: s + 'a',
-            lambda s: 'a' + s[1:],
-            lambda s: s.replace('.', ''),
+            lambda s: s + _b('a'),
+            lambda s: _b('a') + s[1:],
+            lambda s: s.replace(_b('.'), _b('')),
         )
         value = {
             'foo': 'bar',
@@ -46,7 +48,7 @@ class SerializerTestCase(unittest.TestCase):
         for o in objects:
             value = s.dumps(o)
             self.assertNotEqual(o, value)
-            self.assertEqual(o, s.loads(unicode(value)))
+            self.assertEqual(o, s.loads(value.decode('latin1')))
 
     def test_exception_attributes(self):
         secret_key = 'predictable-key'
@@ -56,9 +58,9 @@ class SerializerTestCase(unittest.TestCase):
         ts = s.dumps(value)
 
         try:
-            s.loads(ts + 'x')
+            s.loads(ts + _b('x'))
         except idmod.BadSignature, e:
-            self.assertEqual(e.payload, ts.rsplit('.', 1)[0])
+            self.assertEqual(e.payload, ts.rsplit(_b('.'), 1)[0])
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get bad signature')
@@ -77,14 +79,14 @@ class SerializerTestCase(unittest.TestCase):
         value = u'hello'
 
         s = self.make_serializer(secret_key)
-        ts = unicode(s.dumps(value))
+        ts = s.dumps(value).decode('latin1')
         self.assertEqual(s.loads_unsafe(ts), (True, u'hello'))
         self.assertEqual(s.loads_unsafe(ts, salt='modified'), (False, u'hello'))
 
         try:
             s.loads(ts, salt='modified')
         except idmod.BadSignature, e:
-            self.assertEqual(s.load_payload(unicode(e.payload)), u'hello')
+            self.assertEqual(s.load_payload(e.payload.decode('latin1')), u'hello')
 
     def test_signer_kwargs(self):
         secret_key = 'predictable-key'
@@ -93,7 +95,7 @@ class SerializerTestCase(unittest.TestCase):
             digest_method=hashlib.md5,
             key_derivation='hmac'
         ))
-        ts = unicode(s.dumps(value))
+        ts = s.dumps(value).decode('latin1')
         self.assertEqual(s.loads(ts), u'hello')
 
 
@@ -143,7 +145,7 @@ class TimedSerializerTestCase(SerializerTestCase):
         except idmod.SignatureExpired, e:
             self.assertEqual(e.date_signed,
                 datetime.utcfromtimestamp(time.time()))
-            self.assertEqual(e.payload, ts.rsplit('.', 2)[0])
+            self.assertEqual(e.payload, ts.rsplit(_b('.'), 2)[0])
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get expiration')
@@ -152,14 +154,14 @@ class TimedSerializerTestCase(SerializerTestCase):
 class URLSafeSerializerMixin(object):
 
     def test_is_base62(self):
-        allowed = frozenset('0123456789abcdefghijklmnopqrstuvwxyz' +
-                            'ABCDEFGHIJKLMNOPQRSTUVWXYZ_-.')
+        allowed = frozenset(_b('0123456789abcdefghijklmnopqrstuvwxyz' +
+                               'ABCDEFGHIJKLMNOPQRSTUVWXYZ_-.'))
         objects = (['a', 'list'], 'a string', u'a unicode string \u2019',
                    {'a': 'dictionary'}, 42, 42.5)
         s = self.make_serializer('Test')
         for o in objects:
             value = s.dumps(o)
-            self.assert_(set(value).issubset(set(allowed)))
+            self.assertTrue(set(value).issubset(set(allowed)))
             self.assertNotEqual(o, value)
             self.assertEqual(o, s.loads(value))
 
