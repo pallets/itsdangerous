@@ -153,6 +153,41 @@ def bytes_to_int(bytes):
     return reduce(lambda a, b: a << 8 | b, imap(ord, bytes), 0)
 
 
+class SigningAlgorithm(object):
+    """Subclasses of `SigningAlgorithm` have to implement `get_signature` to
+    provide signature generation functionality.
+    """
+
+    def get_signature(self, key, value):
+        """Returns the signature for the given key and value"""
+        raise NotImplementedError
+
+
+class NoneAlgorithm(SigningAlgorithm):
+    """This class provides a algorithm that does not perform any signing and
+    returns an empty signature.
+    """
+    def get_signature(self, key, value):
+        return ''
+
+
+class HMACAlgorithm(SigningAlgorithm):
+    """This class provides signature generation using HMACs."""
+
+    #: The digest method to use with the MAC algorithm.  This defaults to sha1
+    #: but can be changed for any other function in the hashlib module.
+    default_digest_method = staticmethod(hashlib.sha1)
+
+    def __init__(self, digest_method=None):
+        if digest_method is None:
+            digest_method = self.default_digest_method
+        self.digest_method = digest_method
+
+    def get_signature(self, key, value):
+        mac = hmac.new(key, msg=value, digestmod=self.digest_method)
+        return mac.digest()
+
+
 class Signer(object):
     """This class can sign a string and unsign it and validate the
     signature provided.
@@ -169,6 +204,9 @@ class Signer(object):
     .. versionadded:: 0.14
        `key_derivation` and `digest_method` were added as arguments to the
        class constructor.
+
+    .. versionadded:: 0.18
+        `algorithm` was added as an argument to the class constructor.
     """
 
     #: The digest method to use for the signer.  This defaults to sha1 but can
@@ -186,7 +224,7 @@ class Signer(object):
     default_key_derivation = 'django-concat'
 
     def __init__(self, secret_key, salt=None, sep='.', key_derivation=None,
-                 digest_method=None):
+                 digest_method=None, algorithm=None):
         self.secret_key = secret_key
         self.sep = sep
         self.salt = salt or 'itsdangerous.Signer'
@@ -196,6 +234,9 @@ class Signer(object):
         if digest_method is None:
             digest_method = self.default_digest_method
         self.digest_method = digest_method
+        if algorithm is None:
+            algorithm = HMACAlgorithm(self.digest_method)
+        self.algorithm = algorithm
 
     def derive_key(self):
         """This method is called to derive the key.  If you're unhappy with
@@ -213,14 +254,16 @@ class Signer(object):
             mac = hmac.new(self.secret_key, digestmod=self.digest_method)
             mac.update(self.salt)
             return mac.digest()
+        elif self.key_derivation == 'none':
+            return self.secret_key
         else:
             raise TypeError('Unknown key derivation method')
 
     def get_signature(self, value):
         """Returns the signature for the given value"""
         key = self.derive_key()
-        mac = hmac.new(key, msg=value, digestmod=self.digest_method)
-        return base64_encode(mac.digest())
+        sig = self.algorithm.get_signature(key, value)
+        return base64_encode(sig)
 
     def sign(self, value):
         """Signs the given string."""
@@ -488,6 +531,96 @@ class TimedSerializer(Serializer):
         payload = self.load_payload(base64d)
         if return_timestamp:
             return payload, timestamp
+        return payload
+
+
+class JSONWebSignatureSerializer(Serializer):
+    """This serializer implements JSON Web Signature (JWS) support.  Only
+    supports the JWS Compact Serialization.
+    """
+
+    jws_algorithms = {
+        'HS256': HMACAlgorithm(hashlib.sha256),
+        'HS384': HMACAlgorithm(hashlib.sha384),
+        'HS512': HMACAlgorithm(hashlib.sha512),
+        'none': NoneAlgorithm(),
+    }
+
+    #: The default algorithm to use for signature generation
+    default_algorithm = 'HS256'
+
+    def __init__(self, secret_key, salt=None, signer_kwargs=None, algorithm_name=None):
+        self.secret_key = secret_key
+        self.salt = salt
+        self.serializer = compact_json
+        self.signer = Signer
+        self.signer_kwargs = signer_kwargs or {}
+        if algorithm_name is None:
+            algorithm_name = self.default_algorithm
+        self.algorithm_name = algorithm_name
+        self.algorithm = self.make_algorithm(algorithm_name)
+
+    def load_payload(self, payload, return_header=False):
+        if '.' not in payload:
+            raise BadPayload('No "." found in value')
+        base64d_header, base64d_payload = payload.split('.', 1)
+        try:
+            json_header = base64_decode(base64d_header)
+            json_payload = base64_decode(base64d_payload)
+        except Exception, e:
+            raise BadPayload(u'Could not base64 decode the payload because of '
+                u'an exception', original_error=e)
+        header = super(JSONWebSignatureSerializer, self).load_payload(json_header)
+        payload = super(JSONWebSignatureSerializer, self).load_payload(json_payload)
+        if return_header:
+            return payload, header
+        return payload
+
+    def dump_payload(self, header, obj):
+        base64d_header = base64_encode(self.serializer.dumps(header))
+        base64d_payload = base64_encode(self.serializer.dumps(obj))
+        return '%s.%s' % (base64d_header, base64d_payload)
+
+    def make_algorithm(self, algorithm_name):
+        try:
+            return self.jws_algorithms[algorithm_name]
+        except KeyError:
+            raise NotImplementedError("Algorithm not supported")
+
+    def make_signer(self, salt=None, algorithm=None):
+        if salt is None:
+            salt is self.salt
+        key_derivation = 'none' if salt is None else None
+        if algorithm is None:
+            algorithm = self.algorithm
+        return self.signer(self.secret_key, salt=salt, sep='.',
+            key_derivation=key_derivation, algorithm=algorithm)
+
+    def make_header(self, header_fields):
+        header = header_fields.copy() if header_fields else {}
+        header['alg'] = self.algorithm_name
+        return header
+
+    def dumps(self, obj, salt=None, header_fields=None):
+        """Like :meth:`~Serializer.dumps` but creates a JSON Web Signature.  It
+        also allows for specifying additional fields to be included in the JWS
+        Header.
+        """
+        header = self.make_header(header_fields)
+        signer = self.make_signer(salt, self.algorithm)
+        return signer.sign(self.dump_payload(header, obj))
+
+    def loads(self, s, salt=None, return_header=False):
+        """Reverse of :meth:`dumps`. If requested via `return_header` it will
+        return a tuple of payload and header.
+        """
+        payload, header = self.load_payload(
+            self.make_signer(salt, self.algorithm).unsign(s),
+            return_header=True)
+        if header.pop('alg', None) != self.algorithm_name:
+            raise BadSignature('Algorithm mismatch')
+        if return_header:
+            return payload, header
         return payload
 
 
