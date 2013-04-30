@@ -240,11 +240,11 @@ class Signer(object):
         raise BadSignature('Signature "%s" does not match' % sig,
                            payload=value)
 
-    def validate(self, signed_value, salt=None):
+    def validate(self, signed_value):
         """Just validates the given signed value.  Returns `True` if the
         signature exists and is valid, `False` otherwise."""
         try:
-            self.unsign(signed_value, salt)
+            self.unsign(signed_value)
             return True
         except BadSignature:
             return False
