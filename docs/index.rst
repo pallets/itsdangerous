@@ -13,12 +13,13 @@ Granted, the receiver can decode the contents and look into the package,
 but they can not modify the contents unless they also have your secret
 key.  So if you keep the key secret and complex, you will be fine.
 
-Internally itsdangerous uses HMAC and SHA1 for signing and bases the
+Internally itsdangerous uses HMAC and SHA1 for signing by default and bases the
 implementation on the `Django signing module
-<https://docs.djangoproject.com/en/dev/topics/signing/>`_.  The library is
-BSD licensed and written by Armin Ronacher though most of the copyright
-for the design and implementation goes to Simon Willison and the other
-amazing Django people that made this library possible.
+<https://docs.djangoproject.com/en/dev/topics/signing/>`_.  It also
+however supports JSON Web Signatures (JWS).  The library is BSD licensed and
+written by Armin Ronacher though most of the copyright for the design and
+implementation goes to Simon Willison and the other amazing Django people
+that made this library possible.
 
 Installation
 ------------
@@ -118,6 +119,36 @@ this, itsdangerous also provides URL safe serializers:
 'WzEsMiwzLDRd.wSPHqC0gR7VUqivlSukJ0IeTDgo'
 >>> s.loads('WzEsMiwzLDRd.wSPHqC0gR7VUqivlSukJ0IeTDgo')
 [1, 2, 3, 4]
+
+JSON Web Signatures
+-------------------
+
+Starting with “itsdangerous” 0.18 JSON Web Signatures are also supported.
+They generally work very similar to the already existing URL safe
+serializer but will emit headers according to the current draft (10) of
+the JSON Web Signature (JWS) [``draft-ietf-jose-json-web-signature``].
+
+>>> from itsdangerous import JSONWebSignatureSerializer
+>>> s = JSONWebSignatureSerializer('secret-key')
+>>> s.dumps({'x': 42})
+'eyJhbGciOiJIUzI1NiJ9.eyJ4Ijo0Mn0.ZdTn1YyGz9Yx5B5wNpWRL221G1WpVE5fPCPKNuc6UAo'
+
+When loading the value back the header will not be returned by default
+like with the other serializers.  However it is possible to also ask for
+the header by passing ``return_header=True``.
+Custom header fields can be provided upon serialization:
+
+>>> s.dumps(0, header_fields={'v': 1})
+'eyJhbGciOiJIUzI1NiIsInYiOjF9.MA.wT-RZI9YU06R919VBdAfTLn82_iIQD70J_j-3F4z_aM'
+>>> s.loads('eyJhbGciOiJIUzI1NiIsInYiOjF9.MA.wT-RZI9YU06R919VBdAf'
+...         'TLn82_iIQD70J_j-3F4z_aM', return_header=True)
+...
+(0, {u'alg': u'HS256', u'v': 1})
+
+“itsdangerous” only provides HMAC SHA derivatives and the none algorithm
+at the moment and does not support the ECC based ones.  The algorithm in
+the header is checked against the one of the serializer and on a mismatch
+a :exc:`BadSignature` exception is raised.
 
 .. _the-salt:
 

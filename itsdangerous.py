@@ -494,22 +494,30 @@ class Serializer(object):
 
         .. versionadded:: 0.15
         """
+        return self._loads_unsafe_impl(s, salt)
+
+    def _loads_unsafe_impl(self, s, salt, load_kwargs=None,
+                           load_payload_kwargs=None):
+        """Lowlevel helper function to implement :meth:`loads_unsafe` in
+        serializer subclasses.
+        """
         try:
-            return True, self.loads(s, salt=salt)
+            return True, self.loads(s, salt=salt, **(load_kwargs or {}))
         except BadSignature, e:
             if e.payload is None:
                 return False, None
             try:
-                return False, self.load_payload(e.payload)
+                return False, self.load_payload(e.payload,
+                    **(load_payload_kwargs or {}))
             except BadPayload:
                 return False, None
 
-    def load_unsafe(self, f, salt=None):
+    def load_unsafe(self, f, *args, **kwargs):
         """Like :meth:`loads_unsafe` but loads from a file.
 
         .. versionadded:: 0.15
         """
-        return self.loads_unsafe(f.read(), salt=salt)
+        return self.loads_unsafe(f.read(), *args, **kwargs)
 
 
 class TimedSerializer(Serializer):
@@ -533,6 +541,11 @@ class TimedSerializer(Serializer):
         if return_timestamp:
             return payload, timestamp
         return payload
+
+    def loads_unsafe(self, s, max_age=None, salt=None):
+        load_kwargs = {'max_age': max_age}
+        load_payload_kwargs = {}
+        return self._loads_unsafe_impl(s, salt, load_kwargs, load_payload_kwargs)
 
 
 class JSONWebSignatureSerializer(Serializer):
@@ -618,11 +631,15 @@ class JSONWebSignatureSerializer(Serializer):
         payload, header = self.load_payload(
             self.make_signer(salt, self.algorithm).unsign(s),
             return_header=True)
-        if header.pop('alg', None) != self.algorithm_name:
+        if header.get('alg') != self.algorithm_name:
             raise BadSignature('Algorithm mismatch')
         if return_header:
             return payload, header
         return payload
+
+    def loads_unsafe(self, s, salt=None, return_header=False):
+        kwargs = {'return_header': return_header}
+        return self._loads_unsafe_impl(s, salt, kwargs, kwargs)
 
 
 class URLSafeSerializerMixin(object):

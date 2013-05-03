@@ -8,10 +8,11 @@ setup(
     name='itsdangerous',
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
-    version='0.17',
+    version='0.18',
     url='http://github.com/mitsuhiko/itsdangerous',
     py_modules=['itsdangerous'],
-    description='Various helpers to pass trusted data to untrusted environments.',
+    description='Various helpers to pass trusted data to '
+                'untrusted environments and back.',
     zip_safe=False,
     classifiers=[
         'License :: OSI Approved :: BSD License',

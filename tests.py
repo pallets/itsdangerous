@@ -158,10 +158,13 @@ class JSONWebSignatureSerializerTestCase(SerializerTestCase):
         header = {"typ": "dummy"}
 
         s = self.make_serializer(secret_key)
+        full_header = header.copy()
+        full_header['alg'] = s.algorithm_name
+
         ts = s.dumps(value, header_fields=header)
         loaded, loaded_header = s.loads(ts, return_header=True)
         self.assertEqual(loaded, value)
-        self.assertEqual(loaded_header, header)
+        self.assertEqual(loaded_header, full_header)
 
     def test_hmac_algorithms(self):
         secret_key = 'predictable-key'
