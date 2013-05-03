@@ -430,15 +430,18 @@ class Serializer(object):
         self.signer = signer
         self.signer_kwargs = signer_kwargs or {}
 
-    def load_payload(self, payload):
+    def load_payload(self, payload, serializer=None):
         """Loads the encoded object.  This implementation uses simplejson.
         This function raises :class:`BadPayload` if the payload is not
-        valid.
+        valid.  The `serializer` parameter can be used to override the
+        serializer stored on the class.
         """
+        if serializer is None:
+            serializer = self.serializer
         try:
             if isinstance(payload, unicode):
                 payload = payload.encode('utf-8')
-            return self.serializer.loads(payload)
+            return serializer.loads(payload)
         except Exception, e:
             raise BadPayload(u'Could not load the payload because an '
                 u'exception ocurred on unserializing the data',
@@ -584,7 +587,8 @@ class JSONWebSignatureSerializer(Serializer):
         except Exception, e:
             raise BadPayload(u'Could not base64 decode the payload because of '
                 u'an exception', original_error=e)
-        header = Serializer.load_payload(self, json_header)
+        header = Serializer.load_payload(self, json_header,
+            serializer=simplejson)
         if not isinstance(header, dict):
             raise BadPayload(u'Header payload is not a JSON object')
         payload = Serializer.load_payload(self, json_payload)
