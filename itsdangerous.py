@@ -160,13 +160,14 @@ class SigningAlgorithm(object):
 
     def get_signature(self, key, value):
         """Returns the signature for the given key and value"""
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 class NoneAlgorithm(SigningAlgorithm):
     """This class provides a algorithm that does not perform any signing and
     returns an empty signature.
     """
+
     def get_signature(self, key, value):
         return ''
 
