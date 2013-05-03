@@ -1,6 +1,11 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.18
+~~~~~~~~~~~~
+
+- Added support for JSON Web Signatures (JWS).
+
 Version 0.17
 ~~~~~~~~~~~~
 
