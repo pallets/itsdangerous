@@ -212,6 +212,13 @@ Signers
 .. autoclass:: TimestampSigner
    :members:
 
+Signing Algorithms
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: NoneAlgorithm
+
+.. autoclass:: HMACAlgorithm
+
 Serializers
 ~~~~~~~~~~~
 
@@ -219,6 +226,9 @@ Serializers
    :members:
 
 .. autoclass:: TimedSerializer
+   :members:
+
+.. autoclass:: JSONWebSignatureSerializer
    :members:
 
 .. autoclass:: URLSafeSerializer
