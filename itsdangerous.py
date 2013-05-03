@@ -584,8 +584,10 @@ class JSONWebSignatureSerializer(Serializer):
         except Exception, e:
             raise BadPayload(u'Could not base64 decode the payload because of '
                 u'an exception', original_error=e)
-        header = super(JSONWebSignatureSerializer, self).load_payload(json_header)
-        payload = super(JSONWebSignatureSerializer, self).load_payload(json_payload)
+        header = Serializer.load_payload(self, json_header)
+        if not isinstance(header, dict):
+            raise BadPayload(u'Header payload is not a JSON object')
+        payload = Serializer.load_payload(self, json_payload)
         if return_header:
             return payload, header
         return payload
