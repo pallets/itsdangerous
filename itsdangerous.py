@@ -278,7 +278,7 @@ class Signer(object):
         """Signs the given string."""
         if isinstance(value, unicode):
             value = value.encode('utf-8')
-        return '%s%s%s' % (value, self.sep, self.get_signature(value))
+        return value + self.sep + self.get_signature(value)
 
     def unsign(self, signed_value):
         """Unsigns the given string."""
@@ -325,10 +325,10 @@ class TimestampSigner(Signer):
     def sign(self, value):
         """Signs the given string and also attaches a time information."""
         timestamp = base64_encode(int_to_bytes(self.get_timestamp()))
-        value = '%s%s%s' % (value, self.sep, timestamp)
+        value = value + self.sep + timestamp
         if isinstance(value, unicode):
             value = value.encode('utf-8')
-        return '%s%s%s' % (value, self.sep, self.get_signature(value))
+        return value + self.sep + self.get_signature(value)
 
     def unsign(self, value, max_age=None, return_timestamp=False):
         """Works like the regular :meth:`~Signer.unsign` but can also
@@ -369,7 +369,7 @@ class TimestampSigner(Signer):
         # Signature was okay but the timestamp is actually not there or
         # malformed.  Should not happen, but well.  We handle it nonetheless
         if timestamp is None:
-            raise BadTimeSignature(u'Malformed timestamp', payload=value)
+            raise BadTimeSignature('Malformed timestamp', payload=value)
 
         # Check timestamp is not older than max_age
         if max_age is not None:
@@ -451,8 +451,8 @@ class Serializer(object):
                 payload = payload.encode('utf-8')
             return serializer.loads(payload)
         except Exception as e:
-            raise BadPayload(u'Could not load the payload because an '
-                u'exception ocurred on unserializing the data',
+            raise BadPayload('Could not load the payload because an '
+                'exception ocurred on unserializing the data',
                 original_error=e)
 
     def dump_payload(self, obj):
@@ -593,12 +593,12 @@ class JSONWebSignatureSerializer(Serializer):
             json_header = base64_decode(base64d_header)
             json_payload = base64_decode(base64d_payload)
         except Exception as e:
-            raise BadPayload(u'Could not base64 decode the payload because of '
-                u'an exception', original_error=e)
+            raise BadPayload('Could not base64 decode the payload because of '
+                'an exception', original_error=e)
         header = Serializer.load_payload(self, json_header,
             serializer=simplejson)
         if not isinstance(header, dict):
-            raise BadPayload(u'Header payload is not a JSON object')
+            raise BadPayload('Header payload is not a JSON object')
         payload = Serializer.load_payload(self, json_payload)
         if return_header:
             return payload, header
@@ -607,13 +607,13 @@ class JSONWebSignatureSerializer(Serializer):
     def dump_payload(self, header, obj):
         base64d_header = base64_encode(self.serializer.dumps(header))
         base64d_payload = base64_encode(self.serializer.dumps(obj))
-        return '%s.%s' % (base64d_header, base64d_payload)
+        return base64d_header + b'.' + base64d_payload
 
     def make_algorithm(self, algorithm_name):
         try:
             return self.jws_algorithms[algorithm_name]
         except KeyError:
-            raise NotImplementedError("Algorithm not supported")
+            raise NotImplementedError('Algorithm not supported')
 
     def make_signer(self, salt=None, algorithm=None):
         if salt is None:
@@ -670,14 +670,14 @@ class URLSafeSerializerMixin(object):
         try:
             json = base64_decode(payload)
         except Exception as e:
-            raise BadPayload(u'Could not base64 decode the payload because of '
-                u'an exception', original_error=e)
+            raise BadPayload('Could not base64 decode the payload because of '
+                'an exception', original_error=e)
         if decompress:
             try:
                 json = zlib.decompress(json)
             except Exception as e:
-                raise BadPayload(u'Could not zlib decompress the payload before '
-                    u'decoding the payload', original_error=e)
+                raise BadPayload('Could not zlib decompress the payload before '
+                    'decoding the payload', original_error=e)
         return super(URLSafeSerializerMixin, self).load_payload(json)
 
     def dump_payload(self, obj):
