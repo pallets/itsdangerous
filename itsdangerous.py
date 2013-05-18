@@ -15,6 +15,7 @@ import hmac
 import zlib
 import time
 from datetime import datetime
+import six
 from six.moves import zip, map, reduce
 
 
@@ -65,10 +66,11 @@ class BadData(Exception):
         self.message = message
 
     def __str__(self):
-        return self.message
+        s = self.__unicode__()
+        return s if six.PY3 else s.encode('utf-8')
 
     def __unicode__(self):
-        return self.message.decode('utf-8')
+        return six.text_type(self.message)
 
 
 class BadPayload(BadData):
