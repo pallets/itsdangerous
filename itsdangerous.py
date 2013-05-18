@@ -14,9 +14,8 @@ import hashlib
 import hmac
 import zlib
 import time
-from itertools import izip, imap
 from datetime import datetime
-from functools import reduce
+from six.moves import zip, map, reduce
 
 
 try:
@@ -48,7 +47,7 @@ def constant_time_compare(val1, val2):
     else:
         result = 1
         left = val2
-    for x, y in izip(left, val2):
+    for x, y in zip(left, val2):
         result |= ord(x) ^ ord(y)
     return result == 0
 
@@ -151,7 +150,7 @@ def int_to_bytes(num):
 
 
 def bytes_to_int(bytes):
-    return reduce(lambda a, b: a << 8 | b, imap(ord, bytes), 0)
+    return reduce(lambda a, b: a << 8 | b, map(ord, bytes), 0)
 
 
 class SigningAlgorithm(object):
