@@ -129,30 +129,36 @@ class SignatureExpired(BadTimeSignature):
 
 
 def base64_encode(string):
-    """base64 encodes a single string.  The resulting string is safe for
-    putting into URLs.
+    """base64 encodes a single bytestring.
+    The resulting bytestring is safe for putting into URLs.
     """
-    return base64.urlsafe_b64encode(string).strip('=')
+    return base64.urlsafe_b64encode(string).strip(b'=')
 
 
 def base64_decode(string):
-    """base64 decodes a single string."""
-    if isinstance(string, unicode):
+    """base64 decodes a single bytestring (and is tolerant to getting
+    called with a unicode string).
+    The result is also a bytestring.
+    """
+    if isinstance(string, six.text_type):
         string = string.encode('ascii', 'ignore')
-    return base64.urlsafe_b64decode(string + '=' * (-len(string) % 4))
+    return base64.urlsafe_b64decode(string + b'=' * (-len(string) % 4))
 
 
 def int_to_bytes(num):
     assert num >= 0
     rv = []
     while num:
-        rv.append(chr(num & 0xff))
+        rv.append(six.int2byte(num & 0xff))
         num >>= 8
-    return ''.join(reversed(rv))
+    return b''.join(reversed(rv))
 
 
-def bytes_to_int(bytes):
-    return reduce(lambda a, b: a << 8 | b, map(ord, bytes), 0)
+def bytes_to_int(bytestr):
+    assert isinstance(bytestr, bytes)
+    def byte2int(b):
+        return b if six.PY3 else ord(b)
+    return reduce(lambda a, b: a << 8 | b, map(byte2int, bytestr), 0)
 
 
 class SigningAlgorithm(object):
