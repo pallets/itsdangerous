@@ -57,7 +57,7 @@ class SerializerTestCase(unittest.TestCase):
 
         try:
             s.loads(ts + 'x')
-        except idmod.BadSignature, e:
+        except idmod.BadSignature as e:
             self.assertEqual(e.payload, ts.rsplit('.', 1)[0])
             self.assertEqual(s.load_payload(e.payload), value)
         else:
@@ -83,7 +83,7 @@ class SerializerTestCase(unittest.TestCase):
 
         try:
             s.loads(ts, salt='modified')
-        except idmod.BadSignature, e:
+        except idmod.BadSignature as e:
             self.assertEqual(s.load_payload(unicode(e.payload)), u'hello')
 
     def test_signer_kwargs(self):
@@ -140,7 +140,7 @@ class TimedSerializerTestCase(SerializerTestCase):
         ts = s.dumps(value)
         try:
             s.loads(ts, max_age=-1)
-        except idmod.SignatureExpired, e:
+        except idmod.SignatureExpired as e:
             self.assertEqual(e.date_signed,
                 datetime.utcfromtimestamp(time.time()))
             self.assertEqual(e.payload, ts.rsplit('.', 2)[0])
@@ -194,7 +194,7 @@ class JSONWebSignatureSerializerTestCase(SerializerTestCase):
         s = self.make_serializer(secret_key, algorithm_name='HS384')
         try:
             s.loads(ts)
-        except idmod.BadSignature, e:
+        except idmod.BadSignature as e:
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get algorithm mismatch')

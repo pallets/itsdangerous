@@ -16,6 +16,7 @@ import zlib
 import time
 from itertools import izip, imap
 from datetime import datetime
+from functools import reduce
 
 
 try:
@@ -332,7 +333,7 @@ class TimestampSigner(Signer):
         try:
             result = Signer.unsign(self, value)
             sig_error = None
-        except BadSignature, e:
+        except BadSignature as e:
             sig_error = e
             result = e.payload or ''
 
@@ -442,7 +443,7 @@ class Serializer(object):
             if isinstance(payload, unicode):
                 payload = payload.encode('utf-8')
             return serializer.loads(payload)
-        except Exception, e:
+        except Exception as e:
             raise BadPayload(u'Could not load the payload because an '
                 u'exception ocurred on unserializing the data',
                 original_error=e)
@@ -506,7 +507,7 @@ class Serializer(object):
         """
         try:
             return True, self.loads(s, salt=salt, **(load_kwargs or {}))
-        except BadSignature, e:
+        except BadSignature as e:
             if e.payload is None:
                 return False, None
             try:
@@ -584,7 +585,7 @@ class JSONWebSignatureSerializer(Serializer):
         try:
             json_header = base64_decode(base64d_header)
             json_payload = base64_decode(base64d_payload)
-        except Exception, e:
+        except Exception as e:
             raise BadPayload(u'Could not base64 decode the payload because of '
                 u'an exception', original_error=e)
         header = Serializer.load_payload(self, json_header,
@@ -661,13 +662,13 @@ class URLSafeSerializerMixin(object):
             decompress = True
         try:
             json = base64_decode(payload)
-        except Exception, e:
+        except Exception as e:
             raise BadPayload(u'Could not base64 decode the payload because of '
                 u'an exception', original_error=e)
         if decompress:
             try:
                 json = zlib.decompress(json)
-            except Exception, e:
+            except Exception as e:
                 raise BadPayload(u'Could not zlib decompress the payload before '
                     u'decoding the payload', original_error=e)
         return super(URLSafeSerializerMixin, self).load_payload(json)
