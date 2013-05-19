@@ -24,9 +24,9 @@ class SerializerTestCase(unittest.TestCase):
     def test_decode_detects_tampering(self):
         transforms = (
             lambda s: s.upper(),
-            lambda s: s + 'a',
-            lambda s: 'a' + s[1:],
-            lambda s: s.replace('.', ''),
+            lambda s: s + b'a',
+            lambda s: b'a' + s[1:],
+            lambda s: s.replace(b'.', b''),
         )
         value = {
             'foo': 'bar',
@@ -46,7 +46,7 @@ class SerializerTestCase(unittest.TestCase):
         for o in objects:
             value = s.dumps(o)
             self.assertNotEqual(o, value)
-            self.assertEqual(o, s.loads(unicode(value)))
+            self.assertEqual(o, s.loads(value))
 
     def test_exception_attributes(self):
         secret_key = 'predictable-key'
@@ -56,9 +56,9 @@ class SerializerTestCase(unittest.TestCase):
         ts = s.dumps(value)
 
         try:
-            s.loads(ts + 'x')
-        except idmod.BadSignature, e:
-            self.assertEqual(e.payload, ts.rsplit('.', 1)[0])
+            s.loads(ts + b'x')
+        except idmod.BadSignature as e:
+            self.assertEqual(e.payload, ts.rsplit(b'.', 1)[0])
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get bad signature')
@@ -77,14 +77,14 @@ class SerializerTestCase(unittest.TestCase):
         value = u'hello'
 
         s = self.make_serializer(secret_key)
-        ts = unicode(s.dumps(value))
+        ts = s.dumps(value)
         self.assertEqual(s.loads_unsafe(ts), (True, u'hello'))
         self.assertEqual(s.loads_unsafe(ts, salt='modified'), (False, u'hello'))
 
         try:
             s.loads(ts, salt='modified')
-        except idmod.BadSignature, e:
-            self.assertEqual(s.load_payload(unicode(e.payload)), u'hello')
+        except idmod.BadSignature as e:
+            self.assertEqual(s.load_payload(e.payload), u'hello')
 
     def test_signer_kwargs(self):
         secret_key = 'predictable-key'
@@ -93,7 +93,7 @@ class SerializerTestCase(unittest.TestCase):
             digest_method=hashlib.md5,
             key_derivation='hmac'
         ))
-        ts = unicode(s.dumps(value))
+        ts = s.dumps(value)
         self.assertEqual(s.loads(ts), u'hello')
 
 
@@ -140,10 +140,10 @@ class TimedSerializerTestCase(SerializerTestCase):
         ts = s.dumps(value)
         try:
             s.loads(ts, max_age=-1)
-        except idmod.SignatureExpired, e:
+        except idmod.SignatureExpired as e:
             self.assertEqual(e.date_signed,
                 datetime.utcfromtimestamp(time.time()))
-            self.assertEqual(e.payload, ts.rsplit('.', 2)[0])
+            self.assertEqual(e.payload, ts.rsplit(b'.', 2)[0])
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get expiration')
@@ -194,7 +194,7 @@ class JSONWebSignatureSerializerTestCase(SerializerTestCase):
         s = self.make_serializer(secret_key, algorithm_name='HS384')
         try:
             s.loads(ts)
-        except idmod.BadSignature, e:
+        except idmod.BadSignature as e:
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get algorithm mismatch')
@@ -203,8 +203,8 @@ class JSONWebSignatureSerializerTestCase(SerializerTestCase):
 class URLSafeSerializerMixin(object):
 
     def test_is_base62(self):
-        allowed = frozenset('0123456789abcdefghijklmnopqrstuvwxyz' +
-                            'ABCDEFGHIJKLMNOPQRSTUVWXYZ_-.')
+        allowed = frozenset(b'0123456789abcdefghijklmnopqrstuvwxyz' +
+                            b'ABCDEFGHIJKLMNOPQRSTUVWXYZ_-.')
         objects = (['a', 'list'], 'a string', u'a unicode string \u2019',
                    {'a': 'dictionary'}, 42, 42.5)
         s = self.make_serializer('Test')

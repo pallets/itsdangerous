@@ -9,13 +9,15 @@
     :copyright: (c) 2011 by Armin Ronacher and the Django Software Foundation.
     :license: BSD, see LICENSE for more details.
 """
+
 import base64
 import hashlib
 import hmac
 import zlib
 import time
-from itertools import izip, imap
 from datetime import datetime
+import six
+from six.moves import zip, map, reduce
 
 
 try:
@@ -29,6 +31,18 @@ except ImportError:
 
 # 2011/01/01 in UTC
 EPOCH = 1293840000
+
+
+# _compat stuff, but we have no package...
+
+def byte2int(b):
+    return b if six.PY3 else ord(b)
+
+
+def want_bytes(s, encoding='utf-8', errors='strict'):
+    if isinstance(s, six.text_type):
+        s = s.encode(encoding, errors=errors)
+    return s
 
 
 def constant_time_compare(val1, val2):
@@ -47,8 +61,8 @@ def constant_time_compare(val1, val2):
     else:
         result = 1
         left = val2
-    for x, y in izip(left, val2):
-        result |= ord(x) ^ ord(y)
+    for x, y in zip(left, val2):
+        result |= byte2int(x) ^ byte2int(y)
     return result == 0
 
 
@@ -65,10 +79,11 @@ class BadData(Exception):
         self.message = message
 
     def __str__(self):
-        return self.message
+        s = self.__unicode__()
+        return s if six.PY3 else s.encode('utf-8')
 
     def __unicode__(self):
-        return self.message.decode('utf-8')
+        return six.text_type(self.message)
 
 
 class BadPayload(BadData):
@@ -127,30 +142,35 @@ class SignatureExpired(BadTimeSignature):
 
 
 def base64_encode(string):
-    """base64 encodes a single string.  The resulting string is safe for
-    putting into URLs.
+    """base64 encodes a single bytestring (and is tolerant to getting
+    called with a unicode string).
+    The resulting bytestring is safe for putting into URLs.
     """
-    return base64.urlsafe_b64encode(string).strip('=')
+    string = want_bytes(string)
+    return base64.urlsafe_b64encode(string).strip(b'=')
 
 
 def base64_decode(string):
-    """base64 decodes a single string."""
-    if isinstance(string, unicode):
-        string = string.encode('ascii', 'ignore')
-    return base64.urlsafe_b64decode(string + '=' * (-len(string) % 4))
+    """base64 decodes a single bytestring (and is tolerant to getting
+    called with a unicode string).
+    The result is also a bytestring.
+    """
+    string = want_bytes(string, encoding='ascii', errors='ignore')
+    return base64.urlsafe_b64decode(string + b'=' * (-len(string) % 4))
 
 
 def int_to_bytes(num):
     assert num >= 0
     rv = []
     while num:
-        rv.append(chr(num & 0xff))
+        rv.append(six.int2byte(num & 0xff))
         num >>= 8
-    return ''.join(reversed(rv))
+    return b''.join(reversed(rv))
 
 
-def bytes_to_int(bytes):
-    return reduce(lambda a, b: a << 8 | b, imap(ord, bytes), 0)
+def bytes_to_int(bytestr):
+    assert isinstance(bytestr, bytes)
+    return reduce(lambda a, b: a << 8 | b, map(byte2int, bytestr), 0)
 
 
 class SigningAlgorithm(object):
@@ -169,7 +189,7 @@ class NoneAlgorithm(SigningAlgorithm):
     """
 
     def get_signature(self, key, value):
-        return ''
+        return b''
 
 
 class HMACAlgorithm(SigningAlgorithm):
@@ -224,11 +244,12 @@ class Signer(object):
     #: .. versionadded:: 0.14
     default_key_derivation = 'django-concat'
 
-    def __init__(self, secret_key, salt=None, sep='.', key_derivation=None,
+    def __init__(self, secret_key, salt=None, sep=b'.', key_derivation=None,
                  digest_method=None, algorithm=None):
-        self.secret_key = secret_key
-        self.sep = sep
-        self.salt = salt or 'itsdangerous.Signer'
+        self.secret_key = want_bytes(secret_key)
+        self.sep = want_bytes(sep)
+        self.salt = b'itsdangerous.Signer' if salt is None \
+                    else want_bytes(salt)
         if key_derivation is None:
             key_derivation = self.default_key_derivation
         self.key_derivation = key_derivation
@@ -249,7 +270,7 @@ class Signer(object):
         if self.key_derivation == 'concat':
             return self.digest_method(self.salt + self.secret_key).digest()
         elif self.key_derivation == 'django-concat':
-            return self.digest_method(self.salt + 'signer' +
+            return self.digest_method(self.salt + b'signer' +
                 self.secret_key).digest()
         elif self.key_derivation == 'hmac':
             mac = hmac.new(self.secret_key, digestmod=self.digest_method)
@@ -262,22 +283,20 @@ class Signer(object):
 
     def get_signature(self, value):
         """Returns the signature for the given value"""
+        value = want_bytes(value)
         key = self.derive_key()
         sig = self.algorithm.get_signature(key, value)
         return base64_encode(sig)
 
     def sign(self, value):
         """Signs the given string."""
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        return '%s%s%s' % (value, self.sep, self.get_signature(value))
+        return value + self.sep + self.get_signature(value)
 
     def unsign(self, signed_value):
         """Unsigns the given string."""
-        if isinstance(signed_value, unicode):
-            signed_value = signed_value.encode('utf-8')
+        signed_value = want_bytes(signed_value)
         if self.sep not in signed_value:
-            raise BadSignature('No "%s" found in value' % self.sep)
+            raise BadSignature('No %r found in value' % self.sep)
         value, sig = signed_value.rsplit(self.sep, 1)
         if constant_time_compare(sig, self.get_signature(value)):
             return value
@@ -316,11 +335,10 @@ class TimestampSigner(Signer):
 
     def sign(self, value):
         """Signs the given string and also attaches a time information."""
+        value = want_bytes(value)
         timestamp = base64_encode(int_to_bytes(self.get_timestamp()))
-        value = '%s%s%s' % (value, self.sep, timestamp)
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        return '%s%s%s' % (value, self.sep, self.get_signature(value))
+        value = value + self.sep + timestamp
+        return value + self.sep + self.get_signature(value)
 
     def unsign(self, value, max_age=None, return_timestamp=False):
         """Works like the regular :meth:`~Signer.unsign` but can also
@@ -332,9 +350,9 @@ class TimestampSigner(Signer):
         try:
             result = Signer.unsign(self, value)
             sig_error = None
-        except BadSignature, e:
+        except BadSignature as e:
             sig_error = e
-            result = e.payload or ''
+            result = e.payload or b''
 
         # If there is no timestamp in the result there is something
         # seriously wrong.  In case there was a signature error, we raise
@@ -355,13 +373,13 @@ class TimestampSigner(Signer):
         # Signature is *not* okay.  Raise a proper error now that we have
         # split the value and the timestamp.
         if sig_error is not None:
-            raise BadTimeSignature(unicode(sig_error), payload=value,
+            raise BadTimeSignature(six.text_type(sig_error), payload=value,
                                    date_signed=timestamp)
 
         # Signature was okay but the timestamp is actually not there or
         # malformed.  Should not happen, but well.  We handle it nonetheless
         if timestamp is None:
-            raise BadTimeSignature(u'Malformed timestamp', payload=value)
+            raise BadTimeSignature('Malformed timestamp', payload=value)
 
         # Check timestamp is not older than max_age
         if max_age is not None:
@@ -418,10 +436,10 @@ class Serializer(object):
     #: .. versionadded:: 0.14
     default_signer = Signer
 
-    def __init__(self, secret_key, salt='itsdangerous', serializer=None,
+    def __init__(self, secret_key, salt=b'itsdangerous', serializer=None,
                  signer=None, signer_kwargs=None):
-        self.secret_key = secret_key
-        self.salt = salt
+        self.secret_key = want_bytes(secret_key)
+        self.salt = want_bytes(salt)
         if serializer is None:
             serializer = self.default_serializer
         self.serializer = serializer
@@ -439,19 +457,18 @@ class Serializer(object):
         if serializer is None:
             serializer = self.serializer
         try:
-            if isinstance(payload, unicode):
-                payload = payload.encode('utf-8')
+            payload = want_bytes(payload)
             return serializer.loads(payload)
-        except Exception, e:
-            raise BadPayload(u'Could not load the payload because an '
-                u'exception ocurred on unserializing the data',
+        except Exception as e:
+            raise BadPayload('Could not load the payload because an '
+                'exception ocurred on unserializing the data',
                 original_error=e)
 
     def dump_payload(self, obj):
         """Dumps the encoded object into a bytestring.  This implementation
         uses simplejson.
         """
-        return self.serializer.dumps(obj)
+        return want_bytes(self.serializer.dumps(obj))
 
     def make_signer(self, salt=None):
         """A method that creates a new instance of the signer to be used.
@@ -506,7 +523,7 @@ class Serializer(object):
         """
         try:
             return True, self.loads(s, salt=salt, **(load_kwargs or {}))
-        except BadSignature, e:
+        except BadSignature as e:
             if e.payload is None:
                 return False, None
             try:
@@ -567,8 +584,9 @@ class JSONWebSignatureSerializer(Serializer):
     default_algorithm = 'HS256'
 
     def __init__(self, secret_key, salt=None, signer_kwargs=None, algorithm_name=None):
-        self.secret_key = secret_key
-        self.salt = salt
+        self.secret_key = want_bytes(secret_key)
+        self.salt = salt if salt is None \
+                    else want_bytes(salt)
         self.serializer = compact_json
         self.signer = Signer
         self.signer_kwargs = signer_kwargs or {}
@@ -578,19 +596,20 @@ class JSONWebSignatureSerializer(Serializer):
         self.algorithm = self.make_algorithm(algorithm_name)
 
     def load_payload(self, payload, return_header=False):
-        if '.' not in payload:
+        payload = want_bytes(payload)
+        if b'.' not in payload:
             raise BadPayload('No "." found in value')
-        base64d_header, base64d_payload = payload.split('.', 1)
+        base64d_header, base64d_payload = payload.split(b'.', 1)
         try:
             json_header = base64_decode(base64d_header)
             json_payload = base64_decode(base64d_payload)
-        except Exception, e:
-            raise BadPayload(u'Could not base64 decode the payload because of '
-                u'an exception', original_error=e)
+        except Exception as e:
+            raise BadPayload('Could not base64 decode the payload because of '
+                'an exception', original_error=e)
         header = Serializer.load_payload(self, json_header,
             serializer=simplejson)
         if not isinstance(header, dict):
-            raise BadPayload(u'Header payload is not a JSON object')
+            raise BadPayload('Header payload is not a JSON object')
         payload = Serializer.load_payload(self, json_payload)
         if return_header:
             return payload, header
@@ -599,17 +618,17 @@ class JSONWebSignatureSerializer(Serializer):
     def dump_payload(self, header, obj):
         base64d_header = base64_encode(self.serializer.dumps(header))
         base64d_payload = base64_encode(self.serializer.dumps(obj))
-        return '%s.%s' % (base64d_header, base64d_payload)
+        return base64d_header + b'.' + base64d_payload
 
     def make_algorithm(self, algorithm_name):
         try:
             return self.jws_algorithms[algorithm_name]
         except KeyError:
-            raise NotImplementedError("Algorithm not supported")
+            raise NotImplementedError('Algorithm not supported')
 
     def make_signer(self, salt=None, algorithm=None):
         if salt is None:
-            salt is self.salt
+            salt = self.salt
         key_derivation = 'none' if salt is None else None
         if algorithm is None:
             algorithm = self.algorithm
@@ -655,21 +674,22 @@ class URLSafeSerializerMixin(object):
     """
 
     def load_payload(self, payload):
+        payload = want_bytes(payload)
         decompress = False
-        if payload[0] == '.':
+        if payload[0] == b'.':
             payload = payload[1:]
             decompress = True
         try:
             json = base64_decode(payload)
-        except Exception, e:
-            raise BadPayload(u'Could not base64 decode the payload because of '
-                u'an exception', original_error=e)
+        except Exception as e:
+            raise BadPayload('Could not base64 decode the payload because of '
+                'an exception', original_error=e)
         if decompress:
             try:
                 json = zlib.decompress(json)
-            except Exception, e:
-                raise BadPayload(u'Could not zlib decompress the payload before '
-                    u'decoding the payload', original_error=e)
+            except Exception as e:
+                raise BadPayload('Could not zlib decompress the payload before '
+                    'decoding the payload', original_error=e)
         return super(URLSafeSerializerMixin, self).load_payload(json)
 
     def dump_payload(self, obj):
@@ -681,7 +701,7 @@ class URLSafeSerializerMixin(object):
             is_compressed = True
         base64d = base64_encode(json)
         if is_compressed:
-            base64d = '.' + base64d
+            base64d = b'.' + base64d
         return base64d
 
 
@@ -693,7 +713,7 @@ class _CompactJSON(object):
         return simplejson.loads(payload)
 
     def dumps(self, obj):
-        return simplejson.dumps(obj, separators=(',', ':'))
+        return want_bytes(simplejson.dumps(obj, separators=(',', ':')))
 
 
 compact_json = _CompactJSON()
