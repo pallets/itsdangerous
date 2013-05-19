@@ -617,7 +617,7 @@ class JSONWebSignatureSerializer(Serializer):
 
     def make_signer(self, salt=None, algorithm=None):
         if salt is None:
-            salt is self.salt
+            salt = self.salt
         key_derivation = 'none' if salt is None else None
         if algorithm is None:
             algorithm = self.algorithm
