@@ -1,9 +1,12 @@
-.PHONY: clean-pyc test upload-docs
+.PHONY: clean-pyc test tox-test upload-docs
 
 all: clean-pyc test
 
 test:
 	python tests.py
+
+tox-test:
+	tox
 
 clean-pyc:
 	find . -name '*.pyc' -exec rm -f {} +

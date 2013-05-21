@@ -8,7 +8,7 @@ setup(
     name='itsdangerous',
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
-    version='0.19',
+    version='0.20',
     url='http://github.com/mitsuhiko/itsdangerous',
     py_modules=['itsdangerous'],
     description='Various helpers to pass trusted data to '
@@ -17,8 +17,6 @@ setup(
     classifiers=[
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
     ],
-    install_requires=['six>=1.3.0']
 )

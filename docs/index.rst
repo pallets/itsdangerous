@@ -228,6 +228,15 @@ wrong you can also use the unsafe loading::
 The first item in the returned tuple is a boolean that indicates if the
 signature was correct.
 
+Python 3 Notes
+--------------
+
+On Python 3 the return serialized versions are represented as bytes.
+However in many cases (for instance when using the URL safe serializers)
+the data fits into ASCII so it can trivially be converted into unicode
+strings by adding an ``.encode('ascii')``.  It also assumes that custom
+serializers operate on bytes as well.
+
 
 .. include:: ../CHANGES
 

@@ -10,37 +10,57 @@
     :license: BSD, see LICENSE for more details.
 """
 
-import base64
-import hashlib
+import sys
 import hmac
 import zlib
 import time
+import base64
+import hashlib
+import operator
 from datetime import datetime
-import six
-from six.moves import zip, map, reduce
 
 
+PY2 = sys.version_info[0] == 2
+if PY2:
+    from itertools import izip
+    text_type = unicode
+    int_to_byte = chr
+else:
+    from functools import reduce
+    izip = zip
+    text_type = str
+    int_to_byte = operator.methodcaller('to_bytes', 1, 'big')
+
+
+# On Python 3 the builtin JSON module does not match the
+# behavior of the JSON module from simplejson.  We need to
+# wrap it and encode to utf-8 the return value.  This behavior
+# does not match the behavior of the standalone simplejson
+# module.  If we find simplejson installed we just use it
+# unchanged.
 try:
     import simplejson
 except ImportError:
-    try:
-        from django.utils import simplejson
-    except ImportError:
-        import json as simplejson
+    import json as simplejson
+    if not PY2:
+        _json = simplejson
+        class simplejson(object):
+
+            @staticmethod
+            def dumps(obj, *args, **kwargs):
+                return _json.dumps(obj, *args, **kwargs).encode('utf-8')
+
+            @staticmethod
+            def loads(obj, *args, **kwargs):
+                return _json.loads(obj.decode('utf-8'), *args, **kwargs)
 
 
 # 2011/01/01 in UTC
 EPOCH = 1293840000
 
 
-# _compat stuff, but we have no package...
-
-def byte2int(b):
-    return b if six.PY3 else ord(b)
-
-
 def want_bytes(s, encoding='utf-8', errors='strict'):
-    if isinstance(s, six.text_type):
+    if isinstance(s, text_type):
         s = s.encode(encoding, errors=errors)
     return s
 
@@ -61,8 +81,8 @@ def constant_time_compare(val1, val2):
     else:
         result = 1
         left = val2
-    for x, y in zip(left, val2):
-        result |= byte2int(x) ^ byte2int(y)
+    for x, y in izip(bytearray(left), bytearray(val2)):
+        result |= x ^ y
     return result == 0
 
 
@@ -79,11 +99,12 @@ class BadData(Exception):
         self.message = message
 
     def __str__(self):
-        s = self.__unicode__()
-        return s if six.PY3 else s.encode('utf-8')
+        return text_type(self.message)
 
-    def __unicode__(self):
-        return six.text_type(self.message)
+    if PY2:
+        __unicode__ = __str__
+        def __str__(self):
+            return self.__unicode__().encode('utf-8')
 
 
 class BadPayload(BadData):
@@ -163,14 +184,13 @@ def int_to_bytes(num):
     assert num >= 0
     rv = []
     while num:
-        rv.append(six.int2byte(num & 0xff))
+        rv.append(int_to_byte(num & 0xff))
         num >>= 8
     return b''.join(reversed(rv))
 
 
 def bytes_to_int(bytestr):
-    assert isinstance(bytestr, bytes)
-    return reduce(lambda a, b: a << 8 | b, map(byte2int, bytestr), 0)
+    return reduce(lambda a, b: a << 8 | b, bytearray(bytestr), 0)
 
 
 class SigningAlgorithm(object):
@@ -244,10 +264,10 @@ class Signer(object):
     #: .. versionadded:: 0.14
     default_key_derivation = 'django-concat'
 
-    def __init__(self, secret_key, salt=None, sep=b'.', key_derivation=None,
+    def __init__(self, secret_key, salt=None, sep='.', key_derivation=None,
                  digest_method=None, algorithm=None):
         self.secret_key = want_bytes(secret_key)
-        self.sep = want_bytes(sep)
+        self.sep = sep
         self.salt = b'itsdangerous.Signer' if salt is None \
                     else want_bytes(salt)
         if key_derivation is None:
@@ -290,14 +310,15 @@ class Signer(object):
 
     def sign(self, value):
         """Signs the given string."""
-        return value + self.sep + self.get_signature(value)
+        return value + want_bytes(self.sep) + self.get_signature(value)
 
     def unsign(self, signed_value):
         """Unsigns the given string."""
         signed_value = want_bytes(signed_value)
-        if self.sep not in signed_value:
+        sep = want_bytes(self.sep)
+        if sep not in signed_value:
             raise BadSignature('No %r found in value' % self.sep)
-        value, sig = signed_value.rsplit(self.sep, 1)
+        value, sig = signed_value.rsplit(sep, 1)
         if constant_time_compare(sig, self.get_signature(value)):
             return value
         raise BadSignature('Signature "%s" does not match' % sig,
@@ -337,8 +358,9 @@ class TimestampSigner(Signer):
         """Signs the given string and also attaches a time information."""
         value = want_bytes(value)
         timestamp = base64_encode(int_to_bytes(self.get_timestamp()))
-        value = value + self.sep + timestamp
-        return value + self.sep + self.get_signature(value)
+        sep = want_bytes(self.sep)
+        value = value + sep + timestamp
+        return value + sep + self.get_signature(value)
 
     def unsign(self, value, max_age=None, return_timestamp=False):
         """Works like the regular :meth:`~Signer.unsign` but can also
@@ -353,18 +375,19 @@ class TimestampSigner(Signer):
         except BadSignature as e:
             sig_error = e
             result = e.payload or b''
+        sep = want_bytes(self.sep)
 
         # If there is no timestamp in the result there is something
         # seriously wrong.  In case there was a signature error, we raise
         # that one directly, otherwise we have a weird situation in which
         # we shouldn't have come except someone uses a time-based serializer
         # on non-timestamp data, so catch that.
-        if not self.sep in result:
+        if not sep in result:
             if sig_error:
                 raise sig_error
             raise BadTimeSignature('timestamp missing', payload=result)
 
-        value, timestamp = result.rsplit(self.sep, 1)
+        value, timestamp = result.rsplit(sep, 1)
         try:
             timestamp = bytes_to_int(base64_decode(timestamp))
         except Exception:
@@ -373,7 +396,7 @@ class TimestampSigner(Signer):
         # Signature is *not* okay.  Raise a proper error now that we have
         # split the value and the timestamp.
         if sig_error is not None:
-            raise BadTimeSignature(six.text_type(sig_error), payload=value,
+            raise BadTimeSignature(text_type(sig_error), payload=value,
                                    date_signed=timestamp)
 
         # Signature was okay but the timestamp is actually not there or

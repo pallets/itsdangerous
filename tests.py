@@ -210,7 +210,7 @@ class URLSafeSerializerMixin(object):
         s = self.make_serializer('Test')
         for o in objects:
             value = s.dumps(o)
-            self.assert_(set(value).issubset(set(allowed)))
+            self.assertTrue(set(value).issubset(set(allowed)))
             self.assertNotEqual(o, value)
             self.assertEqual(o, s.loads(value))
 

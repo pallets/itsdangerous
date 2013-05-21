@@ -3,5 +3,7 @@
 *.pyo
 env
 dist
+build
+.tox
 docs/_build
 *.egg-info
