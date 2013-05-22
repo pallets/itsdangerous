@@ -67,6 +67,11 @@ def is_text_serializer(serializer):
     return isinstance(serializer.dumps({}), text_type)
 
 
+# Starting with 3.3 the standard library has a c-implementation for
+# constant time string compares.
+_builtin_constant_time_compare = getattr(hmac, 'compare_digest', None)
+
+
 def constant_time_compare(val1, val2):
     """Returns True if the two strings are equal, False otherwise.
 
@@ -76,6 +81,8 @@ def constant_time_compare(val1, val2):
 
     This is should be implemented in C in order to get it completely right.
     """
+    if _builtin_constant_time_compare is not None:
+        return _builtin_constant_time_compare(val1, val2)
     len_eq = len(val1) == len(val2)
     if len_eq:
         result = 0
