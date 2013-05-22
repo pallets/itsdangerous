@@ -21,6 +21,12 @@ else:
         return value
 
 
+class UtilityTestCase(unittest.TestCase):
+    def test_want_bytes(self):
+        self.assertEqual(want_bytes(b"foobar"), b"foobar")
+        self.assertEqual(want_bytes(u"foobar"), b"foobar")
+
+
 class SerializerTestCase(unittest.TestCase):
     serializer_class = idmod.Serializer
 

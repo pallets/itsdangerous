@@ -58,7 +58,7 @@ EPOCH = 1293840000
 
 def want_bytes(s, encoding='utf-8', errors='strict'):
     if isinstance(s, text_type):
-        s = s.encode(encoding, errors=errors)
+        s = s.encode(encoding, errors)
     return s
 
 
