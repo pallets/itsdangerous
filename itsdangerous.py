@@ -32,27 +32,24 @@ else:
     int_to_byte = operator.methodcaller('to_bytes', 1, 'big')
 
 
-# On Python 3 the builtin JSON module does not match the
-# behavior of the JSON module from simplejson.  We need to
-# wrap it and encode to utf-8 the return value.  This behavior
-# does not match the behavior of the standalone simplejson
-# module.  If we find simplejson installed we just use it
-# unchanged.
 try:
-    import simplejson
+    import simplejson as json
 except ImportError:
-    import json as simplejson
-    if not PY2:
-        _json = simplejson
-        class simplejson(object):
+    import json
 
-            @staticmethod
-            def dumps(obj, *args, **kwargs):
-                return _json.dumps(obj, *args, **kwargs).encode('utf-8')
 
-            @staticmethod
-            def loads(obj, *args, **kwargs):
-                return _json.loads(obj.decode('utf-8'), *args, **kwargs)
+class _CompactJSON(object):
+    """Wrapper around simplejson that strips whitespace.
+    """
+
+    def loads(self, payload):
+        return json.loads(payload)
+
+    def dumps(self, obj):
+        return json.dumps(obj, separators=(',', ':'))
+
+
+compact_json = _CompactJSON()
 
 
 # 2011/01/01 in UTC
@@ -63,6 +60,11 @@ def want_bytes(s, encoding='utf-8', errors='strict'):
     if isinstance(s, text_type):
         s = s.encode(encoding, errors=errors)
     return s
+
+
+def is_text_serializer(serializer):
+    """Checks weather a serializer generates text or binary."""
+    return isinstance(serializer.dumps({}), text_type)
 
 
 def constant_time_compare(val1, val2):
@@ -230,8 +232,8 @@ class HMACAlgorithm(SigningAlgorithm):
 
 
 class Signer(object):
-    """This class can sign a string and unsign it and validate the
-    signature provided.
+    """This class can sign bytes and unsign it and validate the signature
+    provided.
 
     Salt can be used to namespace the hash, so that a signed string is only
     valid for a given namespace.  Leaving this at the default value or re-using
@@ -268,8 +270,7 @@ class Signer(object):
                  digest_method=None, algorithm=None):
         self.secret_key = want_bytes(secret_key)
         self.sep = sep
-        self.salt = b'itsdangerous.Signer' if salt is None \
-                    else want_bytes(salt)
+        self.salt = 'itsdangerous.Signer' if salt is None else salt
         if key_derivation is None:
             key_derivation = self.default_key_derivation
         self.key_derivation = key_derivation
@@ -287,14 +288,15 @@ class Signer(object):
         to be used as a security method to make a complex key out of a short
         password.  Instead you should use large random secret keys.
         """
+        salt = want_bytes(self.salt)
         if self.key_derivation == 'concat':
-            return self.digest_method(self.salt + self.secret_key).digest()
+            return self.digest_method(salt + self.secret_key).digest()
         elif self.key_derivation == 'django-concat':
-            return self.digest_method(self.salt + b'signer' +
+            return self.digest_method(salt + b'signer' +
                 self.secret_key).digest()
         elif self.key_derivation == 'hmac':
             mac = hmac.new(self.secret_key, digestmod=self.digest_method)
-            mac.update(self.salt)
+            mac.update(salt)
             return mac.digest()
         elif self.key_derivation == 'none':
             return self.secret_key
@@ -321,7 +323,7 @@ class Signer(object):
         value, sig = signed_value.rsplit(sep, 1)
         if constant_time_compare(sig, self.get_signature(value)):
             return value
-        raise BadSignature('Signature "%s" does not match' % sig,
+        raise BadSignature('Signature %r does not match' % sig,
                            payload=value)
 
     def validate(self, signed_value):
@@ -429,18 +431,19 @@ class TimestampSigner(Signer):
 
 class Serializer(object):
     """This class provides a serialization interface on top of the
-    signer.  It provides a similar API to json/pickle/simplejson and
-    other modules but is slightly differently structured internally.
-    If you want to change the underlying implementation for parsing and
-    loading you have to override the :meth:`load_payload` and
-    :meth:`dump_payload` functions.
+    signer.  It provides a similar API to json/pickle and other modules but is
+    slightly differently structured internally.  If you want to change the
+    underlying implementation for parsing and loading you have to override the
+    :meth:`load_payload` and :meth:`dump_payload` functions.
 
-    This implementation uses simplejson for dumping and loading.
+    This implementation uses simplejson if available for dumping and loading
+    and will fall back to the standard library's json module if it's not
+    available.
 
-    Starting with 0.14 you do not need to subclass this class in order
-    to switch out or customer the :class:`Signer`.  You can instead
-    also pass a different class to the constructor as well as
-    keyword arguments as dictionary that should be forwarded::
+    Starting with 0.14 you do not need to subclass this class in order to
+    switch out or customer the :class:`Signer`.  You can instead also pass a
+    different class to the constructor as well as keyword arguments as
+    dictionary that should be forwarded::
 
         s = Serializer(signer_kwargs={'key_derivation': 'hmac'})
 
@@ -451,7 +454,7 @@ class Serializer(object):
 
     #: If a serializer module or class is not passed to the constructor
     #: this one is picked up.  This currently defaults to :mod:`json`.
-    default_serializer = simplejson
+    default_serializer = json
 
     #: The default :class:`Signer` class that is being used by this
     #: serializer.
@@ -466,21 +469,26 @@ class Serializer(object):
         if serializer is None:
             serializer = self.default_serializer
         self.serializer = serializer
+        self.is_text_serializer = is_text_serializer(serializer)
         if signer is None:
             signer = self.default_signer
         self.signer = signer
         self.signer_kwargs = signer_kwargs or {}
 
     def load_payload(self, payload, serializer=None):
-        """Loads the encoded object.  This implementation uses simplejson.
-        This function raises :class:`BadPayload` if the payload is not
-        valid.  The `serializer` parameter can be used to override the
-        serializer stored on the class.
+        """Loads the encoded object.  This function raises :class:`BadPayload`
+        if the payload is not valid.  The `serializer` parameter can be used to
+        override the serializer stored on the class.  The encoded payload is
+        always byte based.
         """
         if serializer is None:
             serializer = self.serializer
+            is_text = self.is_text_serializer
+        else:
+            is_text = is_text_serializer(serializer)
         try:
-            payload = want_bytes(payload)
+            if is_text:
+                payload = payload.decode('utf-8')
             return serializer.loads(payload)
         except Exception as e:
             raise BadPayload('Could not load the payload because an '
@@ -488,8 +496,9 @@ class Serializer(object):
                 original_error=e)
 
     def dump_payload(self, obj):
-        """Dumps the encoded object into a bytestring.  This implementation
-        uses simplejson.
+        """Dumps the encoded object.  The return value is always a
+        bytestring.  If the internal serializer is text based the value
+        will automatically be encoded to utf-8.
         """
         return want_bytes(self.serializer.dumps(obj))
 
@@ -502,22 +511,29 @@ class Serializer(object):
         return self.signer(self.secret_key, salt=salt, **self.signer_kwargs)
 
     def dumps(self, obj, salt=None):
-        """Returns URL-safe, signed base64 compressed JSON string.
-
-        If compress is True (the default) checks if compressing using zlib can
-        save some space. Prepends a '.' to signify compression. This is included
-        in the signature, to protect against zip bombs.
+        """Returns a signed string serialized with the internal serializer.
+        The return value can be either a byte or unicode string depending
+        on the format of the internal serializer.
         """
-        return self.make_signer(salt).sign(self.dump_payload(obj))
+        payload = self.dump_payload(obj)
+        if isinstance(payload, text_type):
+            payload = payload.encode('utf-8')
+        rv = self.make_signer(salt).sign(payload)
+        if self.is_text_serializer:
+            rv = rv.decode('utf-8')
+        return rv
 
     def dump(self, obj, f, salt=None):
-        """Like :meth:`dumps` but dumps into a file."""
+        """Like :meth:`dumps` but dumps into a file.  The file handle has
+        to be compatible with what the internal serializer expects.
+        """
         f.write(self.dumps(obj, salt))
 
     def loads(self, s, salt=None):
         """Reverse of :meth:`dumps`, raises :exc:`BadSignature` if the
         signature validation fails.
         """
+        s = want_bytes(s)
         return self.load_payload(self.make_signer(salt).unsign(s))
 
     def load(self, f, salt=None):
@@ -606,13 +622,12 @@ class JSONWebSignatureSerializer(Serializer):
     #: The default algorithm to use for signature generation
     default_algorithm = 'HS256'
 
-    def __init__(self, secret_key, salt=None, signer_kwargs=None, algorithm_name=None):
-        self.secret_key = want_bytes(secret_key)
-        self.salt = salt if salt is None \
-                    else want_bytes(salt)
-        self.serializer = compact_json
-        self.signer = Signer
-        self.signer_kwargs = signer_kwargs or {}
+    default_serializer = compact_json
+
+    def __init__(self, secret_key, salt=None, serializer=None,
+                 signer=None, signer_kwargs=None, algorithm_name=None):
+        Serializer.__init__(self, secret_key, salt, serializer,
+                            signer, signer_kwargs)
         if algorithm_name is None:
             algorithm_name = self.default_algorithm
         self.algorithm_name = algorithm_name
@@ -630,7 +645,7 @@ class JSONWebSignatureSerializer(Serializer):
             raise BadPayload('Could not base64 decode the payload because of '
                 'an exception', original_error=e)
         header = Serializer.load_payload(self, json_header,
-            serializer=simplejson)
+            serializer=json)
         if not isinstance(header, dict):
             raise BadPayload('Header payload is not a JSON object')
         payload = Serializer.load_payload(self, json_payload)
@@ -677,7 +692,7 @@ class JSONWebSignatureSerializer(Serializer):
         return a tuple of payload and header.
         """
         payload, header = self.load_payload(
-            self.make_signer(salt, self.algorithm).unsign(s),
+            self.make_signer(salt, self.algorithm).unsign(want_bytes(s)),
             return_header=True)
         if header.get('alg') != self.algorithm_name:
             raise BadSignature('Algorithm mismatch')
@@ -697,7 +712,6 @@ class URLSafeSerializerMixin(object):
     """
 
     def load_payload(self, payload):
-        payload = want_bytes(payload)
         decompress = False
         if payload[0] == b'.':
             payload = payload[1:]
@@ -726,20 +740,6 @@ class URLSafeSerializerMixin(object):
         if is_compressed:
             base64d = b'.' + base64d
         return base64d
-
-
-class _CompactJSON(object):
-    """Wrapper around simplejson that strips whitespace.
-    """
-
-    def loads(self, payload):
-        return simplejson.loads(payload)
-
-    def dumps(self, obj):
-        return want_bytes(simplejson.dumps(obj, separators=(',', ':')))
-
-
-compact_json = _CompactJSON()
 
 
 class URLSafeSerializer(URLSafeSerializerMixin, Serializer):

@@ -231,11 +231,14 @@ signature was correct.
 Python 3 Notes
 --------------
 
-On Python 3 the return serialized versions are represented as bytes.
-However in many cases (for instance when using the URL safe serializers)
-the data fits into ASCII so it can trivially be converted into unicode
-strings by adding an ``.encode('ascii')``.  It also assumes that custom
-serializers operate on bytes as well.
+On Python 3 the interface that itsdangerous provides can be confusing at
+first.  Depending on the internal serializer it wraps the return value of
+the functions can alter between unicode strings or bytes objects.  The
+internal signer is always byte based.
+
+This is done to allow the module to operate on different serializers
+independent of how they are implemented.  The module decides on the
+type of the serializer by doing a test serialization of an empty object.
 
 
 .. include:: ../CHANGES

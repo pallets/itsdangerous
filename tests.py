@@ -3,7 +3,22 @@ import pickle
 import hashlib
 import unittest
 from datetime import datetime
+
 import itsdangerous as idmod
+from itsdangerous import want_bytes, text_type, PY2
+
+
+# Helper function for some unsafe string manipulation on encoded
+# data.  This is required for Python 3 but would break on Python 2
+if PY2:
+    def _coerce_string(reference_string, value):
+        return value
+else:
+    def _coerce_string(reference_string, value):
+        assert isinstance(value, text_type), 'rhs needs to be a string'
+        if type(reference_string) != type(value):
+            value = value.encode('utf-8')
+        return value
 
 
 class SerializerTestCase(unittest.TestCase):
@@ -22,17 +37,18 @@ class SerializerTestCase(unittest.TestCase):
             self.assertEqual(o, s.loads(value))
 
     def test_decode_detects_tampering(self):
+        s = self.make_serializer('Test')
+
         transforms = (
             lambda s: s.upper(),
-            lambda s: s + b'a',
-            lambda s: b'a' + s[1:],
-            lambda s: s.replace(b'.', b''),
+            lambda s: s + _coerce_string(s, 'a'),
+            lambda s: _coerce_string(s, 'a') + s[1:],
+            lambda s: s.replace(_coerce_string(s, '.'), _coerce_string(s, '')),
         )
         value = {
             'foo': 'bar',
             'baz': 1,
         }
-        s = self.make_serializer('Test')
         encoded = s.dumps(value)
         self.assertEqual(value, s.loads(encoded))
         for transform in transforms:
@@ -56,9 +72,10 @@ class SerializerTestCase(unittest.TestCase):
         ts = s.dumps(value)
 
         try:
-            s.loads(ts + b'x')
+            s.loads(ts + _coerce_string(ts, 'x'))
         except idmod.BadSignature as e:
-            self.assertEqual(e.payload, ts.rsplit(b'.', 1)[0])
+            self.assertEqual(want_bytes(e.payload),
+                want_bytes(ts).rsplit(b'.', 1)[0])
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get bad signature')
@@ -143,7 +160,8 @@ class TimedSerializerTestCase(SerializerTestCase):
         except idmod.SignatureExpired as e:
             self.assertEqual(e.date_signed,
                 datetime.utcfromtimestamp(time.time()))
-            self.assertEqual(e.payload, ts.rsplit(b'.', 2)[0])
+            self.assertEqual(want_bytes(e.payload),
+                want_bytes(ts).rsplit(b'.', 2)[0])
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get expiration')
@@ -209,7 +227,7 @@ class URLSafeSerializerMixin(object):
                    {'a': 'dictionary'}, 42, 42.5)
         s = self.make_serializer('Test')
         for o in objects:
-            value = s.dumps(o)
+            value = want_bytes(s.dumps(o))
             self.assertTrue(set(value).issubset(set(allowed)))
             self.assertNotEqual(o, value)
             self.assertEqual(o, s.loads(value))
