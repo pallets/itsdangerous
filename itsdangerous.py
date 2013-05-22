@@ -63,7 +63,7 @@ def want_bytes(s, encoding='utf-8', errors='strict'):
 
 
 def is_text_serializer(serializer):
-    """Checks weather a serializer generates text or binary."""
+    """Checks wheather a serializer generates text or binary."""
     return isinstance(serializer.dumps({}), text_type)
 
 
@@ -515,9 +515,7 @@ class Serializer(object):
         The return value can be either a byte or unicode string depending
         on the format of the internal serializer.
         """
-        payload = self.dump_payload(obj)
-        if isinstance(payload, text_type):
-            payload = payload.encode('utf-8')
+        payload = want_bytes(self.dump_payload(obj))
         rv = self.make_signer(salt).sign(payload)
         if self.is_text_serializer:
             rv = rv.decode('utf-8')
