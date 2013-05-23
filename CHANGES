@@ -1,6 +1,12 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.20
+~~~~~~~~~~~~
+
+- Fixed an incorrect call into `want_bytes` that broke some
+  uses of itsdangerous on Python 2.6.
+
 Version 0.19
 ~~~~~~~~~~~~
 
