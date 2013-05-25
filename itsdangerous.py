@@ -718,7 +718,7 @@ class URLSafeSerializerMixin(object):
 
     def load_payload(self, payload):
         decompress = False
-        if payload[0] == b'.':
+        if payload.startswith(b'.'):
             payload = payload[1:]
             decompress = True
         try:
