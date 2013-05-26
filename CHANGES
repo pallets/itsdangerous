@@ -1,6 +1,12 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.21
+~~~~~~~~~~~~
+
+- Fixed an issue on Python 3 which caused invalid errors to be
+  generated.
+
 Version 0.20
 ~~~~~~~~~~~~
 
