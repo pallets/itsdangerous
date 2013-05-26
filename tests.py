@@ -234,7 +234,7 @@ class URLSafeSerializerMixin(object):
 
     def test_invalid_base64_does_not_fail_load_payload(self):
         s = idmod.URLSafeSerializer('aha!')
-        self.assertRaises(idmod.BadPayload, s.load_payload, 'kZ4m3du844lIN')
+        self.assertRaises(idmod.BadPayload, s.load_payload, b'kZ4m3du844lIN')
 
 
 class PickleSerializerMixin(object):
