@@ -248,9 +248,8 @@ class TimedJSONWebSignatureSerializerTest(unittest.TestCase):
         self.assertRaises(idmod.SignatureExpired, s.loads, result)
 
     def test_token_is_invalid_if_expiry_time_is_missing(self):
-        t = self.serializer_class("secret")
-        with self.assertRaises(idmod.BadSignature):
-            t.loads(self.invalid_token_empty)
+        s = self.serializer_class("secret")
+        self.assertRaises(idmod.BadSignature, s.loads, self.invalid_token_empty)
 
     def test_token_is_invalid_if_expiry_time_is_of_wrong_type(self):
         s = self.serializer_class("secret")
