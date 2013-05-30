@@ -736,7 +736,7 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
         if 'exp' not in payload:
             raise BadSignature("Missing ['exp'] expiry date", payload=payload)
 
-        if not isinstance(payload['exp'], int) and payload['exp'] > 0:
+        if not (isinstance(payload['exp'], int) and payload['exp'] > 0):
             raise BadSignature("['exp'] expiry date is not an IntDate", payload=payload)
 
         if payload['exp'] < self.now():
