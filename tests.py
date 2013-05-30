@@ -264,7 +264,7 @@ class TimedJSONWebSignatureSerializerTest(unittest.TestCase):
         expires_in_two_hours = 7200
         s = self.serializer_class("secret", expires_in=expires_in_two_hours)
         result = s.loads(s.dumps({'foo': 'bar'}))
-        self.assertEquals(result['exp'] - result['iat'], expires_in_two_hours)
+        self.assertEqual(result['exp'] - result['iat'], expires_in_two_hours)
 
 
 class URLSafeSerializerMixin(object):
