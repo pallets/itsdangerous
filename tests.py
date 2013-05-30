@@ -2,6 +2,7 @@ import time
 import pickle
 import hashlib
 import unittest
+import calendar
 from datetime import datetime
 
 import itsdangerous as idmod
@@ -222,6 +223,48 @@ class JSONWebSignatureSerializerTestCase(SerializerTestCase):
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get algorithm mismatch')
+
+
+class TimedJSONWebSignatureSerializerTest(unittest.TestCase):
+    serializer_class = idmod.TimedJSONWebSignatureSerializer
+
+    def setUp(self):
+        # Use the original implementation to create 'invalid' tokens
+        self.invalid_token_empty = idmod.JSONWebSignatureSerializer("secret").dumps({})
+        self.invalid_token_wrong_type = idmod.JSONWebSignatureSerializer("secret").dumps({'exp':'geloet'})
+
+    def test_token_contains_issue_date_and_expiry_time(self):
+        s = self.serializer_class("secret")
+        result = s.dumps({'es': 'geht'})
+        self.assert_('exp' in s.loads(result))
+        self.assert_('iat' in s.loads(result))
+
+    def test_token_expires_at_given_expiry_time(self):
+        s = self.serializer_class("secret")
+        an_hour_ago = calendar.timegm(datetime.utcnow().utctimetuple()) - 3601
+        s.now = lambda: an_hour_ago
+        result = s.dumps({'foo':'bar'})
+        s = self.serializer_class("secret")
+        self.assertRaises(idmod.SignatureExpired, s.loads, result)
+
+    def test_token_is_invalid_if_expiry_time_is_missing(self):
+        s = self.serializer_class("secret")
+        self.assertRaises(idmod.BadSignature, s.loads, self.invalid_token_empty)
+
+    def test_token_is_invalid_if_expiry_time_is_of_wrong_type(self):
+        s = self.serializer_class("secret")
+        self.assertRaises(idmod.BadSignature, s.loads, self.invalid_token_wrong_type)
+
+    def test_token_is_invalid_if_expiry_time_is_negative(self):
+        s = self.serializer_class("secret", expires_in=-123)
+        result = s.dumps({'foo':'bar'})
+        self.assertRaises(idmod.BadSignature, s.loads, result)
+
+    def test_creating_a_token_adds_the_expiry_date(self):
+        expires_in_two_hours = 7200
+        s = self.serializer_class("secret", expires_in=expires_in_two_hours)
+        result = s.loads(s.dumps({'foo': 'bar'}))
+        self.assertEqual(result['exp'] - result['iat'], expires_in_two_hours)
 
 
 class URLSafeSerializerMixin(object):
