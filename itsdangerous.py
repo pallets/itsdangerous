@@ -17,7 +17,6 @@ import time
 import base64
 import hashlib
 import operator
-import calendar
 from datetime import datetime
 
 
@@ -714,47 +713,61 @@ class JSONWebSignatureSerializer(Serializer):
 class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
     """Works like the regular :class:`JSONWebSignatureSerializer` but also
     records the time of the signing and can be used to expire signatures.
-    The expiry date is encoded into the serialized object as specified
-    in http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html#expDef.
-    The unsign method can raise a :exc:`SignatureExpired` method if the unsigning
-    failed because the signature is expired.  This exception is a subclass
-    of :exc:`BadSignature`.
+
+    JWS currently does not specify this behavior but the JWT spec does.  The
+    expiry date is encoded into the header as specified in
+    `draft-ietf-oauth-json-web-token
+    <http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html#expDef`_.
+
+    The unsign method can raise a :exc:`SignatureExpired` method if the
+    unsigning failed because the signature is expired.  This exception is a
+    subclass of :exc:`BadSignature`.
     """
 
     DEFAULT_EXPIRES_IN = 3600
 
-    def __init__(self, secret_key, salt=None, serializer=None, signer=None, signer_kwargs=None, algorithm_name=None, expires_in=None):
-        super(TimedJSONWebSignatureSerializer, self).__init__(secret_key, salt, serializer, signer, signer_kwargs,
-            algorithm_name)
-        if not expires_in:
+    def __init__(self, secret_key, expires_in=None, **kwargs):
+        JSONWebSignatureSerializer.__init__(self, secret_key, **kwargs)
+        if expires_in is None:
             expires_in = self.DEFAULT_EXPIRES_IN
         self.expires_in = expires_in
 
     def loads(self, s, salt=None, return_header=False):
-        payload = super(TimedJSONWebSignatureSerializer, self).loads(s, salt, return_header)
+        payload, header = JSONWebSignatureSerializer.loads(
+            self, s, salt, return_header=True)
 
-        if 'exp' not in payload:
-            raise BadSignature("Missing ['exp'] expiry date", payload=payload)
+        if 'exp' not in header:
+            raise BadSignature('Missing expiry date', payload=payload)
 
-        if not (isinstance(payload['exp'], int) and payload['exp'] > 0):
-            raise BadSignature("['exp'] expiry date is not an IntDate", payload=payload)
+        if not (isinstance(header['exp'], (int, long, float))
+                and header['exp'] > 0):
+            raise BadSignature('expiry date is not an IntDate',
+                               payload=payload)
 
-        if payload['exp'] < self.now():
-            raise SignatureExpired(
-                'Signature expired',
-                payload=payload)
+        if header['exp'] < self.now():
+            raise SignatureExpired('Signature expired', payload=payload,
+                                   date_signed=self.get_issue_date(header))
 
-        return super(TimedJSONWebSignatureSerializer, self).loads(s, salt, return_header)
+        if return_header:
+            return payload, header
+        return payload
 
     def dumps(self, obj, salt=None, header_fields=None):
         iat = self.now()
         exp = iat + self.expires_in
-        obj['iat'] = iat
-        obj['exp'] = exp
-        return super(TimedJSONWebSignatureSerializer, self).dumps(obj, salt=salt, header_fields=header_fields)
+        if header_fields is None:
+            header_fields = {}
+        header_fields['iat'] = iat
+        header_fields['exp'] = exp
+        return JSONWebSignatureSerializer.dumps(self, obj, salt, header_fields)
+
+    def get_issue_date(self, header):
+        rv = header.get('iat')
+        if isinstance(rv, (int, long)):
+            return datetime.utcfromtimestamp(rv)
 
     def now(self):
-        return calendar.timegm(datetime.utcnow().utctimetuple())
+        return int(time.time())
 
 
 class URLSafeSerializerMixin(object):
