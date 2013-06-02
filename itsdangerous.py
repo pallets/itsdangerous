@@ -734,6 +734,14 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
             expires_in = self.DEFAULT_EXPIRES_IN
         self.expires_in = expires_in
 
+    def make_header(self, header_fields):
+        header = JSONWebSignatureSerializer.make_header(self, header_fields)
+        iat = self.now()
+        exp = iat + self.expires_in
+        header['iat'] = iat
+        header['exp'] = exp
+        return header
+
     def loads(self, s, salt=None, return_header=False):
         payload, header = JSONWebSignatureSerializer.loads(
             self, s, salt, return_header=True)
@@ -753,15 +761,6 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
         if return_header:
             return payload, header
         return payload
-
-    def dumps(self, obj, salt=None, header_fields=None):
-        iat = self.now()
-        exp = iat + self.expires_in
-        if header_fields is None:
-            header_fields = {}
-        header_fields['iat'] = iat
-        header_fields['exp'] = exp
-        return JSONWebSignatureSerializer.dumps(self, obj, salt, header_fields)
 
     def get_issue_date(self, header):
         rv = header.get('iat')
