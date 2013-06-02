@@ -1,6 +1,11 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.22
+~~~~~~~~~~~~
+
+- Added support for `TimedJSONWebSignatureSerializer`.
+
 Version 0.21
 ~~~~~~~~~~~~
 

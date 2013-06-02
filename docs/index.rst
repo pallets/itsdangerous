@@ -274,6 +274,9 @@ Serializers
 .. autoclass:: JSONWebSignatureSerializer
    :members:
 
+.. autoclass:: TimedJSONWebSignatureSerializer
+   :members:
+
 .. autoclass:: URLSafeSerializer
 
 .. autoclass:: URLSafeTimedSerializer
