@@ -230,8 +230,8 @@ class TimedJSONWebSignatureSerializerTest(unittest.TestCase):
     def test_token_contains_issue_date_and_expiry_time(self):
         s = self.serializer_class('secret')
         result = s.dumps({'es': 'geht'})
-        self.assert_('exp' in s.loads(result, return_header=True)[1])
-        self.assert_('iat' in s.loads(result, return_header=True)[1])
+        self.assertTrue('exp' in s.loads(result, return_header=True)[1])
+        self.assertTrue('iat' in s.loads(result, return_header=True)[1])
 
     def test_token_expires_at_given_expiry_time(self):
         s = self.serializer_class('secret')

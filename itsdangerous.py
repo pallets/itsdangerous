@@ -25,11 +25,13 @@ if PY2:
     from itertools import izip
     text_type = unicode
     int_to_byte = chr
+    number_types = (int, long, float)
 else:
     from functools import reduce
     izip = zip
     text_type = str
     int_to_byte = operator.methodcaller('to_bytes', 1, 'big')
+    number_types = (int, float)
 
 
 try:
@@ -739,7 +741,7 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
         if 'exp' not in header:
             raise BadSignature('Missing expiry date', payload=payload)
 
-        if not (isinstance(header['exp'], (int, long, float))
+        if not (isinstance(header['exp'], number_types)
                 and header['exp'] > 0):
             raise BadSignature('expiry date is not an IntDate',
                                payload=payload)
@@ -763,8 +765,8 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
 
     def get_issue_date(self, header):
         rv = header.get('iat')
-        if isinstance(rv, (int, long)):
-            return datetime.utcfromtimestamp(rv)
+        if isinstance(rv, number_types):
+            return datetime.utcfromtimestamp(int(rv))
 
     def now(self):
         return int(time.time())
