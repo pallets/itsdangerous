@@ -213,6 +213,10 @@ class SigningAlgorithm(object):
         """Returns the signature for the given key and value"""
         raise NotImplementedError()
 
+    def verify_signature(self, key, value, sig):
+        """Verifies the given signature matches the expected signature"""
+        return constant_time_compare(sig, self.get_signature(key, value))
+
 
 class NoneAlgorithm(SigningAlgorithm):
     """This class provides a algorithm that does not perform any signing and
@@ -323,6 +327,12 @@ class Signer(object):
         """Signs the given string."""
         return value + want_bytes(self.sep) + self.get_signature(value)
 
+    def verify_signature(self, value, sig):
+        """Verifies the signature for the given value."""
+        key = self.derive_key()
+        sig = base64_decode(sig)
+        return self.algorithm.verify_signature(key, value, sig)
+
     def unsign(self, signed_value):
         """Unsigns the given string."""
         signed_value = want_bytes(signed_value)
@@ -330,7 +340,7 @@ class Signer(object):
         if sep not in signed_value:
             raise BadSignature('No %r found in value' % self.sep)
         value, sig = signed_value.rsplit(sep, 1)
-        if constant_time_compare(sig, self.get_signature(value)):
+        if self.verify_signature(value, sig):
             return value
         raise BadSignature('Signature %r does not match' % sig,
                            payload=value)
