@@ -5,6 +5,8 @@ Version 0.22
 ~~~~~~~~~~~~
 
 - Added support for `TimedJSONWebSignatureSerializer`.
+- made it possible to override the signature verification function
+  to allow implementing asymmetrical algorithms.
 
 Version 0.21
 ~~~~~~~~~~~~
