@@ -1,6 +1,12 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.23
+~~~~~~~~~~~~
+
+- Fixed a packaging mistake that caused the tests and license
+  files to not be included.
+
 Version 0.22
 ~~~~~~~~~~~~
 
