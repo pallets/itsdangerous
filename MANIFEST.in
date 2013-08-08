@@ -1,0 +1,3 @@
+include MANIFEST.in Makefile CHANGES LICENSE tox.ini tests.py
+recursive-include docs *
+recursive-exclude docs/_build *
