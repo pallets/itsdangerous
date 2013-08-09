@@ -1,6 +1,13 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 0.24
+~~~~~~~~~~~~
+
+- Added a `BadHeader` exception that is used for bad headers
+  that replaces the old `BadPayload` exception that was reused
+  in those cases.
+
 Version 0.23
 ~~~~~~~~~~~~
 

@@ -296,6 +296,9 @@ Exceptions
 .. autoexception:: SignatureExpired
    :members:
 
+.. autoexception:: BadHeader
+   :members:
+
 .. autoexception:: BadPayload
    :members:
 
