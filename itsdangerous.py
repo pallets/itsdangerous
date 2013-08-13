@@ -207,7 +207,12 @@ def base64_decode(string):
     The result is also a bytestring.
     """
     string = want_bytes(string, encoding='ascii', errors='ignore')
-    return base64.urlsafe_b64decode(string + b'=' * (-len(string) % 4))
+    string += b'=' * (-len(string) % 4)
+
+    try:
+        return base64.urlsafe_b64decode(string)
+    except (TypeError, ValueError):
+        raise BadData('Invalid base64-encoded data')
 
 
 _int64_struct = struct.Struct('>Q')
