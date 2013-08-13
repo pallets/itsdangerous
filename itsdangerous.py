@@ -10,6 +10,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import re
 import sys
 import hmac
 import zlib
@@ -26,12 +27,15 @@ if PY2:
     text_type = unicode
     int_to_byte = chr
     number_types = (int, long, float)
+    import string
+    _maketrans = string.maketrans
 else:
     from functools import reduce
     izip = zip
     text_type = str
     int_to_byte = operator.methodcaller('to_bytes', 1, 'big')
     number_types = (int, float)
+    _maketrans = bytes.maketrans
 
 
 try:
@@ -56,6 +60,10 @@ compact_json = _CompactJSON()
 
 # 2011/01/01 in UTC
 EPOCH = 1293840000
+
+_urlsafe_decode_translation = _maketrans(b'-_', b'+/')
+_b64_strip_re = re.compile(b'[^\+\/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                           b'abcdefghijklmnopqrstuvwxyz]')
 
 
 def want_bytes(s, encoding='utf-8', errors='strict'):
@@ -213,10 +221,12 @@ def base64_decode(string):
     The result is also a bytestring.
     """
     string = want_bytes(string, encoding='ascii', errors='ignore')
-    string += b'=' * (-len(string) % 4)
+    string = string.translate(_urlsafe_decode_translation)
+    string = _b64_strip_re.sub(b'', string)
+    string = string + b'=' * (-len(string) % 4)
 
     try:
-        return base64.urlsafe_b64decode(string)
+        return base64.standard_b64decode(string)
     except (TypeError, ValueError):
         raise BadData('Invalid base64-encoded data')
 

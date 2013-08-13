@@ -5,7 +5,7 @@ import unittest
 from datetime import datetime
 
 import itsdangerous as idmod
-from itsdangerous import want_bytes, text_type, PY2
+from itsdangerous import want_bytes, text_type, PY2, base64_decode
 
 
 # Helper function for some unsafe string manipulation on encoded
@@ -25,6 +25,14 @@ class UtilityTestCase(unittest.TestCase):
     def test_want_bytes(self):
         self.assertEqual(want_bytes(b"foobar"), b"foobar")
         self.assertEqual(want_bytes(u"foobar"), b"foobar")
+
+    def test_base64_decode(self):
+        self.assertRaises(idmod.BadData, base64_decode, b'A')
+
+        self.assertEqual(base64_decode(b'AA'), b'\x00')
+        self.assertEqual(base64_decode(b'AA=='), b'\x00')
+        self.assertEqual(base64_decode(b'AA\\\\'), b'\x00')
+        self.assertEqual(base64_decode(b'A!A'), b'\x00')
 
 
 class SerializerTestCase(unittest.TestCase):
