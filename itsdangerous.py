@@ -217,7 +217,7 @@ def base64_decode(string):
 
     try:
         return base64.urlsafe_b64decode(string)
-    except Exception:
+    except (TypeError, ValueError):
         raise BadData('Invalid base64-encoded data')
 
 
