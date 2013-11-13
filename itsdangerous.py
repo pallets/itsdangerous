@@ -536,7 +536,7 @@ class Serializer(object):
             return serializer.loads(payload)
         except Exception as e:
             raise BadPayload('Could not load the payload because an '
-                'exception ocurred on unserializing the data',
+                'exception occurred on unserializing the data',
                 original_error=e)
 
     def dump_payload(self, obj):
