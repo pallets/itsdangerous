@@ -65,7 +65,7 @@ def want_bytes(s, encoding='utf-8', errors='strict'):
 
 
 def is_text_serializer(serializer):
-    """Checks wheather a serializer generates text or binary."""
+    """Checks whether a serializer generates text or binary."""
     return isinstance(serializer.dumps({}), text_type)
 
 
@@ -78,7 +78,7 @@ def constant_time_compare(val1, val2):
     """Returns True if the two strings are equal, False otherwise.
 
     The time taken is independent of the number of characters that match.  Do
-    not use this function for anything else than comparision with known
+    not use this function for anything else than comparison with known
     length targets.
 
     This is should be implemented in C in order to get it completely right.
