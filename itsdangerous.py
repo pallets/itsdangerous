@@ -355,7 +355,10 @@ class Signer(object):
     def verify_signature(self, value, sig):
         """Verifies the signature for the given value."""
         key = self.derive_key()
-        sig = base64_decode(sig)
+        try:
+            sig = base64_decode(sig)
+        except Exception:
+            return False
         return self.algorithm.verify_signature(key, value, sig)
 
     def unsign(self, signed_value):
