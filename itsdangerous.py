@@ -383,7 +383,7 @@ class Signer(object):
 class TimestampSigner(Signer):
     """Works like the regular :class:`Signer` but also records the time
     of the signing and can be used to expire signatures.  The unsign
-    method can rause a :exc:`SignatureExpired` method if the unsigning
+    method can raise a :exc:`SignatureExpired` method if the unsigning
     failed because the signature is expired.  This exception is a subclass
     of :exc:`BadSignature`.
     """
