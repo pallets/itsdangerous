@@ -179,11 +179,12 @@ class JSONWebSignatureSerializerTestCase(SerializerTestCase):
     def test_decode_return_header(self):
         secret_key = 'predictable-key'
         value = u'hello'
-        header = {"typ": "dummy"}
+        header = {"cty": "dummy"}
 
         s = self.make_serializer(secret_key)
         full_header = header.copy()
         full_header['alg'] = s.algorithm_name
+        full_header['typ'] = s.media_type
 
         ts = s.dumps(value, header_fields=header)
         loaded, loaded_header = s.loads(ts, return_header=True)
@@ -222,6 +223,19 @@ class JSONWebSignatureSerializerTestCase(SerializerTestCase):
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail('Did not get algorithm mismatch')
+
+    def test_custom_media_type(self):
+        secret_key = 'predictable-key'
+        media_type = 'example'
+
+        s = self.make_serializer(secret_key, media_type=media_type)
+        full_header = {
+            'alg': s.algorithm_name,
+            'typ': s.media_type,
+        }
+        ts = s.dumps({})
+        loaded, loaded_header = s.loads(ts, return_header=True)
+        self.assertEqual(loaded_header, full_header)
 
 
 class TimedJSONWebSignatureSerializerTest(unittest.TestCase):
