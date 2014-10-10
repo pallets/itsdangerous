@@ -119,6 +119,16 @@ class SerializerTestCase(unittest.TestCase):
         ts = s.dumps(value)
         self.assertEqual(s.loads(ts), u'hello')
 
+    def test_serializer_kwargs(self):
+        secret_key = 'predictable-key'
+
+        s = self.make_serializer(secret_key, serializer_kwargs={'sort_keys': True})
+
+        ts1 = s.dumps({'c': 3, 'a': 1, 'b': 2})
+        ts2 = s.dumps(dict(a=1, b=2, c=3))
+
+        self.assertEqual(ts1, ts2)
+
 
 class TimedSerializerTestCase(SerializerTestCase):
     serializer_class = idmod.TimedSerializer
@@ -281,6 +291,7 @@ class URLSafeSerializerMixin(object):
 class PickleSerializerMixin(object):
 
     def make_serializer(self, *args, **kwargs):
+        kwargs.pop('serializer_kwargs', '')
         kwargs.setdefault('serializer', pickle)
         return super(PickleSerializerMixin, self).make_serializer(*args, **kwargs)
 
