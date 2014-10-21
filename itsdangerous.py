@@ -488,7 +488,7 @@ class Serializer(object):
     available.
 
     Starting with 0.14 you do not need to subclass this class in order to
-    switch out or customer the :class:`Signer`.  You can instead also pass a
+    switch out or customize the :class:`Signer`.  You can instead also pass a
     different class to the constructor as well as keyword arguments as
     dictionary that should be forwarded::
 
