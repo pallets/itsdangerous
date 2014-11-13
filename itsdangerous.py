@@ -802,7 +802,7 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
             raise BadSignature('expiry date is not an IntDate',
                                payload=payload)
 
-        if header['exp'] < self.now():
+        if header['exp'] != header['iat'] and header['exp'] < self.now():
             raise SignatureExpired('Signature expired', payload=payload,
                                    date_signed=self.get_issue_date(header))
 

@@ -252,6 +252,11 @@ class TimedJSONWebSignatureSerializerTest(unittest.TestCase):
         result = s.dumps({'foo': 'bar'})
         self.assertRaises(idmod.BadSignature, s.loads, result)
 
+    def test_token_is_valid_if_expiry_time_is_zero(self):
+        s = self.serializer_class('secret', expires_in=0)
+        result, header = s.loads(s.dumps({'foo': 'bar'}), return_header=True)
+        self.assertEqual(header['exp'] - header['iat'], 0)
+
     def test_creating_a_token_adds_the_expiry_date(self):
         expires_in_two_hours = 7200
         s = self.serializer_class('secret', expires_in=expires_in_two_hours)
