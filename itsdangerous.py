@@ -204,7 +204,7 @@ def base64_encode(string):
     The resulting bytestring is safe for putting into URLs.
     """
     string = want_bytes(string)
-    return base64.urlsafe_b64encode(string).strip(b'=')
+    return base64.urlsafe_b64encode(string).rstrip(b'=')
 
 
 def base64_decode(string):
