@@ -9,7 +9,7 @@ setup(
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
     version='0.24',
-    url='http://github.com/mitsuhiko/itsdangerous',
+    url='http://github.com/pallets/itsdangerous',
     py_modules=['itsdangerous'],
     description='Various helpers to pass trusted data to '
                 'untrusted environments and back.',
