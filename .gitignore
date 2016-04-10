@@ -7,3 +7,4 @@ build
 .tox
 docs/_build
 *.egg-info
+.idea/
