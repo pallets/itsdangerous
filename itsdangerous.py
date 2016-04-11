@@ -43,8 +43,8 @@ class _CompactJSON(object):
     def loads(self, payload):
         return json.loads(payload)
 
-    def dumps(self, obj):
-        return json.dumps(obj, separators=(',', ':'))
+    def dumps(self, obj, **kwargs):
+        return json.dumps(obj, separators=(',', ':'), **kwargs)
 
 
 compact_json = _CompactJSON()
@@ -506,7 +506,7 @@ class Serializer(object):
     default_signer = Signer
 
     def __init__(self, secret_key, salt=b'itsdangerous', serializer=None,
-                 signer=None, signer_kwargs=None):
+                 signer=None, signer_kwargs=None, serializer_kwargs=None):
         self.secret_key = want_bytes(secret_key)
         self.salt = want_bytes(salt)
         if serializer is None:
@@ -517,6 +517,7 @@ class Serializer(object):
             signer = self.default_signer
         self.signer = signer
         self.signer_kwargs = signer_kwargs or {}
+        self.serializer_kwargs = serializer_kwargs or {}
 
     def load_payload(self, payload, serializer=None):
         """Loads the encoded object.  This function raises :class:`BadPayload`
@@ -543,7 +544,7 @@ class Serializer(object):
         bytestring.  If the internal serializer is text based the value
         will automatically be encoded to utf-8.
         """
-        return want_bytes(self.serializer.dumps(obj))
+        return want_bytes(self.serializer.dumps(obj, **self.serializer_kwargs))
 
     def make_signer(self, salt=None):
         """A method that creates a new instance of the signer to be used.
@@ -666,9 +667,9 @@ class JSONWebSignatureSerializer(Serializer):
     default_serializer = compact_json
 
     def __init__(self, secret_key, salt=None, serializer=None,
-                 signer=None, signer_kwargs=None, algorithm_name=None):
+                 signer=None, signer_kwargs=None, serializer_kwargs=None, algorithm_name=None):
         Serializer.__init__(self, secret_key, salt, serializer,
-                            signer, signer_kwargs)
+                            signer, signer_kwargs, serializer_kwargs)
         if algorithm_name is None:
             algorithm_name = self.default_algorithm
         self.algorithm_name = algorithm_name
@@ -704,8 +705,8 @@ class JSONWebSignatureSerializer(Serializer):
         return payload
 
     def dump_payload(self, header, obj):
-        base64d_header = base64_encode(self.serializer.dumps(header))
-        base64d_payload = base64_encode(self.serializer.dumps(obj))
+        base64d_header = base64_encode(self.serializer.dumps(header, **self.serializer_kwargs))
+        base64d_payload = base64_encode(self.serializer.dumps(obj, **self.serializer_kwargs))
         return base64d_header + b'.' + base64d_payload
 
     def make_algorithm(self, algorithm_name):
