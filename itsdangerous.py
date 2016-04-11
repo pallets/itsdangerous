@@ -9,14 +9,13 @@
     :copyright: (c) 2014 by Armin Ronacher and the Django Software Foundation.
     :license: BSD, see LICENSE for more details.
 """
-
+import struct
 import sys
 import hmac
 import zlib
 import time
 import base64
 import hashlib
-import operator
 from datetime import datetime
 
 
@@ -24,13 +23,10 @@ PY2 = sys.version_info[0] == 2
 if PY2:
     from itertools import izip
     text_type = unicode
-    int_to_byte = chr
     number_types = (int, long, float)
 else:
-    from functools import reduce
     izip = zip
     text_type = str
-    int_to_byte = operator.methodcaller('to_bytes', 1, 'big')
     number_types = (int, float)
 
 
@@ -69,11 +65,6 @@ def is_text_serializer(serializer):
     return isinstance(serializer.dumps({}), text_type)
 
 
-# Starting with 3.3 the standard library has a c-implementation for
-# constant time string compares.
-_builtin_constant_time_compare = getattr(hmac, 'compare_digest', None)
-
-
 def constant_time_compare(val1, val2):
     """Returns True if the two strings are equal, False otherwise.
 
@@ -82,9 +73,9 @@ def constant_time_compare(val1, val2):
     length targets.
 
     This is should be implemented in C in order to get it completely right.
+
+    This is an alias of :func:`hmac.compare_digest` on Python>=2.7,3.3.
     """
-    if _builtin_constant_time_compare is not None:
-        return _builtin_constant_time_compare(val1, val2)
     len_eq = len(val1) == len(val2)
     if len_eq:
         result = 0
@@ -95,6 +86,11 @@ def constant_time_compare(val1, val2):
     for x, y in izip(bytearray(left), bytearray(val2)):
         result |= x ^ y
     return result == 0
+
+
+# Starting with 2.7/3.3 the standard library has a c-implementation for
+# constant time string compares.
+constant_time_compare = getattr(hmac, 'compare_digest', constant_time_compare)
 
 
 class BadData(Exception):
@@ -216,17 +212,17 @@ def base64_decode(string):
     return base64.urlsafe_b64decode(string + b'=' * (-len(string) % 4))
 
 
+_int64_struct = struct.Struct('>Q')
+_int_to_bytes = _int64_struct.pack
+_bytes_to_int = _int64_struct.unpack
+
+
 def int_to_bytes(num):
-    assert num >= 0
-    rv = []
-    while num:
-        rv.append(int_to_byte(num & 0xff))
-        num >>= 8
-    return b''.join(reversed(rv))
+    return _int_to_bytes(num).lstrip(b'\x00')
 
 
 def bytes_to_int(bytestr):
-    return reduce(lambda a, b: a << 8 | b, bytearray(bytestr), 0)
+    return _bytes_to_int(bytestr.rjust(8, b'\x00'))[0]
 
 
 class SigningAlgorithm(object):
