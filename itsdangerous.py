@@ -35,6 +35,8 @@ try:
 except ImportError:
     import json
 
+__version__ = '1.0'
+
 
 class _CompactJSON(object):
     """Wrapper around simplejson that strips whitespace.
