@@ -763,7 +763,7 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
     JWS currently does not specify this behavior but it mentions a possibility
     extension like this in the spec.  Expiry date is encoded into the header
     similarily as specified in `draft-ietf-oauth-json-web-token
-    <http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html#expDef`_.
+    <http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html#expDef>`_.
 
     The unsign method can raise a :exc:`SignatureExpired` method if the
     unsigning failed because the signature is expired.  This exception is a
