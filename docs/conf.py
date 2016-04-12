@@ -105,8 +105,9 @@ html_theme = 'flask_small'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    'index_logo':       'itsdangerous.png',
-    'github_fork':      'pallets/itsdangerous'
+    'index_logo': 'itsdangerous.png',
+    'index_logo_height': '157px',
+    'github_fork': 'pallets/itsdangerous'
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
