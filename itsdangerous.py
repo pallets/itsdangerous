@@ -39,17 +39,17 @@ __version__ = '1.0'
 
 
 class _CompactJSON(object):
-    """Wrapper around simplejson that strips whitespace.
-    """
+    """Wrapper around json module that strips whitespace."""
 
-    def loads(self, payload):
+    @staticmethod
+    def loads(payload):
         return json.loads(payload)
 
-    def dumps(self, obj, **kwargs):
-        return json.dumps(obj, ensure_ascii=False, separators=(',', ':'), **kwargs)
-
-
-compact_json = _CompactJSON()
+    @staticmethod
+    def dumps(obj, **kwargs):
+        kwargs.setdefault('ensure_ascii', False)
+        kwargs.setdefault('separators', (',', ':'))
+        return json.dumps(obj, **kwargs)
 
 
 def want_bytes(s, encoding='utf-8', errors='strict'):
@@ -503,8 +503,11 @@ class Serializer(object):
     #: .. versionadded:: 0.14
     default_signer = Signer
 
-    def __init__(self, secret_key, salt=b'itsdangerous', serializer=None,
-                 signer=None, signer_kwargs=None, serializer_kwargs=None):
+    def __init__(
+        self, secret_key, salt=b'itsdangerous',
+        serializer=None, serializer_kwargs=None,
+        signer=None, signer_kwargs=None
+    ):
         self.secret_key = want_bytes(secret_key)
         self.salt = want_bytes(salt)
         if serializer is None:
@@ -662,12 +665,19 @@ class JSONWebSignatureSerializer(Serializer):
     #: The default algorithm to use for signature generation
     default_algorithm = 'HS256'
 
-    default_serializer = compact_json
+    default_serializer = _CompactJSON
 
-    def __init__(self, secret_key, salt=None, serializer=None,
-                 signer=None, signer_kwargs=None, serializer_kwargs=None, algorithm_name=None):
-        Serializer.__init__(self, secret_key, salt, serializer,
-                            signer, signer_kwargs, serializer_kwargs)
+    def __init__(
+        self, secret_key, salt=None,
+        serializer=None, serializer_kwargs=None,
+        signer=None, signer_kwargs=None,
+        algorithm_name=None
+    ):
+        Serializer.__init__(
+            self, secret_key=secret_key, salt=salt,
+            serializer=serializer, serializer_kwargs=serializer_kwargs,
+            signer=signer, signer_kwargs=signer_kwargs
+        )
         if algorithm_name is None:
             algorithm_name = self.default_algorithm
         self.algorithm_name = algorithm_name
@@ -856,7 +866,7 @@ class URLSafeSerializer(URLSafeSerializerMixin, Serializer):
     safe string consisting of the upper and lowercase character of the
     alphabet as well as ``'_'``, ``'-'`` and ``'.'``.
     """
-    default_serializer = compact_json
+    default_serializer = _CompactJSON
 
 
 class URLSafeTimedSerializer(URLSafeSerializerMixin, TimedSerializer):
@@ -864,4 +874,4 @@ class URLSafeTimedSerializer(URLSafeSerializerMixin, TimedSerializer):
     safe string consisting of the upper and lowercase character of the
     alphabet as well as ``'_'``, ``'-'`` and ``'.'``.
     """
-    default_serializer = compact_json
+    default_serializer = _CompactJSON
