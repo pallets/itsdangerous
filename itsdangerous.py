@@ -46,7 +46,7 @@ class _CompactJSON(object):
         return json.loads(payload)
 
     def dumps(self, obj):
-        return json.dumps(obj, separators=(',', ':'))
+        return json.dumps(obj, ensure_ascii=False, separators=(',', ':'))
 
 
 compact_json = _CompactJSON()
