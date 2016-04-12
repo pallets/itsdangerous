@@ -121,9 +121,11 @@ class SerializerTestCase(unittest.TestCase):
         self.assertEqual(s.loads(ts), u'hello')
 
     def test_serializer_kwargs(self):
-        secret_key = 'predictable-key'
+        s = self.make_serializer('predictable-key', serializer_kwargs={'sort_keys': True})
 
-        s = self.make_serializer(secret_key, serializer_kwargs={'sort_keys': True})
+        # pickle tests pop serializer kwargs, so skip this test for those
+        if not s.serializer_kwargs:
+            return
 
         ts1 = s.dumps({'c': 3, 'a': 1, 'b': 2})
         ts2 = s.dumps(dict(a=1, b=2, c=3))
