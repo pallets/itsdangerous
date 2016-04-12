@@ -126,7 +126,7 @@ class TimedSerializerTestCase(SerializerTestCase):
 
     def setUp(self):
         self._time = time.time
-        time.time = lambda: idmod.EPOCH
+        time.time = lambda: 0
 
     def tearDown(self):
         time.time = self._time
@@ -140,7 +140,7 @@ class TimedSerializerTestCase(SerializerTestCase):
         self.assertNotEqual(ts, idmod.Serializer(secret_key).dumps(value))
 
         self.assertEqual(s.loads(ts), value)
-        time.time = lambda: idmod.EPOCH + 10
+        time.time = lambda: 10
         self.assertEqual(s.loads(ts, max_age=11), value)
         self.assertEqual(s.loads(ts, max_age=10), value)
         self.assertRaises(
