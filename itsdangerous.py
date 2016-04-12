@@ -6,7 +6,7 @@
     A module that implements various functions to deal with untrusted
     sources.  Mainly useful for web applications.
 
-    :copyright: (c) 2014 by Armin Ronacher and the Django Software Foundation.
+    :copyright: (c) 2011 by Armin Ronacher and the Django Software Foundation.
     :license: BSD, see LICENSE for more details.
 """
 import struct

@@ -12,6 +12,7 @@
 # serve to show the default.
 
 from __future__ import print_function
+from datetime import datetime
 import os
 import sys
 import pkg_resources
@@ -44,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'itsdangerous'
-copyright = u'2010, Armin Ronacher'
+copyright = u'2011 - {0}, Armin Ronacher'.format(datetime.utcnow().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
