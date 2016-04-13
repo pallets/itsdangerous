@@ -669,7 +669,6 @@ class JSONWebSignatureSerializer(Serializer):
 
     #: The default algorithm to use for signature generation
     default_algorithm = 'HS256'
-    default_media_type = 'JWT'
 
     default_serializer = _CompactJSON
 
@@ -677,7 +676,7 @@ class JSONWebSignatureSerializer(Serializer):
         self, secret_key, salt=None,
         serializer=None, serializer_kwargs=None,
         signer=None, signer_kwargs=None,
-        algorithm_name=None, media_type=None
+        algorithm_name=None
     ):
         Serializer.__init__(
             self, secret_key=secret_key, salt=salt,
@@ -688,9 +687,6 @@ class JSONWebSignatureSerializer(Serializer):
             algorithm_name = self.default_algorithm
         self.algorithm_name = algorithm_name
         self.algorithm = self.make_algorithm(algorithm_name)
-        if media_type is None:
-            media_type = self.default_media_type
-        self.media_type = media_type
 
     def load_payload(self, payload, return_header=False):
         payload = want_bytes(payload)
@@ -744,7 +740,6 @@ class JSONWebSignatureSerializer(Serializer):
     def make_header(self, header_fields):
         header = header_fields.copy() if header_fields else {}
         header['alg'] = self.algorithm_name
-        header['typ'] = self.media_type
         return header
 
     def dumps(self, obj, salt=None, header_fields=None):
