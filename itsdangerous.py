@@ -16,6 +16,7 @@ import zlib
 import time
 import base64
 import hashlib
+import json
 from datetime import datetime
 
 
@@ -28,12 +29,6 @@ else:
     izip = zip
     text_type = str
     number_types = (int, float)
-
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
 
 __version__ = '1.0'
 
