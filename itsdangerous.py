@@ -391,8 +391,7 @@ class TimestampSigner(Signer):
     """
 
     def get_timestamp(self):
-        """Returns the current timestamp.  This implementation returns the
-        seconds since 1/1/2011.  The function must return an integer.
+        """Returns the current timestamp. The function must return an integer.
         """
         return int(time.time())
 
