@@ -59,7 +59,7 @@ def want_bytes(s, encoding='utf-8', errors='strict'):
 
 
 def is_text_serializer(serializer):
-    """Checks wheather a serializer generates text or binary."""
+    """Checks whether a serializer generates text or binary."""
     return isinstance(serializer.dumps({}), text_type)
 
 
