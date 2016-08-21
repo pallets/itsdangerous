@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import time
 import pickle
+import pytest
 import hashlib
 import unittest
 from datetime import datetime
@@ -36,6 +37,11 @@ class SignerTestCase(unittest.TestCase):
     def test_sign(self):
         s = self.make_signer('secret-key')
         assert isinstance(s.sign('my string'), bytes)
+
+    def test_sign_invalid_separator(self):
+        with pytest.raises(ValueError) as excinfo:
+            s = self.make_signer('secret-key', sep='-')
+        assert 'separator cannot be used' in str(excinfo.value)
 
 
 class SerializerTestCase(unittest.TestCase):

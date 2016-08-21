@@ -9,6 +9,7 @@
     :copyright: (c) 2011 by Armin Ronacher and the Django Software Foundation.
     :license: BSD, see LICENSE for more details.
 """
+import string
 import struct
 import sys
 import hmac
@@ -215,6 +216,11 @@ def base64_decode(string):
         raise BadData('Invalid base64-encoded data')
 
 
+# The alphabet used by base64.urlsafe_*
+_base64_alphabet = (
+    string.ascii_letters + string.digits + '-_='
+).encode('ascii')
+
 _int64_struct = struct.Struct('>Q')
 _int_to_bytes = _int64_struct.pack
 _bytes_to_int = _int64_struct.unpack
@@ -306,7 +312,12 @@ class Signer(object):
     def __init__(self, secret_key, salt=None, sep='.', key_derivation=None,
                  digest_method=None, algorithm=None):
         self.secret_key = want_bytes(secret_key)
-        self.sep = sep
+        self.sep = want_bytes(sep)
+        if self.sep in _base64_alphabet:
+            raise ValueError('The given separator cannot be used because it '
+                             'may be contained in the signature itself. '
+                             'Alphanumeric characters and `-_=` must not be '
+                             'used.')
         self.salt = 'itsdangerous.Signer' if salt is None else salt
         if key_derivation is None:
             key_derivation = self.default_key_derivation
