@@ -28,6 +28,16 @@ class UtilityTestCase(unittest.TestCase):
         self.assertEqual(want_bytes(u"foobar"), b"foobar")
 
 
+class SignerTestCase(unittest.TestCase):
+    signer_class = idmod.Signer
+    def make_signer(self, *args, **kwargs):
+        return self.signer_class(*args, **kwargs)
+
+    def test_sign(self):
+        s = self.make_signer('secret-key')
+        assert isinstance(s.sign('my string'), bytes)
+
+
 class SerializerTestCase(unittest.TestCase):
     serializer_class = idmod.Serializer
 

@@ -349,7 +349,9 @@ class Signer(object):
 
     def sign(self, value):
         """Signs the given string."""
-        return value + want_bytes(self.sep) + self.get_signature(value)
+        return want_bytes(value) + \
+            want_bytes(self.sep) + \
+            self.get_signature(value)
 
     def verify_signature(self, value, sig):
         """Verifies the signature for the given value."""
