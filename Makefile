@@ -16,3 +16,6 @@ clean-pyc:
 upload-docs:
 	$(MAKE) -C docs html
 	python setup.py upload_docs
+
+release:
+	python setup.py sdist bdist_wheel upload
