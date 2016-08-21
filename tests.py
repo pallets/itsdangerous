@@ -331,7 +331,3 @@ class PickleURLSafeSerializerTestCase(PickleSerializerMixin, URLSafeSerializerTe
 
 class PickleURLSafeTimedSerializerTestCase(PickleSerializerMixin, URLSafeTimedSerializerTestCase):
     pass
-
-
-if __name__ == '__main__':
-    unittest.main()

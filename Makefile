@@ -3,7 +3,7 @@
 all: clean-pyc test
 
 test:
-	python tests.py
+	py.test
 
 tox-test:
 	tox
