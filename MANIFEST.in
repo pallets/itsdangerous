@@ -1,4 +1,4 @@
-include CHANGES LICENSE tests.py tox.ini
+include CHANGES LICENSE tests.py tox.ini test-requirements.txt
 graft docs
 prune docs/_build
 recursive-exclude docs/_themes *.pyc .git*
