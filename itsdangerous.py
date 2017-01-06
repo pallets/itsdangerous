@@ -700,7 +700,7 @@ class JSONWebSignatureSerializer(Serializer):
         self.algorithm_name = algorithm_name
         self.algorithm = self.make_algorithm(algorithm_name)
 
-    def load_payload(self, payload, return_header=False):
+    def load_payload(self, payload, serializer=None, return_header=False):
         payload = want_bytes(payload)
         if b'.' not in payload:
             raise BadPayload('No "." found in value')
@@ -724,7 +724,7 @@ class JSONWebSignatureSerializer(Serializer):
         if not isinstance(header, dict):
             raise BadHeader('Header payload is not a JSON object',
                 header=header)
-        payload = Serializer.load_payload(self, json_payload)
+        payload = Serializer.load_payload(self, json_payload, serializer=serializer)
         if return_header:
             return payload, header
         return payload
@@ -847,7 +847,7 @@ class URLSafeSerializerMixin(object):
     the string so that it can safely be placed in a URL.
     """
 
-    def load_payload(self, payload):
+    def load_payload(self, payload, *args, **kwargs):
         decompress = False
         if payload.startswith(b'.'):
             payload = payload[1:]
@@ -863,7 +863,7 @@ class URLSafeSerializerMixin(object):
             except Exception as e:
                 raise BadPayload('Could not zlib decompress the payload before '
                     'decoding the payload', original_error=e)
-        return super(URLSafeSerializerMixin, self).load_payload(json)
+        return super(URLSafeSerializerMixin, self).load_payload(json, *args, **kwargs)
 
     def dump_payload(self, obj):
         json = super(URLSafeSerializerMixin, self).dump_payload(obj)
