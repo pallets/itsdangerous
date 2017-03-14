@@ -260,9 +260,9 @@ class NoneAlgorithm(SigningAlgorithm):
 class HMACAlgorithm(SigningAlgorithm):
     """This class provides signature generation using HMACs."""
 
-    #: The digest method to use with the MAC algorithm.  This defaults to sha1
+    #: The digest method to use with the MAC algorithm.  This defaults to sha256
     #: but can be changed for any other function in the hashlib module.
-    default_digest_method = staticmethod(hashlib.sha1)
+    default_digest_method = staticmethod(hashlib.sha256)
 
     def __init__(self, digest_method=None):
         if digest_method is None:
@@ -295,11 +295,11 @@ class Signer(object):
         `algorithm` was added as an argument to the class constructor.
     """
 
-    #: The digest method to use for the signer.  This defaults to sha1 but can
+    #: The digest method to use for the signer.  This defaults to sha256 but can
     #: be changed for any other function in the hashlib module.
     #:
     #: .. versionchanged:: 0.14
-    default_digest_method = staticmethod(hashlib.sha1)
+    default_digest_method = staticmethod(hashlib.sha256)
 
     #: Controls how the key is derived.  The default is Django style
     #: concatenation.  Possible values are ``concat``, ``django-concat``
