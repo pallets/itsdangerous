@@ -260,9 +260,12 @@ class NoneAlgorithm(SigningAlgorithm):
 class HMACAlgorithm(SigningAlgorithm):
     """This class provides signature generation using HMACs."""
 
-    #: The digest method to use with the MAC algorithm.  This defaults to sha1
-    #: but can be changed for any other function in the hashlib module.
-    default_digest_method = staticmethod(hashlib.sha1)
+    #: The digest method to use with the MAC algorithm.  This defaults to
+    #: SHA-512, but can be changed to any other function in the hashlib module.
+    #:
+    #: .. versionchanged:: 1.0
+    #:    The default was changed from SHA-1 to SHA-512.
+    default_digest_method = staticmethod(hashlib.sha512)
 
     def __init__(self, digest_method=None):
         if digest_method is None:
@@ -295,11 +298,14 @@ class Signer(object):
         `algorithm` was added as an argument to the class constructor.
     """
 
-    #: The digest method to use for the signer.  This defaults to sha1 but can
-    #: be changed for any other function in the hashlib module.
+    #: The digest method to use for the signer.  This defaults to SHA-512 but
+    #: can be changed to any other function in the hashlib module.
     #:
-    #: .. versionchanged:: 0.14
-    default_digest_method = staticmethod(hashlib.sha1)
+    #: .. versionchanged:: 1.0
+    #:    The default was changed from SHA-1 to SHA-512.
+    #:
+    #: .. versionadded:: 0.14
+    default_digest_method = staticmethod(hashlib.sha512)
 
     #: Controls how the key is derived.  The default is Django style
     #: concatenation.  Possible values are ``concat``, ``django-concat``
@@ -680,7 +686,7 @@ class JSONWebSignatureSerializer(Serializer):
     }
 
     #: The default algorithm to use for signature generation
-    default_algorithm = 'HS256'
+    default_algorithm = 'HS512'
 
     default_serializer = _CompactJSON
 
