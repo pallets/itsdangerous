@@ -68,7 +68,7 @@ def constant_time_compare(val1, val2):
     """Returns True if the two strings are equal, False otherwise.
 
     The time taken is independent of the number of characters that match.  Do
-    not use this function for anything else than comparision with known
+    not use this function for anything else than comparison with known
     length targets.
 
     This is should be implemented in C in order to get it completely right.
