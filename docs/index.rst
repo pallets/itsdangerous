@@ -13,7 +13,7 @@ Granted, the receiver can decode the contents and look into the package,
 but they can not modify the contents unless they also have your secret
 key.  So if you keep the key secret and complex, you will be fine.
 
-Internally itsdangerous uses HMAC and SHA1 for signing by default and bases the
+Internally itsdangerous uses HMAC and SHA-512 for signing by default and bases the
 implementation on the `Django signing module
 <https://docs.djangoproject.com/en/dev/topics/signing/>`_.  It also
 however supports JSON Web Signatures (JWS).  The library is BSD licensed and
@@ -52,7 +52,7 @@ can be used to attach a signature to a specific string:
 >>> s = Signer('secret-key')
 >>> s.sign('my string')
 'my string.wh6tMHxLgJqB6oY1uT73iMlyrOA'
-    
+
 The signature is appended to the string, separated by a dot (``.``).  To
 validate the string, use the :meth:`~Signer.unsign` method:
 
