@@ -825,6 +825,11 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
         if 'exp' not in header:
             raise BadSignature('Missing expiry date', payload=payload)
 
+        try:
+            header['exp'] = int(header['exp'])
+        except ValueError:
+            raise BadHeader('Expiry date is not valid timestamp', payload=payload)
+
         if not (isinstance(header['exp'], number_types)
                 and header['exp'] > 0):
             raise BadSignature('expiry date is not an IntDate',
