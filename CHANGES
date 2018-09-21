@@ -1,6 +1,20 @@
 It's Dangerous Changelog
 ------------------------
 
+Version 1.0
+~~~~~~~~~~~
+
+Unreleased
+
+- Dropped support for Python 2.6 and 3.3. Added support for 3.6.
+- Distribute a universal wheel.
+- Changed default intermediate hash from SHA-1 to SHA-512
+- More compact JSON dumps for unicode strings.
+- Added `serializer_kwargs` argument to `Serializer`.
+- `base64_decode` raises `BadData` when it is passed invalid data.
+- Added `media_type` argument to `JSONWebSignatureSerializer`.
+- `ValueError` is raised when an invalid `sep` is passed to `Signer`.
+
 Version 0.24
 ~~~~~~~~~~~~
 
