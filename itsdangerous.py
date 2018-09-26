@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-    itsdangerous
-    ~~~~~~~~~~~~
+itsdangerous
+~~~~~~~~~~~~
 
-    A module that implements various functions to deal with untrusted
-    sources.  Mainly useful for web applications.
+A module that implements various functions to deal with untrusted
+sources. Mainly useful for web applications.
 
-    :copyright: (c) 2011 by Armin Ronacher and the Django Software Foundation.
-    :license: BSD, see LICENSE for more details.
+:copyright: © 2011 by the Pallets team
+:license: BSD, see LICENSE.rst for more details.
 """
+
 import string
 import struct
 import sys
@@ -36,7 +37,7 @@ try:
 except ImportError:
     import json
 
-__version__ = '1.0'
+__version__ = '1.0.dev'
 
 
 class _CompactJSON(object):
