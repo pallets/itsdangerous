@@ -1,7 +1,13 @@
-itsdangerous
-============
-
 .. module:: itsdangerous
+
+.. rst-class:: hide-header
+
+It's Dangerous
+==============
+
+.. image:: _static/itsdangerous-logo.png
+    :align: center
+    :target: https://palletsprojects.com/p/itsdangerous/
 
 Sometimes you just want to send some data to untrusted environments.  But
 how to do this safely?  The trick involves signing.  Given a key only you
@@ -13,13 +19,10 @@ Granted, the receiver can decode the contents and look into the package,
 but they can not modify the contents unless they also have your secret
 key.  So if you keep the key secret and complex, you will be fine.
 
-Internally itsdangerous uses HMAC and SHA-512 for signing by default and bases the
-implementation on the `Django signing module
-<https://docs.djangoproject.com/en/dev/topics/signing/>`_.  It also
-however supports JSON Web Signatures (JWS).  The library is BSD licensed and
-written by Armin Ronacher though most of the copyright for the design and
-implementation goes to Simon Willison and the other amazing Django people
-that made this library possible.
+Internally itsdangerous uses HMAC and SHA-512 for signing by default.
+The initial implementation was inspired by `Django's signing module
+<https://docs.djangoproject.com/en/dev/topics/signing/>`_. It also
+supports JSON Web Signatures (JWS). The library is BSD licensed.
 
 Installation
 ------------
@@ -240,9 +243,6 @@ This is done to allow the module to operate on different serializers
 independent of how they are implemented.  The module decides on the
 type of the serializer by doing a test serialization of an empty object.
 
-
-.. include:: ../CHANGES
-
 API
 ---
 
@@ -308,3 +308,8 @@ Useful Helpers
 .. autofunction:: base64_encode
 
 .. autofunction:: base64_decode
+
+Changelog
+=========
+
+.. include:: ../CHANGES.rst

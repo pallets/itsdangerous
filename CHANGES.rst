@@ -1,7 +1,3 @@
-It's Dangerous Changelog
-========================
-
-
 Version 1.0
 -----------
 

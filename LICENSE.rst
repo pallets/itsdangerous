@@ -37,3 +37,11 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE AND DOCUMENTATION, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
+
+----
+
+The initial implementation of It's Dangerous was inspired by Django's
+signing module.
+
+Copyright © Django Software Foundation and individual contributors.
+All rights reserved.
