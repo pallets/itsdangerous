@@ -3,14 +3,35 @@ Version 1.0
 
 Unreleased
 
--   Dropped support for Python 2.6 and 3.3.
--   Distribute a universal wheel.
--   Changed default intermediate hash from SHA-1 to SHA-512
--   More compact JSON dumps for unicode strings.
--   Added ``serializer_kwargs`` argument to ``Serializer``.
+-   Drop support for Python 2.6 and 3.3.
+-   Optimize how timestamps are serialized and deserialized. (`#13`_)
 -   ``base64_decode`` raises ``BadData`` when it is passed invalid data.
--   Added ``media_type`` argument to ``JSONWebSignatureSerializer``.
--   ``ValueError`` is raised when an invalid ``sep`` is passed to ``Signer``.
+    (`#27`_)
+-   Ensure value is bytes when signing to avoid a ``TypeError`` on
+    Python 3. (`#29`_)
+-   Add a ``serializer_kwargs`` argument to ``Serializer``, which is
+    passed to ``dumps`` during ``dump_payload``. (`#36`_)
+-   More compact JSON dumps for unicode strings. (`#38`_)
+-   Use the full timestamp rather than an offset, allowing dates before
+    2011. (`#46`_)
+-   Detect a ``sep`` character that may show up in the signature itself
+    and raise a ``ValueError``. (`#62`_)
+-   Use a consistent signature for keyword arguments for
+    ``Serializer.load_payload`` in subclasses. (`#74`_, `#75`_)
+-   Change default intermediate hash from SHA-1 to SHA-512. (`#80`_)
+-   Convert JWS exp header to an int when loading. (`#99`_)
+
+.. _#13: https://github.com/pallets/itsdangerous/pull/13
+.. _#27: https://github.com/pallets/itsdangerous/pull/27
+.. _#29: https://github.com/pallets/itsdangerous/issues/29
+.. _#36: https://github.com/pallets/itsdangerous/pull/36
+.. _#38: https://github.com/pallets/itsdangerous/issues/38
+.. _#46: https://github.com/pallets/itsdangerous/issues/46
+.. _#62: https://github.com/pallets/itsdangerous/issues/62
+.. _#74: https://github.com/pallets/itsdangerous/issues/74
+.. _#75: https://github.com/pallets/itsdangerous/pull/75
+.. _#80: https://github.com/pallets/itsdangerous/pull/80
+.. _#99: https://github.com/pallets/itsdangerous/pull/99
 
 
 Version 0.24
