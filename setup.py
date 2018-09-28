@@ -1,11 +1,11 @@
 import io
 import re
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with io.open("README.rst", "rt", encoding="utf8") as f:
     readme = f.read()
 
-with io.open("itsdangerous.py", "rt", encoding="utf8") as f:
+with io.open("src/itsdangerous/__init__.py", "rt", encoding="utf8") as f:
     version = re.search(r"__version__ = \'(.*?)\'", f.read()).group(1)
 
 setup(
@@ -24,7 +24,8 @@ setup(
     maintainer_email='contact@palletsprojects.com',
     description='Various helpers to pass data to untrusted environments and back.',
     long_description=readme,
-    py_modules=['itsdangerous'],
+    packages=find_packages("src"),
+    package_dir={"": "src"},
     include_package_data=True,
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
     classifiers=[
