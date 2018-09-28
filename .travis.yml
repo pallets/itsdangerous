@@ -11,6 +11,8 @@ python:
 env: TOXENV=py,codecov
 
 matrix:
+  include:
+    - env: TOXENV=stylecheck,docs-html
   allow_failures:
     - python: nightly
     - python: pypy3
