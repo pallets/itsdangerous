@@ -1,4 +1,5 @@
-from pallets_sphinx_themes import ProjectLink, get_version
+from pallets_sphinx_themes import get_version
+from pallets_sphinx_themes import ProjectLink
 
 # Project --------------------------------------------------------------
 
@@ -26,9 +27,7 @@ html_context = {
         ProjectLink("Issue Tracker", "https://github.com/pallets/itsdangerous/issues/"),
     ]
 }
-html_sidebars = {
-    "index": ["project.html", "localtoc.html", "versions.html"],
-}
+html_sidebars = {"index": ["project.html", "localtoc.html", "versions.html"]}
 html_static_path = ["_static"]
 html_title = "It's Dangerous Documentation ({})".format(version)
 html_show_sourcelink = False
