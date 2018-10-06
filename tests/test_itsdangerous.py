@@ -7,11 +7,10 @@ from datetime import datetime
 
 import pytest
 
-import itsdangerous as idmod
-from itsdangerous import PY2
-from itsdangerous import text_type
-from itsdangerous import want_bytes
-
+import itsdangerous
+from itsdangerous._compat import PY2
+from itsdangerous._compat import text_type
+from itsdangerous.encoding import want_bytes
 
 # Helper function for some unsafe string manipulation on encoded
 # data.  This is required for Python 3 but would break on Python 2
@@ -37,7 +36,7 @@ class UtilityTestCase(unittest.TestCase):
 
 
 class SignerTestCase(unittest.TestCase):
-    signer_class = idmod.Signer
+    signer_class = itsdangerous.Signer
 
     def make_signer(self, *args, **kwargs):
         return self.signer_class(*args, **kwargs)
@@ -53,7 +52,7 @@ class SignerTestCase(unittest.TestCase):
 
 
 class SerializerTestCase(unittest.TestCase):
-    serializer_class = idmod.Serializer
+    serializer_class = itsdangerous.Serializer
 
     def make_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
@@ -86,7 +85,7 @@ class SerializerTestCase(unittest.TestCase):
         encoded = s.dumps(value)
         self.assertEqual(value, s.loads(encoded))
         for transform in transforms:
-            self.assertRaises(idmod.BadSignature, s.loads, transform(encoded))
+            self.assertRaises(itsdangerous.BadSignature, s.loads, transform(encoded))
 
     def test_accepts_unicode(self):
         objects = (
@@ -112,7 +111,7 @@ class SerializerTestCase(unittest.TestCase):
 
         try:
             s.loads(ts + _coerce_string(ts, "x"))
-        except idmod.BadSignature as e:
+        except itsdangerous.BadSignature as e:
             self.assertEqual(want_bytes(e.payload), want_bytes(ts).rsplit(b".", 1)[0])
             self.assertEqual(s.load_payload(e.payload), value)
         else:
@@ -138,7 +137,7 @@ class SerializerTestCase(unittest.TestCase):
 
         try:
             s.loads(ts, salt="modified")
-        except idmod.BadSignature as e:
+        except itsdangerous.BadSignature as e:
             self.assertEqual(s.load_payload(e.payload), u"hello")
 
     def test_signer_kwargs(self):
@@ -167,7 +166,7 @@ class SerializerTestCase(unittest.TestCase):
 
 
 class TimedSerializerTestCase(SerializerTestCase):
-    serializer_class = idmod.TimedSerializer
+    serializer_class = itsdangerous.TimedSerializer
 
     def setUp(self):
         self._time = time.time
@@ -182,13 +181,13 @@ class TimedSerializerTestCase(SerializerTestCase):
 
         s = self.make_serializer(secret_key)
         ts = s.dumps(value)
-        self.assertNotEqual(ts, idmod.Serializer(secret_key).dumps(value))
+        self.assertNotEqual(ts, itsdangerous.Serializer(secret_key).dumps(value))
 
         self.assertEqual(s.loads(ts), value)
         time.time = lambda: 10
         self.assertEqual(s.loads(ts, max_age=11), value)
         self.assertEqual(s.loads(ts, max_age=10), value)
-        self.assertRaises(idmod.SignatureExpired, s.loads, ts, max_age=9)
+        self.assertRaises(itsdangerous.SignatureExpired, s.loads, ts, max_age=9)
 
     def test_decode_return_timestamp(self):
         secret_key = "predictable-key"
@@ -208,7 +207,7 @@ class TimedSerializerTestCase(SerializerTestCase):
         ts = s.dumps(value)
         try:
             s.loads(ts, max_age=-1)
-        except idmod.SignatureExpired as e:
+        except itsdangerous.SignatureExpired as e:
             self.assertEqual(e.date_signed, datetime.utcfromtimestamp(time.time()))
             self.assertEqual(want_bytes(e.payload), want_bytes(ts).rsplit(b".", 2)[0])
             self.assertEqual(s.load_payload(e.payload), value)
@@ -217,7 +216,7 @@ class TimedSerializerTestCase(SerializerTestCase):
 
 
 class JSONWebSignatureSerializerTestCase(SerializerTestCase):
-    serializer_class = idmod.JSONWebSignatureSerializer
+    serializer_class = itsdangerous.JSONWebSignatureSerializer
 
     def test_decode_return_header(self):
         secret_key = "predictable-key"
@@ -261,14 +260,14 @@ class JSONWebSignatureSerializerTestCase(SerializerTestCase):
         s = self.make_serializer(secret_key, algorithm_name="HS384")
         try:
             s.loads(ts)
-        except idmod.BadSignature as e:
+        except itsdangerous.BadSignature as e:
             self.assertEqual(s.load_payload(e.payload), value)
         else:
             self.fail("Did not get algorithm mismatch")
 
 
 class TimedJSONWebSignatureSerializerTest(unittest.TestCase):
-    serializer_class = idmod.TimedJSONWebSignatureSerializer
+    serializer_class = itsdangerous.TimedJSONWebSignatureSerializer
 
     def test_token_contains_issue_date_and_expiry_time(self):
         s = self.serializer_class("secret")
@@ -282,18 +281,18 @@ class TimedJSONWebSignatureSerializerTest(unittest.TestCase):
         s.now = lambda: an_hour_ago
         result = s.dumps({"foo": "bar"})
         s = self.serializer_class("secret")
-        self.assertRaises(idmod.SignatureExpired, s.loads, result)
+        self.assertRaises(itsdangerous.SignatureExpired, s.loads, result)
 
     def test_token_is_invalid_if_expiry_time_is_missing(self):
-        bad_s = idmod.JSONWebSignatureSerializer("secret")
+        bad_s = itsdangerous.JSONWebSignatureSerializer("secret")
         invalid_token_empty = bad_s.dumps({})
         s = self.serializer_class("secret")
-        self.assertRaises(idmod.BadSignature, s.loads, invalid_token_empty)
+        self.assertRaises(itsdangerous.BadSignature, s.loads, invalid_token_empty)
 
     def test_token_is_invalid_if_expiry_time_is_negative(self):
         s = self.serializer_class("secret", expires_in=-123)
         result = s.dumps({"foo": "bar"})
-        self.assertRaises(idmod.BadSignature, s.loads, result)
+        self.assertRaises(itsdangerous.BadSignature, s.loads, result)
 
     def test_creating_a_token_adds_the_expiry_date(self):
         expires_in_two_hours = 7200
@@ -323,8 +322,8 @@ class URLSafeSerializerMixin(object):
             self.assertEqual(o, s.loads(value))
 
     def test_invalid_base64_does_not_fail_load_payload(self):
-        s = idmod.URLSafeSerializer("aha!")
-        self.assertRaises(idmod.BadPayload, s.load_payload, b"kZ4m3du844lIN")
+        s = itsdangerous.URLSafeSerializer("aha!")
+        self.assertRaises(itsdangerous.BadPayload, s.load_payload, b"kZ4m3du844lIN")
 
 
 class PickleSerializerMixin(object):
@@ -335,11 +334,11 @@ class PickleSerializerMixin(object):
 
 
 class URLSafeSerializerTestCase(URLSafeSerializerMixin, SerializerTestCase):
-    serializer_class = idmod.URLSafeSerializer
+    serializer_class = itsdangerous.URLSafeSerializer
 
 
 class URLSafeTimedSerializerTestCase(URLSafeSerializerMixin, TimedSerializerTestCase):
-    serializer_class = idmod.URLSafeTimedSerializer
+    serializer_class = itsdangerous.URLSafeTimedSerializer
 
 
 class PickleSerializerTestCase(PickleSerializerMixin, SerializerTestCase):

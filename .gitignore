@@ -2,6 +2,7 @@
 *.pyo
 __pycache__/
 .idea/
+.vscode/
 .DS_Store
 env/
 venv/

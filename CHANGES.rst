@@ -4,6 +4,10 @@ Version 1.0
 Unreleased
 
 -   Drop support for Python 2.6 and 3.3.
+-   Refactor code from a single module to a package. Any object in the
+    API docs is still importable from the top-level ``itsdangerous``
+    name, but other imports will need to be changed. A future release
+    will remove many of these compatibility imports.
 -   Optimize how timestamps are serialized and deserialized. (`#13`_)
 -   ``base64_decode`` raises ``BadData`` when it is passed invalid data.
     (`#27`_)
