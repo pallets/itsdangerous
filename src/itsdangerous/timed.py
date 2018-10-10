@@ -15,11 +15,10 @@ from .signer import Signer
 
 
 class TimestampSigner(Signer):
-    """Works like the regular :class:`Signer` but also records the time
+    """Works like the regular :class:`.Signer` but also records the time
     of the signing and can be used to expire signatures. The
-    :meth:`unsign` method can raise :exc:`SignatureExpired` if the
-    unsigning failed because the signature is expired. This exception is
-    a subclass of :exc:`BadSignature`.
+    :meth:`unsign` method can raise :exc:`.SignatureExpired` if the
+    unsigning failed because the signature is expired.
     """
 
     def get_timestamp(self):
@@ -43,7 +42,7 @@ class TimestampSigner(Signer):
         return value + sep + self.get_signature(value)
 
     def unsign(self, value, max_age=None, return_timestamp=False):
-        """Works like the regular :meth:`~Signer.unsign` but can also
+        """Works like the regular :meth:`.Signer.unsign` but can also
         validate the time. See the base docstring of the class for
         the general behavior. If ``return_timestamp`` is ``True`` the
         timestamp of the signature will be returned as a naive
@@ -111,18 +110,17 @@ class TimestampSigner(Signer):
 
 class TimedSerializer(Serializer):
     """Uses :class:`TimestampSigner` instead of the default
-    :class:`Signer`.
+    :class:`.Signer`.
     """
 
     default_signer = TimestampSigner
 
     def loads(self, s, max_age=None, return_timestamp=False, salt=None):
-        """Reverse of :meth:`dumps`, raises :exc:`BadSignature` if the
+        """Reverse of :meth:`dumps`, raises :exc:`.BadSignature` if the
         signature validation fails. If a ``max_age`` is provided it will
         ensure the signature is not older than that time in seconds. In
-        case the signature is outdated, :exc:`SignatureExpired` is
-        raised, which is a subclass of :exc:`BadSignature`. All
-        arguments are forwarded to the signer's
+        case the signature is outdated, :exc:`.SignatureExpired` is
+        raised. All arguments are forwarded to the signer's
         :meth:`~TimestampSigner.unsign` method.
         """
         base64d, timestamp = self.make_signer(salt).unsign(

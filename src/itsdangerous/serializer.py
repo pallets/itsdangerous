@@ -24,17 +24,17 @@ class Serializer(object):
     it's not available.
 
     You do not need to subclass this class in order to switch out or
-    customize the :class:`Signer`. You can instead also pass a different
+    customize the :class:`.Signer`. You can instead pass a different
     class to the constructor as well as keyword arguments as a dict that
-    should be forwarded
+    should be forwarded.
 
-    .. code-block:: python
+    .. code-block:: python3
 
         s = Serializer(signer_kwargs={'key_derivation': 'hmac'})
 
     .. versionchanged:: 0.14:
-        The `signer` and `signer_kwargs` parameters were added to the
-        constructor.
+        The ``signer`` and ``signer_kwargs`` parameters were added to
+        the constructor.
     """
 
     #: If a serializer module or class is not passed to the constructor
@@ -70,7 +70,7 @@ class Serializer(object):
 
     def load_payload(self, payload, serializer=None):
         """Loads the encoded object. This function raises
-        :class:`BadPayload` if the payload is not valid. The
+        :class:`.BadPayload` if the payload is not valid. The
         ``serializer`` parameter can be used to override the serializer
         stored on the class. The encoded ``payload`` should always be
         bytes.
@@ -100,7 +100,7 @@ class Serializer(object):
 
     def make_signer(self, salt=None):
         """Creates a new instance of the signer to be used. The default
-        implementation uses the :class:`Signer` base class.
+        implementation uses the :class:`.Signer` base class.
         """
         if salt is None:
             salt = self.salt
@@ -124,7 +124,7 @@ class Serializer(object):
         f.write(self.dumps(obj, salt))
 
     def loads(self, s, salt=None):
-        """Reverse of :meth:`dumps`. Raises :exc:`BadSignature` if the
+        """Reverse of :meth:`dumps`. Raises :exc:`.BadSignature` if the
         signature validation fails.
         """
         s = want_bytes(s)

@@ -52,14 +52,14 @@ class URLSafeSerializerMixin(object):
 
 
 class URLSafeSerializer(URLSafeSerializerMixin, Serializer):
-    """Works like :class:`Serializer` but dumps and loads into a URL
+    """Works like :class:`.Serializer` but dumps and loads into a URL
     safe string consisting of the upper and lowercase character of the
     alphabet as well as ``'_'``, ``'-'`` and ``'.'``.
     """
 
 
 class URLSafeTimedSerializer(URLSafeSerializerMixin, TimedSerializer):
-    """Works like :class:`TimedSerializer` but dumps and loads into a
+    """Works like :class:`.TimedSerializer` but dumps and loads into a
     URL safe string consisting of the upper and lowercase character of
     the alphabet as well as ``'_'``, ``'-'`` and ``'.'``.
     """
