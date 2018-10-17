@@ -25,7 +25,9 @@ script:
   - tox
 
 cache:
-  - pip
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.cache/pre-commit
 
 branches:
   only:

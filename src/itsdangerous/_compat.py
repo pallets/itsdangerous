@@ -16,7 +16,7 @@ else:
 number_types = (numbers.Real, decimal.Decimal)
 
 
-def constant_time_compare(val1, val2):
+def _constant_time_compare(val1, val2):
     """Return ``True`` if the two strings are equal, ``False``
     otherwise.
 
@@ -43,4 +43,4 @@ def constant_time_compare(val1, val2):
 
 # Starting with 2.7/3.3 the standard library has a c-implementation for
 # constant time string compares.
-constant_time_compare = getattr(hmac, "compare_digest", constant_time_compare)
+constant_time_compare = getattr(hmac, "compare_digest", _constant_time_compare)
