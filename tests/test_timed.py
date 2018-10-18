@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 from functools import partial
 
 import pytest
@@ -33,7 +34,7 @@ class TestTimestampSigner(FreezeMixin, TestSigner):
         signed = signer.sign("value")
         freeze.tick()
         assert signer.unsign(signed, max_age=10) == b"value"
-        freeze.tick(10)
+        freeze.tick(timedelta(seconds=10))
 
         with pytest.raises(SignatureExpired) as exc_info:
             signer.unsign(signed, max_age=10)
@@ -72,7 +73,7 @@ class TestTimedSerializer(FreezeMixin, TestSerializer):
         signed = serializer.dumps(value)
         freeze.tick()
         assert serializer.loads(signed, max_age=10) == value
-        freeze.tick(10)
+        freeze.tick(timedelta(seconds=10))
 
         with pytest.raises(SignatureExpired) as exc_info:
             serializer.loads(signed, max_age=10)

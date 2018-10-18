@@ -1,3 +1,4 @@
+from datetime import timedelta
 from functools import partial
 
 import pytest
@@ -79,7 +80,7 @@ class TestTimedJWSSerializer(TestJWSSerializer, TestTimedSerializer):
         signed = serializer.dumps(value)
         freeze.tick()
         assert serializer.loads(signed) == value
-        freeze.tick(10)
+        freeze.tick(timedelta(seconds=10))
 
         with pytest.raises(SignatureExpired) as exc_info:
             serializer.loads(signed)
