@@ -2,8 +2,8 @@ from datetime import timedelta
 from functools import partial
 
 import pytest
-from tests.test_serializer import TestSerializer
-from tests.test_timed import TestTimedSerializer
+from test_itsdangerous.test_serializer import TestSerializer
+from test_itsdangerous.test_timed import TestTimedSerializer
 
 from itsdangerous.exc import BadData
 from itsdangerous.exc import BadHeader
