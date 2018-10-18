@@ -27,12 +27,15 @@ html_context = {
         ProjectLink("Issue Tracker", "https://github.com/pallets/itsdangerous/issues/"),
     ]
 }
-html_sidebars = {"index": ["project.html", "localtoc.html", "versions.html"]}
+html_sidebars = {
+    "index": ["project.html", "localtoc.html", "searchbox.html"],
+    "**": ["localtoc.html", "relations.html", "searchbox.html"],
+}
+singlehtml_sidebars = {"index": ["project.html", "localtoc.html"]}
 html_static_path = ["_static"]
+html_logo = "_static/itsdangerous-logo-sidebar.png"
 html_title = "It's Dangerous Documentation ({})".format(version)
 html_show_sourcelink = False
-html_domain_indices = False
-html_experimental_html5_writer = True
 
 # LaTeX ----------------------------------------------------------------
 

@@ -2,6 +2,7 @@
 *.pyo
 __pycache__/
 .idea/
+.vscode/
 .DS_Store
 env/
 venv/
@@ -15,3 +16,4 @@ docs/_build/
 .coverage
 .coverage.*
 htmlcov/
+.hypothesis/
