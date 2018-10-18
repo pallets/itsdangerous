@@ -1,13 +1,13 @@
-Version 1.0
------------
+Version 1.0.0
+-------------
 
-Unreleased
+Released 2018-10-18
 
 -   Drop support for Python 2.6 and 3.3.
 -   Refactor code from a single module to a package. Any object in the
     API docs is still importable from the top-level ``itsdangerous``
     name, but other imports will need to be changed. A future release
-    will remove many of these compatibility imports.
+    will remove many of these compatibility imports. (`#107`_)
 -   Optimize how timestamps are serialized and deserialized. (`#13`_)
 -   ``base64_decode`` raises ``BadData`` when it is passed invalid data.
     (`#27`_)
@@ -36,6 +36,7 @@ Unreleased
 .. _#75: https://github.com/pallets/itsdangerous/pull/75
 .. _#80: https://github.com/pallets/itsdangerous/pull/80
 .. _#99: https://github.com/pallets/itsdangerous/pull/99
+.. _#107: https://github.com/pallets/itsdangerous/pull/107
 
 
 Version 0.24
