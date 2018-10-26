@@ -1,7 +1,22 @@
+Version 1.1.0
+-------------
+
+Released 2018-10-26
+
+-   Change algorithm back to SHA-1
+-   Add support for fallback algorithm
+-   Changed capitalization of packages back to lowercase as the
+    change in capitalization broke some tooling.
+
 Version 1.0.0
 -------------
 
 Released 2018-10-18
+
+YANKED
+
+*Note*: this release was yanked from pypi because it changed the default
+algorithm to SHA-512.  This decision was reverted and it remains at SHA1.
 
 -   Drop support for Python 2.6 and 3.3.
 -   Refactor code from a single module to a package. Any object in the

@@ -19,7 +19,7 @@ Install and update using `pip`_:
 
 .. code-block:: text
 
-    pip install -U ItsDangerous
+    pip install -U itsdangerous
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
 
@@ -33,13 +33,11 @@ name between web requests.
 .. code-block:: python
 
     from itsdangerous import URLSafeSerializer
-
     auth_s = URLSafeSerializer("secret key", "auth")
     token = auth_s.dumps({"id": 5, "name": "itsdangerous"})
 
     print(token)
-    # eyJpZCI6NSwibmFtZSI6Iml0c2Rhbmdlcm91cyJ9.AmSPrPa_iZ6q-ERXXdQxt6ce8NEqt
-    # 3i2Uke3sIRnDG0riZD6OoqckqC72VJ9SBIu-vAf_XlwNHnt7dLEClT0JA
+    # eyJpZCI6NSwibmFtZSI6Iml0c2Rhbmdlcm91cyJ9.6YP6T0BaO67XP--9UzTrmurXSmg
 
     data = auth_s.loads(token)
     print(data["name"])

@@ -11,7 +11,7 @@ with io.open("src/itsdangerous/__init__.py", "rt", encoding="utf8") as f:
     version = re.search(r"__version__ = \"(.*?)\"", f.read()).group(1)
 
 setup(
-    name="ItsDangerous",
+    name="itsdangerous",
     version=version,
     url="https://palletsprojects.com/p/itsdangerous/",
     project_urls={

@@ -1,3 +1,4 @@
+import hashlib
 import pickle
 from functools import partial
 from io import BytesIO
@@ -131,3 +132,36 @@ class TestSerializer(object):
             return
 
         assert serializer.loads(serializer.dumps({(): 1})) == {}
+
+    def test_fallback_signers(self):
+        serializer = Serializer(
+            secret_key="foo", signer_kwargs={"digest_method": hashlib.sha512}
+        )
+        value = serializer.dumps([1, 2, 3])
+        fallback_serializer = Serializer(
+            secret_key="foo",
+            signer_kwargs={"digest_method": hashlib.sha1},
+            fallback_signers=[{"digest_method": hashlib.sha512}],
+        )
+        assert fallback_serializer.loads(value) == [1, 2, 3]
+
+    def test_digests(self):
+        default_value = Serializer(
+            secret_key="dev key", salt="dev salt", signer_kwargs={}
+        ).dumps([42])
+        sha1_value = Serializer(
+            secret_key="dev key",
+            salt="dev salt",
+            signer_kwargs={"digest_method": hashlib.sha1},
+        ).dumps([42])
+        sha512_value = Serializer(
+            secret_key="dev key",
+            salt="dev salt",
+            signer_kwargs={"digest_method": hashlib.sha512},
+        ).dumps([42])
+        assert default_value == sha1_value
+        assert sha1_value == "[42].-9cNi0CxsSB3hZPNCe9a2eEs1ZM"
+        assert sha512_value == (
+            "[42].MKCz_0nXQqv7wKpfHZcRtJRmpT2T5uvs9YQsJEhJimqxc"
+            "9bCLxG31QzS5uC8OVBI1i6jyOLAFNoKaF5ckO9L5Q"
+        )
