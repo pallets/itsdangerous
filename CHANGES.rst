@@ -5,6 +5,8 @@ Released 2018-10-26
 
 -   Change algorithm back to SHA-1
 -   Add support for fallback algorithm
+-   Changed capitalization of packages back to lowercase as the
+    change in capitalization broke some tooling.
 
 Version 1.0.0
 -------------
