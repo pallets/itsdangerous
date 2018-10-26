@@ -19,7 +19,7 @@ Install and update using `pip`_:
 
 .. code-block:: text
 
-    pip install -U ItsDangerous
+    pip install -U itsdangerous
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
 
