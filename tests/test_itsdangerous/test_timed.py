@@ -1,9 +1,9 @@
+import hashlib
 from datetime import datetime
 from datetime import timedelta
 from functools import partial
 
 import pytest
-import hashlib
 from freezegun import freeze_time
 from test_itsdangerous.test_serializer import TestSerializer
 from test_itsdangerous.test_signer import TestSigner

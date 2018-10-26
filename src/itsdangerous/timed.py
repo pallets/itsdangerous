@@ -127,9 +127,7 @@ class TimedSerializer(Serializer):
         last_exception = None
         for signer in self.iter_unsigners(salt):
             try:
-                base64d, timestamp = signer.unsign(
-                    s, max_age, return_timestamp=True
-                )
+                base64d, timestamp = signer.unsign(s, max_age, return_timestamp=True)
                 payload = self.load_payload(base64d)
                 if return_timestamp:
                     return payload, timestamp
