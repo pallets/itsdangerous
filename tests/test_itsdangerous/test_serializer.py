@@ -6,6 +6,7 @@ from io import StringIO
 
 import pytest
 
+from itsdangerous import Signer
 from itsdangerous.exc import BadPayload
 from itsdangerous.exc import BadSignature
 from itsdangerous.serializer import Serializer
@@ -143,6 +144,25 @@ class TestSerializer(object):
         )
 
         assert fallback_serializer.loads(signed) == value
+
+    def test_iter_unsigners(self, serializer, serializer_factory):
+        class Signer256(serializer.signer):
+            default_digest_method = hashlib.sha256
+
+        serializer = serializer_factory(
+            secret_key="secret_key",
+            fallback_signers=[
+                {"digest_method": hashlib.sha256},
+                (Signer, {"digest_method": hashlib.sha256}),
+                Signer256,
+            ],
+        )
+
+        unsigners = serializer.iter_unsigners()
+        assert next(unsigners).digest_method == hashlib.sha1
+
+        for signer in unsigners:
+            assert signer.digest_method == hashlib.sha256
 
 
 def test_digests():
