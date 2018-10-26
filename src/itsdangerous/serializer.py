@@ -1,3 +1,5 @@
+import hashlib
+
 from ._compat import text_type
 from ._json import json
 from .encoding import want_bytes
@@ -57,7 +59,9 @@ class Serializer(object):
         the constructor.
 
     .. versionchanged:: 1.1:
-        Added support for ``fallback_signers``.
+        Added support for ``fallback_signers`` and configured a default
+        SHA-512 fallback.  This fallback is for users who used the 1.0
+        release which was yanked which had SHA-512 support in it.
     """
 
     #: If a serializer module or class is not passed to the constructor
@@ -69,6 +73,9 @@ class Serializer(object):
     #:
     #: .. versionadded:: 0.14
     default_signer = Signer
+
+    #: The default fallback signers.
+    default_fallback_signers = [{"digest_method": hashlib.sha512}]
 
     def __init__(
         self,
@@ -90,7 +97,9 @@ class Serializer(object):
             signer = self.default_signer
         self.signer = signer
         self.signer_kwargs = signer_kwargs or {}
-        self.fallback_signers = fallback_signers or ()
+        if fallback_signers is None:
+            fallback_signers = list(self.default_fallback_signers or ())
+        self.fallback_signers = fallback_signers
         self.serializer_kwargs = serializer_kwargs or {}
 
     def load_payload(self, payload, serializer=None):

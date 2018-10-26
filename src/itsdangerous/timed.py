@@ -132,6 +132,11 @@ class TimedSerializer(Serializer):
                 if return_timestamp:
                     return payload, timestamp
                 return payload
+            # If we get a signature expired it means we could read the
+            # signature but it's invalid.  In that case we do not want to
+            # try the next signer.
+            except SignatureExpired:
+                raise
             except BadSignature as err:
                 last_exception = err
         raise last_exception
