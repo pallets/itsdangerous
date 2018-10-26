@@ -3,6 +3,7 @@ from datetime import timedelta
 from functools import partial
 
 import pytest
+import hashlib
 from freezegun import freeze_time
 from test_itsdangerous.test_serializer import TestSerializer
 from test_itsdangerous.test_signer import TestSigner
@@ -84,3 +85,15 @@ class TestTimedSerializer(FreezeMixin, TestSerializer):
     def test_return_payload(self, serializer, value, ts):
         signed = serializer.dumps(value)
         assert serializer.loads(signed, return_timestamp=True) == (value, ts)
+
+    def test_fallback_signers(self):
+        serializer = TimedSerializer(
+            secret_key="foo", signer_kwargs={"digest_method": hashlib.sha512}
+        )
+        value = serializer.dumps([1, 2, 3])
+        fallback_serializer = TimedSerializer(
+            secret_key="foo",
+            signer_kwargs={"digest_method": hashlib.sha1},
+            fallback_signers=[{"digest_method": hashlib.sha512}],
+        )
+        assert fallback_serializer.loads(value) == [1, 2, 3]

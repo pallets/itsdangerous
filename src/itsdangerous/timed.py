@@ -123,13 +123,20 @@ class TimedSerializer(Serializer):
         raised. All arguments are forwarded to the signer's
         :meth:`~TimestampSigner.unsign` method.
         """
-        base64d, timestamp = self.make_signer(salt).unsign(
-            s, max_age, return_timestamp=True
-        )
-        payload = self.load_payload(base64d)
-        if return_timestamp:
-            return payload, timestamp
-        return payload
+        s = want_bytes(s)
+        last_exception = None
+        for signer in self.iter_unsigners(salt):
+            try:
+                base64d, timestamp = signer.unsign(
+                    s, max_age, return_timestamp=True
+                )
+                payload = self.load_payload(base64d)
+                if return_timestamp:
+                    return payload, timestamp
+                return payload
+            except BadSignature as err:
+                last_exception = err
+        raise last_exception
 
     def loads_unsafe(self, s, max_age=None, salt=None):
         load_kwargs = {"max_age": max_age}
