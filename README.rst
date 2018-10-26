@@ -1,5 +1,5 @@
-It's Dangerous
-==============
+itsdangerous
+============
 
 ... so better sign this
 
@@ -47,7 +47,7 @@ name between web requests.
 Donate
 ------
 
-The Pallets organization develops and supports ItsDangerous and other
+The Pallets organization develops and supports itsdangerous and other
 popular packages. In order to grow the community of contributors and
 users, and allow the maintainers to devote more time to the projects,
 `please donate today`_.

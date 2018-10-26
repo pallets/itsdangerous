@@ -1,7 +1,7 @@
 .. rst-class:: hide-header
 
-It's Dangerous
-==============
+itsdangerous
+============
 
 .. image:: _static/itsdangerous-logo.png
     :align: center

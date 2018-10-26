@@ -3,10 +3,15 @@ Version 1.1.0
 
 Released 2018-10-26
 
--   Change algorithm back to SHA-1
--   Add support for fallback algorithm
--   Changed capitalization of packages back to lowercase as the
-    change in capitalization broke some tooling.
+-   Change default signing algorithm back to SHA-1. (`#113`_)
+-   Add support for fallback algorithms during deserialization to
+    support changing the default in the future without breaking existing
+    signatures. (`#113`_)
+-   Changed capitalization of packages back to lowercase as the change
+    in capitalization broke some tooling. (`#113`_)
+
+.. _#113: https://github.com/pallets/itsdangerous/pull/113
+
 
 Version 1.0.0
 -------------
@@ -15,8 +20,8 @@ Released 2018-10-18
 
 YANKED
 
-*Note*: this release was yanked from pypi because it changed the default
-algorithm to SHA-512.  This decision was reverted and it remains at SHA1.
+*Note*: This release was yanked from PyPI because it changed the default
+algorithm to SHA-512. This decision was reverted and it remains at SHA1.
 
 -   Drop support for Python 2.6 and 3.3.
 -   Refactor code from a single module to a package. Any object in the

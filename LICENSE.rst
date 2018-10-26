@@ -40,7 +40,7 @@ SUCH DAMAGE.
 
 ----
 
-The initial implementation of It's Dangerous was inspired by Django's
+The initial implementation of itsdangerous was inspired by Django's
 signing module.
 
 Copyright © Django Software Foundation and individual contributors.

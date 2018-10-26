@@ -21,6 +21,7 @@ class TestJWSSerializer(TestSerializer):
 
     test_signer_cls = None
     test_signer_kwargs = None
+    test_fallback_signers = None
 
     @pytest.mark.parametrize("algorithm_name", ("HS256", "HS384", "HS512", "none"))
     def test_algorithm(self, serializer_factory, algorithm_name):

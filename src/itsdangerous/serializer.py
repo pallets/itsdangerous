@@ -32,21 +32,24 @@ class Serializer(object):
 
         s = Serializer(signer_kwargs={'key_derivation': 'hmac'})
 
-    Additionally as of 1.1 fallback signers can be defined by providing
-    a list as `fallback_signers`.  These are used for deserialization as a
-    fallback.  Each item can be one of the following:
-    a signer class (which is instantiated with `signer_kwargs`, salt and
-    secret key), a tuple `(signer_class, signer_kwargs)` or just `signer_kwargs`.
-    If kwargs are provided they need to be a dict.
+    You may want to upgrade the signing parameters without invalidating
+    existing signatures that are in use. Fallback signatures can be
+    given that will be tried if unsigning with the current signer fails.
 
-    For instance this is a serializer that supports deserialization that
-    supports both SHA1 and SHA512:
+    Fallback signers can be defined by providing a list of
+    ``fallback_signers``. Each item can be one of the following: a
+    signer class (which is instantiated with ``signer_kwargs``,
+    ``salt``, and ``secret_key``), a tuple
+    ``(signer_class, signer_kwargs)``, or a dict of ``signer_kwargs``.
 
-    .. code-block:: python3
+    For example, this is a serializer that signs using SHA-512, but will
+    unsign using either SHA-512 or SHA1:
+
+    .. code-block:: python
 
         s = Serializer(
-            signer_kwargs={'digest_method': hashlib.sha512},
-            fallback_signers=[{'digest_method': hashlib.sha1}]
+            signer_kwargs={"digest_method": hashlib.sha512},
+            fallback_signers=[{"digest_method": hashlib.sha1}]
         )
 
     .. versionchanged:: 0.14:
@@ -54,7 +57,7 @@ class Serializer(object):
         the constructor.
 
     .. versionchanged:: 1.1:
-        Added support for `fallback_signers`.
+        Added support for ``fallback_signers``.
     """
 
     #: If a serializer module or class is not passed to the constructor
@@ -129,7 +132,10 @@ class Serializer(object):
         return self.signer(self.secret_key, salt=salt, **self.signer_kwargs)
 
     def iter_unsigners(self, salt=None):
-        """Iterates over all signers for unsigning."""
+        """Iterates over all signers to be tried for unsigning. Starts
+        with the configured signer, then constructs each signer
+        specified in ``fallback_signers``.
+        """
         if salt is None:
             salt = self.salt
         yield self.make_signer(salt)

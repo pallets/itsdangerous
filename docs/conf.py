@@ -3,7 +3,7 @@ from pallets_sphinx_themes import ProjectLink
 
 # Project --------------------------------------------------------------
 
-project = "It's Dangerous"
+project = "itsdangerous"
 copyright = "2011 Pallets Team"
 author = "Pallets Team"
 release, version = get_version("itsdangerous")
@@ -34,11 +34,11 @@ html_sidebars = {
 singlehtml_sidebars = {"index": ["project.html", "localtoc.html"]}
 html_static_path = ["_static"]
 html_logo = "_static/itsdangerous-logo-sidebar.png"
-html_title = "It's Dangerous Documentation ({})".format(version)
+html_title = "itsdangerous Documentation ({})".format(version)
 html_show_sourcelink = False
 
 # LaTeX ----------------------------------------------------------------
 
 latex_documents = [
-    (master_doc, "ItsDangerous-{}.tex".format(version), html_title, author, "manual")
+    (master_doc, "itsdangerous-{}.tex".format(version), html_title, author, "manual")
 ]
