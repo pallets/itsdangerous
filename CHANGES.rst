@@ -4,6 +4,7 @@ Version 1.1.0
 Released 2018-10-26
 
 -   Change default signing algorithm back to SHA-1. (`#113`_)
+-   Added a default SHA-512 fallback.
 -   Add support for fallback algorithms during deserialization to
     support changing the default in the future without breaking existing
     signatures. (`#113`_)

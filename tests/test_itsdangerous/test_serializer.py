@@ -134,12 +134,12 @@ class TestSerializer(object):
         assert serializer.loads(serializer.dumps({(): 1})) == {}
 
     def test_fallback_signers(self, serializer_factory, value):
-        serializer = serializer_factory(signer_kwargs={"digest_method": hashlib.sha512})
+        serializer = serializer_factory(signer_kwargs={"digest_method": hashlib.sha256})
         signed = serializer.dumps(value)
 
         fallback_serializer = serializer_factory(
             signer_kwargs={"digest_method": hashlib.sha1},
-            fallback_signers=[{"digest_method": hashlib.sha512}],
+            fallback_signers=[{"digest_method": hashlib.sha256}],
         )
 
         assert fallback_serializer.loads(signed) == value
