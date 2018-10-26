@@ -30,7 +30,7 @@ class Serializer(object):
     class to the constructor as well as keyword arguments as a dict that
     should be forwarded.
 
-    .. code-block:: python3
+    .. code-block:: python
 
         s = Serializer(signer_kwargs={'key_derivation': 'hmac'})
 
@@ -58,10 +58,10 @@ class Serializer(object):
         The ``signer`` and ``signer_kwargs`` parameters were added to
         the constructor.
 
-    .. versionchanged:: 1.1:
+    .. versionchanged:: 1.1.0:
         Added support for ``fallback_signers`` and configured a default
-        SHA-512 fallback.  This fallback is for users who used the 1.0
-        release which was yanked which had SHA-512 support in it.
+        SHA-512 fallback. This fallback is for users who used the yanked
+        1.0.0 release which defaulted to SHA-512.
     """
 
     #: If a serializer module or class is not passed to the constructor
