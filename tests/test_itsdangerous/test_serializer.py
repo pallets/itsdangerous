@@ -1,3 +1,4 @@
+import hashlib
 import pickle
 from functools import partial
 from io import BytesIO
@@ -131,3 +132,15 @@ class TestSerializer(object):
             return
 
         assert serializer.loads(serializer.dumps({(): 1})) == {}
+
+    def test_fallback_signers(self):
+        serializer = Serializer(
+            secret_key="foo", signer_kwargs={"digest_method": hashlib.sha512}
+        )
+        value = serializer.dumps([1, 2, 3])
+        fallback_serializer = Serializer(
+            secret_key="foo",
+            signer_kwargs={"digest_method": hashlib.sha1},
+            fallback_signers=[{"digest_method": hashlib.sha512}],
+        )
+        assert fallback_serializer.loads(value) == [1, 2, 3]

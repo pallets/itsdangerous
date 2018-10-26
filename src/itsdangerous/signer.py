@@ -40,10 +40,7 @@ class HMACAlgorithm(SigningAlgorithm):
     #: The digest method to use with the MAC algorithm. This defaults to
     #: SHA-512, but can be changed to any other function in the hashlib
     #: module.
-    #:
-    #: .. versionchanged:: 1.0
-    #:     The default was changed from SHA-1 to SHA-512.
-    default_digest_method = staticmethod(hashlib.sha512)
+    default_digest_method = staticmethod(hashlib.sha1)
 
     def __init__(self, digest_method=None):
         if digest_method is None:
@@ -80,11 +77,8 @@ class Signer(object):
     #: SHA-512 but can be changed to any other function in the hashlib
     #: module.
     #:
-    #: .. versionchanged:: 1.0
-    #:     The default was changed from SHA-1 to SHA-512.
-    #:
     #: .. versionadded:: 0.14
-    default_digest_method = staticmethod(hashlib.sha512)
+    default_digest_method = staticmethod(hashlib.sha1)
 
     #: Controls how the key is derived. The default is Django-style
     #: concatenation. Possible values are ``concat``, ``django-concat``
