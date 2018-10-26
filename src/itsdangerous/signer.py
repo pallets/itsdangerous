@@ -38,7 +38,7 @@ class HMACAlgorithm(SigningAlgorithm):
     """Provides signature generation using HMACs."""
 
     #: The digest method to use with the MAC algorithm. This defaults to
-    #: SHA-512, but can be changed to any other function in the hashlib
+    #: SHA1, but can be changed to any other function in the hashlib
     #: module.
     default_digest_method = staticmethod(hashlib.sha1)
 
@@ -74,7 +74,7 @@ class Signer(object):
     """
 
     #: The digest method to use for the signer.  This defaults to
-    #: SHA-512 but can be changed to any other function in the hashlib
+    #: SHA1 but can be changed to any other function in the hashlib
     #: module.
     #:
     #: .. versionadded:: 0.14
