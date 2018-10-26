@@ -1,6 +1,7 @@
 from ._json import json
 from .encoding import base64_decode
 from .encoding import base64_encode
+from .encoding import want_bytes
 from .exc import BadData
 from .exc import BadHeader
 from .exc import BadPayload
