@@ -14,6 +14,7 @@ from .serializer import Serializer
 from .signer import HMACAlgorithm
 from .signer import NoneAlgorithm
 from .signer import Signer
+from .signer import SigningAlgorithm
 from .timed import TimedSerializer
 from .timed import TimestampSigner
 from .url_safe import URLSafeSerializer
