@@ -42,6 +42,10 @@ at SHA1.
 -   More compact JSON dumps for unicode strings. (`#38`_)
 -   Use the full timestamp rather than an offset, allowing dates before
     2011. (`#46`_)
+    To retain compatibility with signers from itsdangerous 0, consider
+    using `this shim
+    <https://github.com/pallets/itsdangerous/issues/120#issuecomment-456913331>`_
+    when unsigning.
 -   Detect a ``sep`` character that may show up in the signature itself
     and raise a ``ValueError``. (`#62`_)
 -   Use a consistent signature for keyword arguments for
