@@ -63,7 +63,7 @@ class JSONWebSignatureSerializer(Serializer):
         payload = want_bytes(payload)
         if b"." not in payload:
             raise BadPayload('No "." found in value')
-        base64d_header, base64d_payload = payload.split(b".", 1)
+        base64d_header, base64d_payload, _ = payload.split(b".")
         try:
             json_header = base64_decode(base64d_header)
         except Exception as e:
@@ -139,12 +139,13 @@ class JSONWebSignatureSerializer(Serializer):
         """Reverse of :meth:`dumps`. If requested via ``return_header``
         it will return a tuple of payload and header.
         """
-        payload, header = self.load_payload(
-            self.make_signer(salt, self.algorithm).unsign(want_bytes(s)),
-            return_header=True,
-        )
-        if header.get("alg") != self.algorithm_name:
-            raise BadHeader("Algorithm mismatch", header=header, payload=payload)
+        payload, header = self.load_payload(s, return_header=True)
+
+        algorithm_name = header.get("alg")
+        algorithm = self.make_algorithm(algorithm_name)
+
+        self.make_signer(salt, algorithm).unsign(want_bytes(s))
+
         if return_header:
             return payload, header
         return payload
