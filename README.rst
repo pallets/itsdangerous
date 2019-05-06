@@ -66,3 +66,4 @@ Links
 *   Issue tracker: https://github.com/pallets/itsdangerous/issues
 *   Test status: https://travis-ci.org/pallets/itsdangerous
 *   Test coverage: https://codecov.io/gh/pallets/itsdangerous
+*   Official chat: https://discord.gg/t6rrQZH
