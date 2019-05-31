@@ -67,7 +67,7 @@ class TestTimestampSigner(FreezeMixin, TestSigner):
         signed = signer.sign("value")
         
         with freeze_time("1971-05-31"):
-            with pytest.raises(SignatureExpired) as exc_info:
+            with pytest.raises(SignatureExpired):
                 signer.unsign(signed, max_age=10)
 
 class TestTimedSerializer(FreezeMixin, TestSerializer):
