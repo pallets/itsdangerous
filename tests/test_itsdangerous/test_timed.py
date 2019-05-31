@@ -70,6 +70,7 @@ class TestTimestampSigner(FreezeMixin, TestSigner):
             with pytest.raises(SignatureExpired):
                 signer.unsign(signed, max_age=10)
 
+
 class TestTimedSerializer(FreezeMixin, TestSerializer):
     @pytest.fixture()
     def serializer_factory(self):
