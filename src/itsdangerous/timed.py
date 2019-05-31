@@ -94,7 +94,7 @@ class TimestampSigner(Signer):
                     date_signed=self.timestamp_to_datetime(timestamp),
                 )
             if age < 0:
-                raise BadTimeSignature(
+                raise SignatureExpired(
                     "Signature age %s < 0 seconds" % (age),
                     payload=value,
                     date_signed=self.timestamp_to_datetime(timestamp),
