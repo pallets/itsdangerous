@@ -7,6 +7,9 @@ Unreleased
 -   ``datetime`` values are timezone-aware with ``timezone.utc``. Code
     using ``TimestampSigner.unsign(return_timestamp=True)`` or
     ``BadTimeSignature.date_signed`` may need to change. :issue:`150`
+-   If a signature has an age less than 0, it will raise
+    ``SignatureExpired`` rather than appearing valid. This can happen if
+    the timestamp offset is changed. :issue:`126`
 
 
 Version 1.1.0
