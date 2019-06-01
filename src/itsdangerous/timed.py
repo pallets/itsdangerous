@@ -93,6 +93,12 @@ class TimestampSigner(Signer):
                     payload=value,
                     date_signed=self.timestamp_to_datetime(timestamp),
                 )
+            if age < 0:
+                raise SignatureExpired(
+                    "Signature age %s < 0 seconds" % (age),
+                    payload=value,
+                    date_signed=self.timestamp_to_datetime(timestamp),
+                )
 
         if return_timestamp:
             return value, self.timestamp_to_datetime(timestamp)
