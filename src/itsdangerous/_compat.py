@@ -21,7 +21,7 @@ def _constant_time_compare(val1, val2):
     otherwise.
 
     The time taken is independent of the number of characters that
-    match. Do not use this function for anything else than comparision
+    match. Do not use this function for anything else than comparison
     with known length targets.
 
     This is should be implemented in C in order to get it completely
