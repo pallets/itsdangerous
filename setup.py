@@ -8,7 +8,7 @@ with io.open("README.rst", "rt", encoding="utf8") as f:
     readme = f.read()
 
 with io.open("src/itsdangerous/__init__.py", "rt", encoding="utf8") as f:
-    version = re.search(r"__version__ = \"(.*?)\"", f.read()).group(1)
+    version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
 setup(
     name="itsdangerous",
@@ -19,10 +19,10 @@ setup(
         "Code": "https://github.com/pallets/itsdangerous",
         "Issue tracker": "https://github.com/pallets/itsdangerous/issues",
     },
-    license="BSD",
+    license="BSD-3-Clause",
     author="Armin Ronacher",
     author_email="armin.ronacher@active-4.com",
-    maintainer="Pallets Team",
+    maintainer="Pallets",
     maintainer_email="contact@palletsprojects.com",
     description="Various helpers to pass data to untrusted environments and back.",
     long_description=readme,
