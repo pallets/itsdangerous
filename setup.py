@@ -22,7 +22,7 @@ setup(
     license="BSD",
     author="Armin Ronacher",
     author_email="armin.ronacher@active-4.com",
-    maintainer="Pallets Team",
+    maintainer="Pallets",
     maintainer_email="contact@palletsprojects.com",
     description="Various helpers to pass data to untrusted environments and back.",
     long_description=readme,

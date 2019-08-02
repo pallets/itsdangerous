@@ -4,7 +4,7 @@ from ._compat import text_type
 
 class BadData(Exception):
     """Raised if bad data of any sort was encountered. This is the base
-    for all exceptions that itsdangerous defines.
+    for all exceptions that ItsDangerous defines.
 
     .. versionadded:: 0.15
     """

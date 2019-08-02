@@ -45,7 +45,7 @@ the salt to be something that is stored alongside the resulting signed
 string as a way to prevent rainbow table lookups. Such salts are usually
 public.
 
-In itsdangerous, like in the original Django implementation, the salt
+In ItsDangerous, like in the original Django implementation, the salt
 serves a different purpose. You could describe it as namespacing. It's
 still not critical if you disclose it because without the secret key it
 does not help an attacker.
