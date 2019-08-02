@@ -4,14 +4,14 @@ from functools import partial
 
 import pytest
 from freezegun import freeze_time
-from test_itsdangerous.test_serializer import TestSerializer
-from test_itsdangerous.test_signer import TestSigner
 
 from itsdangerous import Signer
 from itsdangerous.exc import BadTimeSignature
 from itsdangerous.exc import SignatureExpired
 from itsdangerous.timed import TimedSerializer
 from itsdangerous.timed import TimestampSigner
+from test_itsdangerous.test_serializer import TestSerializer
+from test_itsdangerous.test_signer import TestSigner
 
 
 class FreezeMixin(object):
