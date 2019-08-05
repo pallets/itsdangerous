@@ -64,8 +64,7 @@ Links
 *   Releases: https://pypi.org/project/itsdangerous/
 *   Code: https://github.com/pallets/itsdangerous
 *   Issue tracker: https://github.com/pallets/itsdangerous/issues
-*   Test status: https://travis-ci.org/pallets/itsdangerous
-*   Test coverage: https://codecov.io/gh/pallets/itsdangerous
+*   Test status: https://dev.azure.com/pallets/itsdangerous/_build
 *   Official chat: https://discord.gg/t6rrQZH
 
 .. _BSD-3-Clause: https://github.com/pallets/itsdangerous/blob/master/LICENSE.rst
