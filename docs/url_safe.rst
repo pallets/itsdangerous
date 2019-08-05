@@ -5,7 +5,7 @@ URL Safe Serialization
 
 Often it is helpful if you can pass these trusted strings in places
 where you only have a limited set of characters available. Because of
-this, itsdangerous also provides URL safe serializers:
+this, ItsDangerous also provides URL safe serializers:
 
 .. code-block:: python
 

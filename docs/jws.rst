@@ -30,7 +30,7 @@ be provided upon serialization:
     )
     (0, {'alg': 'HS256', 'v': 1})
 
-itsdangerous only provides HMAC SHA derivatives and the none algorithm
+ItsDangerous only provides HMAC SHA derivatives and the none algorithm
 at the moment and does not support the ECC based ones. The algorithm in
 the header is checked against the one of the serializer and on a
 mismatch a :exc:`~itsdangerous.exc.BadSignature` exception is raised.

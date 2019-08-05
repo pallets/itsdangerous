@@ -3,17 +3,14 @@ Version 1.1.0
 
 Released 2018-10-26
 
--   Change default signing algorithm back to SHA-1. (`#113`_)
+-   Change default signing algorithm back to SHA-1. :pr:`113`
 -   Added a default SHA-512 fallback for users who used the yanked 1.0.0
-    release which defaulted to SHA-512. (`#114`_)
+    release which defaulted to SHA-512. :pr:`114`
 -   Add support for fallback algorithms during deserialization to
     support changing the default in the future without breaking existing
-    signatures. (`#113`_)
+    signatures. :pr:`113`
 -   Changed capitalization of packages back to lowercase as the change
-    in capitalization broke some tooling. (`#113`_)
-
-.. _#113: https://github.com/pallets/itsdangerous/pull/113
-.. _#114: https://github.com/pallets/itsdangerous/pull/114
+    in capitalization broke some tooling. :pr:`113`
 
 
 Version 1.0.0
@@ -31,40 +28,27 @@ at SHA1.
 -   Refactor code from a single module to a package. Any object in the
     API docs is still importable from the top-level ``itsdangerous``
     name, but other imports will need to be changed. A future release
-    will remove many of these compatibility imports. (`#107`_)
--   Optimize how timestamps are serialized and deserialized. (`#13`_)
+    will remove many of these compatibility imports. :pr:`107`
+-   Optimize how timestamps are serialized and deserialized. :pr:`13`
 -   ``base64_decode`` raises ``BadData`` when it is passed invalid data.
-    (`#27`_)
+    :pr:`27`
 -   Ensure value is bytes when signing to avoid a ``TypeError`` on
-    Python 3. (`#29`_)
+    Python 3. :issue:`29`
 -   Add a ``serializer_kwargs`` argument to ``Serializer``, which is
-    passed to ``dumps`` during ``dump_payload``. (`#36`_)
--   More compact JSON dumps for unicode strings. (`#38`_)
+    passed to ``dumps`` during ``dump_payload``. :pr:`36`
+-   More compact JSON dumps for unicode strings. :issue:`38`
 -   Use the full timestamp rather than an offset, allowing dates before
-    2011. (`#46`_)
+    2011. :issue:`46`
 
     To retain compatibility with signers from previous versions,
     consider using `this shim <https://github.com/pallets/itsdangerous
     /issues/120#issuecomment-456913331>`_ when unsigning.
 -   Detect a ``sep`` character that may show up in the signature itself
-    and raise a ``ValueError``. (`#62`_)
+    and raise a ``ValueError``. :issue:`62`
 -   Use a consistent signature for keyword arguments for
-    ``Serializer.load_payload`` in subclasses. (`#74`_, `#75`_)
--   Change default intermediate hash from SHA-1 to SHA-512. (`#80`_)
--   Convert JWS exp header to an int when loading. (`#99`_)
-
-.. _#13: https://github.com/pallets/itsdangerous/pull/13
-.. _#27: https://github.com/pallets/itsdangerous/pull/27
-.. _#29: https://github.com/pallets/itsdangerous/issues/29
-.. _#36: https://github.com/pallets/itsdangerous/pull/36
-.. _#38: https://github.com/pallets/itsdangerous/issues/38
-.. _#46: https://github.com/pallets/itsdangerous/issues/46
-.. _#62: https://github.com/pallets/itsdangerous/issues/62
-.. _#74: https://github.com/pallets/itsdangerous/issues/74
-.. _#75: https://github.com/pallets/itsdangerous/pull/75
-.. _#80: https://github.com/pallets/itsdangerous/pull/80
-.. _#99: https://github.com/pallets/itsdangerous/pull/99
-.. _#107: https://github.com/pallets/itsdangerous/pull/107
+    ``Serializer.load_payload`` in subclasses. :issue:`74`, :pr:`75`
+-   Change default intermediate hash from SHA-1 to SHA-512. :pr:`80`
+-   Convert JWS exp header to an int when loading. :pr:`99`
 
 
 Version 0.24
@@ -111,7 +95,7 @@ Version 0.20
 Released 2013-05-23
 
 -   Fixed an incorrect call into ``want_bytes`` that broke some uses of
-    itsdangerous on Python 2.6.
+    ItsDangerous on Python 2.6.
 
 
 Version 0.19

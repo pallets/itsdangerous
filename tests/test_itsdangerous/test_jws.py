@@ -2,8 +2,6 @@ from datetime import timedelta
 from functools import partial
 
 import pytest
-from test_itsdangerous.test_serializer import TestSerializer
-from test_itsdangerous.test_timed import TestTimedSerializer
 
 from itsdangerous.exc import BadData
 from itsdangerous.exc import BadHeader
@@ -12,6 +10,8 @@ from itsdangerous.exc import BadSignature
 from itsdangerous.exc import SignatureExpired
 from itsdangerous.jws import JSONWebSignatureSerializer
 from itsdangerous.jws import TimedJSONWebSignatureSerializer
+from test_itsdangerous.test_serializer import TestSerializer
+from test_itsdangerous.test_timed import TestTimedSerializer
 
 
 class TestJWSSerializer(TestSerializer):

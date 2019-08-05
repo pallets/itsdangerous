@@ -3,16 +3,23 @@ from pallets_sphinx_themes import ProjectLink
 
 # Project --------------------------------------------------------------
 
-project = "itsdangerous"
-copyright = "2011 Pallets Team"
-author = "Pallets Team"
+project = "ItsDangerous"
+copyright = "2011 Pallets"
+author = "Pallets"
 release, version = get_version("itsdangerous")
 
 # General --------------------------------------------------------------
 
 master_doc = "index"
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx", "pallets_sphinx_themes"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "pallets_sphinx_themes",
+    "sphinxcontrib.log_cabinet",
+    "sphinx_issues",
+]
 intersphinx_mapping = {"python": ("https://docs.python.org/3/", None)}
+issues_github_path = "pallets/itsdangerous"
 
 # HTML -----------------------------------------------------------------
 
@@ -33,12 +40,13 @@ html_sidebars = {
 }
 singlehtml_sidebars = {"index": ["project.html", "localtoc.html"]}
 html_static_path = ["_static"]
+html_favicon = "_static/itsdangerous-logo-sidebar.png"
 html_logo = "_static/itsdangerous-logo-sidebar.png"
-html_title = "itsdangerous Documentation ({})".format(version)
+html_title = "{} Documentation ({})".format(project, version)
 html_show_sourcelink = False
 
 # LaTeX ----------------------------------------------------------------
 
 latex_documents = [
-    (master_doc, "itsdangerous-{}.tex".format(version), html_title, author, "manual")
+    (master_doc, "{}-{}.tex".format(project, version), html_title, author, "manual")
 ]

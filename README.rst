@@ -1,4 +1,4 @@
-itsdangerous
+ItsDangerous
 ============
 
 ... so better sign this
@@ -47,7 +47,7 @@ name between web requests.
 Donate
 ------
 
-The Pallets organization develops and supports itsdangerous and other
+The Pallets organization develops and supports ItsDangerous and other
 popular packages. In order to grow the community of contributors and
 users, and allow the maintainers to devote more time to the projects,
 `please donate today`_.
@@ -60,9 +60,12 @@ Links
 
 *   Website: https://palletsprojects.com/p/itsdangerous/
 *   Documentation: https://itsdangerous.palletsprojects.com/
-*   License: `BSD <https://github.com/pallets/itsdangerous/blob/master/LICENSE.rst>`_
+*   License: `BSD-3-Clause`_
 *   Releases: https://pypi.org/project/itsdangerous/
 *   Code: https://github.com/pallets/itsdangerous
 *   Issue tracker: https://github.com/pallets/itsdangerous/issues
 *   Test status: https://travis-ci.org/pallets/itsdangerous
 *   Test coverage: https://codecov.io/gh/pallets/itsdangerous
+*   Official chat: https://discord.gg/t6rrQZH
+
+.. _BSD-3-Clause: https://github.com/pallets/itsdangerous/blob/master/LICENSE.rst
