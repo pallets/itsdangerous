@@ -67,6 +67,17 @@ class TestJWSSerializer(TestSerializer):
 
         assert match in str(exc_info.value)
 
+    def test_secret_keys(self):
+        with pytest.deprecated_call():
+            serializer = JSONWebSignatureSerializer("a")
+
+        dumped = serializer.dumps("value")
+
+        with pytest.deprecated_call():
+            serializer = JSONWebSignatureSerializer(["a", "b"])
+
+        assert serializer.loads(dumped) == "value"
+
 
 class TestTimedJWSSerializer(TestJWSSerializer, TestTimedSerializer):
     @pytest.fixture()
