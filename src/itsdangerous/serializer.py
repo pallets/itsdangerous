@@ -82,7 +82,11 @@ class Serializer:
         signer_kwargs=None,
         fallback_signers=None,
     ):
-        self.secret_key = want_bytes(secret_key)
+        if isinstance(secret_key, list):
+            self.secret_keys = [want_bytes(s) for s in secret_key]
+        else:
+            self.secret_keys = [want_bytes(secret_key)]
+
         self.salt = want_bytes(salt)
 
         if serializer is None:
@@ -141,7 +145,7 @@ class Serializer:
         """
         if salt is None:
             salt = self.salt
-        return self.signer(self.secret_key, salt=salt, **self.signer_kwargs)
+        return self.signer(self.secret_keys, salt=salt, **self.signer_kwargs)
 
     def iter_unsigners(self, salt=None):
         """Iterates over all signers to be tried for unsigning. Starts
@@ -162,7 +166,8 @@ class Serializer:
             else:
                 kwargs = self.signer_kwargs
 
-            yield fallback(self.secret_key, salt=salt, **kwargs)
+            for secret_key in self.secret_keys:
+                yield fallback(secret_key, salt=salt, **kwargs)
 
     def dumps(self, obj, salt=None):
         """Returns a signed string serialized with the internal
