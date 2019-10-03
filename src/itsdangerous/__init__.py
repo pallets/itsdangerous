@@ -8,8 +8,6 @@ from .exc import BadPayload
 from .exc import BadSignature
 from .exc import BadTimeSignature
 from .exc import SignatureExpired
-from .jws import JSONWebSignatureSerializer
-from .jws import TimedJSONWebSignatureSerializer
 from .serializer import Serializer
 from .signer import HMACAlgorithm
 from .signer import NoneAlgorithm
