@@ -126,14 +126,18 @@ class JSONWebSignatureSerializer(Serializer):
         header["alg"] = self.algorithm_name
         return header
 
-    def dumps(self, obj, salt=None, header_fields=None):
+    def dumps(self, obj, salt=None, header_fields=None, return_header=False):
         """Like :meth:`.Serializer.dumps` but creates a JSON Web
         Signature. It also allows for specifying additional fields to be
         included in the JWS header.
         """
         header = self.make_header(header_fields)
         signer = self.make_signer(salt, self.algorithm)
-        return signer.sign(self.dump_payload(header, obj))
+        signed = signer.sign(self.dump_payload(header, obj))
+        if return_header:
+            return signed, header
+        else:
+            return signed
 
     def loads(self, s, salt=None, return_header=False):
         """Reverse of :meth:`dumps`. If requested via ``return_header``

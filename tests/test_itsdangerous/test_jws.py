@@ -98,6 +98,11 @@ class TestTimedJWSSerializer(TestJWSSerializer, TestTimedSerializer):
         date_signed = serializer.get_issue_date(header)
         assert (payload, date_signed) == (value, ts)
 
+    def test_dumps_return_header(self, serializer, value, ts):
+        signed, dumped_header = serializer.dumps(value, return_header=True)
+        payload, loaded_header = serializer.loads(signed, return_header=True)
+        assert dumped_header == loaded_header
+
     def test_missing_exp(self, serializer):
         header = serializer.make_header(None)
         del header["exp"]
