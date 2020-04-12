@@ -4,6 +4,9 @@ Version 2.0.0
 Unreleased
 
 -   Drop support for Python 2 and 3.5.
+-   Signature timestamps are in UTC rather than local time. This may
+    cause some tokens to expire a few hours early or late if the server
+    is not set to UTC. :issue:`137`
 
 
 Version 1.1.0

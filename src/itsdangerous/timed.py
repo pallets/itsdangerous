@@ -1,5 +1,5 @@
-import time
 from datetime import datetime
+from datetime import timezone
 
 from .encoding import base64_decode
 from .encoding import base64_encode
@@ -21,10 +21,10 @@ class TimestampSigner(Signer):
     """
 
     def get_timestamp(self):
-        """Returns the current timestamp. The function must return an
-        integer.
+        """Returns the current UTC timestamp. The function must return
+        an integer.
         """
-        return int(time.time())
+        return int(datetime.now(tz=timezone.utc).timestamp())
 
     def timestamp_to_datetime(self, ts):
         """Used to convert the timestamp from :meth:`get_timestamp` into
