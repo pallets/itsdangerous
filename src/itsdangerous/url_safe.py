@@ -8,7 +8,7 @@ from .serializer import Serializer
 from .timed import TimedSerializer
 
 
-class URLSafeSerializerMixin(object):
+class URLSafeSerializerMixin:
     """Mixed in with a regular serializer it will attempt to zlib
     compress the string to make it shorter if necessary. It will also
     base64 encode the string so that it can safely be placed in a URL.
@@ -36,10 +36,10 @@ class URLSafeSerializerMixin(object):
                     "Could not zlib decompress the payload before decoding the payload",
                     original_error=e,
                 )
-        return super(URLSafeSerializerMixin, self).load_payload(json, *args, **kwargs)
+        return super().load_payload(json, *args, **kwargs)
 
     def dump_payload(self, obj):
-        json = super(URLSafeSerializerMixin, self).dump_payload(obj)
+        json = super().dump_payload(obj)
         is_compressed = False
         compressed = zlib.compress(json)
         if len(compressed) < (len(json) - 1):

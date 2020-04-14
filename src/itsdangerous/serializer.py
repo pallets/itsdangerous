@@ -12,7 +12,7 @@ def is_text_serializer(serializer):
     return isinstance(serializer.dumps({}), str)
 
 
-class Serializer(object):
+class Serializer:
     """This class provides a serialization interface on top of the
     signer. It provides a similar API to json/pickle and other modules
     but is structured differently internally. If you want to change the

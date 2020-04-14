@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pytest
 
 from itsdangerous.encoding import base64_decode
@@ -9,13 +8,13 @@ from itsdangerous.encoding import want_bytes
 from itsdangerous.exc import BadData
 
 
-@pytest.mark.parametrize("value", (u"mañana", b"tomorrow"))
+@pytest.mark.parametrize("value", ("mañana", b"tomorrow"))
 def test_want_bytes(value):
     out = want_bytes(value)
     assert isinstance(out, bytes)
 
 
-@pytest.mark.parametrize("value", (u"無限", b"infinite"))
+@pytest.mark.parametrize("value", ("無限", b"infinite"))
 def test_base64(value):
     enc = base64_encode(value)
     assert isinstance(enc, bytes)

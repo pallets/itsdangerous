@@ -42,11 +42,11 @@ singlehtml_sidebars = {"index": ["project.html", "localtoc.html"]}
 html_static_path = ["_static"]
 html_favicon = "_static/itsdangerous-logo-sidebar.png"
 html_logo = "_static/itsdangerous-logo-sidebar.png"
-html_title = "{} Documentation ({})".format(project, version)
+html_title = f"{project} Documentation ({version})"
 html_show_sourcelink = False
 
 # LaTeX ----------------------------------------------------------------
 
 latex_documents = [
-    (master_doc, "{}-{}.tex".format(project, version), html_title, author, "manual")
+    (master_doc, f"{project}-{version}.tex", html_title, author, "manual")
 ]

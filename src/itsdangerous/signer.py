@@ -8,7 +8,7 @@ from .encoding import want_bytes
 from .exc import BadSignature
 
 
-class SigningAlgorithm(object):
+class SigningAlgorithm:
     """Subclasses must implement :meth:`get_signature` to provide
     signature generation functionality.
     """
@@ -51,7 +51,7 @@ class HMACAlgorithm(SigningAlgorithm):
         return mac.digest()
 
 
-class Signer(object):
+class Signer:
     """This class can sign and unsign bytes, validating the signature
     provided.
 

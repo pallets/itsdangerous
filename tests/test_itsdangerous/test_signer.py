@@ -15,7 +15,7 @@ class _ReverseAlgorithm(SigningAlgorithm):
         return (key + value)[::-1]
 
 
-class TestSigner(object):
+class TestSigner:
     @pytest.fixture()
     def signer_factory(self):
         return partial(Signer, secret_key="secret-key")
