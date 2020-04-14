@@ -1,7 +1,6 @@
 import time
 from datetime import datetime
 
-from ._compat import text_type
 from .encoding import base64_decode
 from .encoding import base64_encode
 from .encoding import bytes_to_int
@@ -75,9 +74,7 @@ class TimestampSigner(Signer):
         # Signature is *not* okay. Raise a proper error now that we have
         # split the value and the timestamp.
         if sig_error is not None:
-            raise BadTimeSignature(
-                text_type(sig_error), payload=value, date_signed=timestamp
-            )
+            raise BadTimeSignature(str(sig_error), payload=value, date_signed=timestamp)
 
         # Signature was okay but the timestamp is actually not there or
         # malformed. Should not happen, but we handle it anyway.

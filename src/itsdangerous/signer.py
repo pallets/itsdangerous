@@ -1,7 +1,6 @@
 import hashlib
 import hmac
 
-from ._compat import constant_time_compare
 from .encoding import _base64_alphabet
 from .encoding import base64_decode
 from .encoding import base64_encode
@@ -22,7 +21,7 @@ class SigningAlgorithm(object):
         """Verifies the given signature matches the expected
         signature.
         """
-        return constant_time_compare(sig, self.get_signature(key, value))
+        return hmac.compare_digest(sig, self.get_signature(key, value))
 
 
 class NoneAlgorithm(SigningAlgorithm):

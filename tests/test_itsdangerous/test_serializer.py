@@ -13,7 +13,7 @@ from itsdangerous.serializer import Serializer
 
 
 def coerce_str(ref, s):
-    if not isinstance(s, type(ref)):
+    if isinstance(ref, bytes):
         return s.encode("utf8")
 
     return s

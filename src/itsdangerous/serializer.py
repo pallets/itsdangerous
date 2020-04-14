@@ -1,6 +1,5 @@
 import hashlib
 
-from ._compat import text_type
 from ._json import json
 from .encoding import want_bytes
 from .exc import BadPayload
@@ -10,7 +9,7 @@ from .signer import Signer
 
 def is_text_serializer(serializer):
     """Checks whether a serializer generates text or binary."""
-    return isinstance(serializer.dumps({}), text_type)
+    return isinstance(serializer.dumps({}), str)
 
 
 class Serializer(object):

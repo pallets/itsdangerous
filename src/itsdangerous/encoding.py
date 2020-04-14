@@ -2,12 +2,11 @@ import base64
 import string
 import struct
 
-from ._compat import text_type
 from .exc import BadData
 
 
 def want_bytes(s, encoding="utf-8", errors="strict"):
-    if isinstance(s, text_type):
+    if isinstance(s, str):
         s = s.encode(encoding, errors)
     return s
 

@@ -1,7 +1,3 @@
-from ._compat import PY2
-from ._compat import text_type
-
-
 class BadData(Exception):
     """Raised if bad data of any sort was encountered. This is the base
     for all exceptions that ItsDangerous defines.
@@ -16,13 +12,7 @@ class BadData(Exception):
         self.message = message
 
     def __str__(self):
-        return text_type(self.message)
-
-    if PY2:
-        __unicode__ = __str__
-
-        def __str__(self):
-            return self.__unicode__().encode("utf-8")
+        return self.message
 
 
 class BadSignature(BadData):

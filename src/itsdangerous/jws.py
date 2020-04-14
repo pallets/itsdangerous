@@ -1,8 +1,9 @@
 import hashlib
 import time
 from datetime import datetime
+from decimal import Decimal
+from numbers import Real
 
-from ._compat import number_types
 from ._json import _CompactJSON
 from ._json import json
 from .encoding import base64_decode
@@ -211,7 +212,8 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
 
     def get_issue_date(self, header):
         rv = header.get("iat")
-        if isinstance(rv, number_types):
+
+        if isinstance(rv, (Real, Decimal)):
             return datetime.utcfromtimestamp(int(rv))
 
     def now(self):
