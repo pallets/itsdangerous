@@ -14,7 +14,7 @@ from test_itsdangerous.test_serializer import TestSerializer
 from test_itsdangerous.test_signer import TestSigner
 
 
-class FreezeMixin(object):
+class FreezeMixin:
     @pytest.fixture()
     def ts(self):
         return datetime(2011, 6, 24, 0, 9, 5)

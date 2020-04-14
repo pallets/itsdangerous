@@ -13,13 +13,13 @@ from itsdangerous.serializer import Serializer
 
 
 def coerce_str(ref, s):
-    if not isinstance(s, type(ref)):
+    if isinstance(ref, bytes):
         return s.encode("utf8")
 
     return s
 
 
-class TestSerializer(object):
+class TestSerializer:
     @pytest.fixture(params=(Serializer, partial(Serializer, serializer=pickle)))
     def serializer_factory(self, request):
         return partial(request.param, secret_key="secret_key")
@@ -33,7 +33,7 @@ class TestSerializer(object):
         return {"id": 42}
 
     @pytest.mark.parametrize(
-        "value", (None, True, "str", u"text", [1, 2, 3], {"id": 42})
+        "value", (None, True, "str", "text", [1, 2, 3], {"id": 42})
     )
     def test_serializer(self, serializer, value):
         assert serializer.loads(serializer.dumps(value)) == value
@@ -87,7 +87,7 @@ class TestSerializer(object):
         class BadUnsign(serializer.signer):
             def unsign(self, signed_value, *args, **kwargs):
                 try:
-                    return super(BadUnsign, self).unsign(signed_value, *args, **kwargs)
+                    return super().unsign(signed_value, *args, **kwargs)
                 except BadSignature as e:
                     e.payload = None
                     raise

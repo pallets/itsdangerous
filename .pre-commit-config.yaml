@@ -1,20 +1,27 @@
 repos:
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.1.1
+    hooks:
+      - id: pyupgrade
+        args: ["--py36-plus"]
   - repo: https://github.com/asottile/reorder_python_imports
-    rev: v1.6.1
+    rev: v2.2.0
     hooks:
       - id: reorder-python-imports
         args: ["--application-directories", "src:tests"]
   - repo: https://github.com/ambv/black
-    rev: 19.3b0
+    rev: 19.10b0
     hooks:
       - id: black
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.7.8
+    rev: 3.7.9
     hooks:
       - id: flake8
-        additional_dependencies: [flake8-bugbear]
+        additional_dependencies:
+          - flake8-bugbear
+          - flake8-implicit-str-concat
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.3
+    rev: v2.5.0
     hooks:
       - id: check-byte-order-marker
       - id: trailing-whitespace

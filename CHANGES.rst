@@ -1,3 +1,11 @@
+Version 2.0.0
+-------------
+
+Unreleased
+
+-   Drop support for Python 2 and 3.5.
+
+
 Version 1.1.0
 -------------
 

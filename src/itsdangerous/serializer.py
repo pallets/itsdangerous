@@ -1,6 +1,5 @@
 import hashlib
 
-from ._compat import text_type
 from ._json import json
 from .encoding import want_bytes
 from .exc import BadPayload
@@ -10,10 +9,10 @@ from .signer import Signer
 
 def is_text_serializer(serializer):
     """Checks whether a serializer generates text or binary."""
-    return isinstance(serializer.dumps({}), text_type)
+    return isinstance(serializer.dumps({}), str)
 
 
-class Serializer(object):
+class Serializer:
     """This class provides a serialization interface on top of the
     signer. It provides a similar API to json/pickle and other modules
     but is structured differently internally. If you want to change the
@@ -89,16 +88,22 @@ class Serializer(object):
     ):
         self.secret_key = want_bytes(secret_key)
         self.salt = want_bytes(salt)
+
         if serializer is None:
             serializer = self.default_serializer
+
         self.serializer = serializer
         self.is_text_serializer = is_text_serializer(serializer)
+
         if signer is None:
             signer = self.default_signer
+
         self.signer = signer
         self.signer_kwargs = signer_kwargs or {}
+
         if fallback_signers is None:
             fallback_signers = list(self.default_fallback_signers or ())
+
         self.fallback_signers = fallback_signers
         self.serializer_kwargs = serializer_kwargs or {}
 
@@ -114,9 +119,11 @@ class Serializer(object):
             is_text = self.is_text_serializer
         else:
             is_text = is_text_serializer(serializer)
+
         try:
             if is_text:
                 payload = payload.decode("utf-8")
+
             return serializer.loads(payload)
         except Exception as e:
             raise BadPayload(
@@ -147,7 +154,9 @@ class Serializer(object):
         """
         if salt is None:
             salt = self.salt
+
         yield self.make_signer(salt)
+
         for fallback in self.fallback_signers:
             if type(fallback) is dict:
                 kwargs = fallback
@@ -156,6 +165,7 @@ class Serializer(object):
                 fallback, kwargs = fallback
             else:
                 kwargs = self.signer_kwargs
+
             yield fallback(self.secret_key, salt=salt, **kwargs)
 
     def dumps(self, obj, salt=None):
@@ -165,8 +175,10 @@ class Serializer(object):
         """
         payload = want_bytes(self.dump_payload(obj))
         rv = self.make_signer(salt).sign(payload)
+
         if self.is_text_serializer:
             rv = rv.decode("utf-8")
+
         return rv
 
     def dump(self, obj, f, salt=None):
@@ -181,11 +193,13 @@ class Serializer(object):
         """
         s = want_bytes(s)
         last_exception = None
+
         for signer in self.iter_unsigners(salt):
             try:
                 return self.load_payload(signer.unsign(s))
             except BadSignature as err:
                 last_exception = err
+
         raise last_exception
 
     def load(self, f, salt=None):
@@ -217,6 +231,7 @@ class Serializer(object):
         except BadSignature as e:
             if e.payload is None:
                 return False, None
+
             try:
                 return (
                     False,

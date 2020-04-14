@@ -4,7 +4,7 @@ except ImportError:
     import json
 
 
-class _CompactJSON(object):
+class _CompactJSON:
     """Wrapper around json module that strips whitespace."""
 
     @staticmethod
