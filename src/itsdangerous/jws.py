@@ -46,8 +46,7 @@ class JSONWebSignatureSerializer(Serializer):
         signer_kwargs=None,
         algorithm_name=None,
     ):
-        Serializer.__init__(
-            self,
+        super().__init__(
             secret_key=secret_key,
             salt=salt,
             serializer=serializer,
@@ -55,16 +54,21 @@ class JSONWebSignatureSerializer(Serializer):
             signer=signer,
             signer_kwargs=signer_kwargs,
         )
+
         if algorithm_name is None:
             algorithm_name = self.default_algorithm
+
         self.algorithm_name = algorithm_name
         self.algorithm = self.make_algorithm(algorithm_name)
 
     def load_payload(self, payload, serializer=None, return_header=False):
         payload = want_bytes(payload)
+
         if b"." not in payload:
             raise BadPayload('No "." found in value')
+
         base64d_header, base64d_payload = payload.split(b".", 1)
+
         try:
             json_header = base64_decode(base64d_header)
         except Exception as e:
@@ -72,6 +76,7 @@ class JSONWebSignatureSerializer(Serializer):
                 "Could not base64 decode the header because of an exception",
                 original_error=e,
             )
+
         try:
             json_payload = base64_decode(base64d_payload)
         except Exception as e:
@@ -79,18 +84,23 @@ class JSONWebSignatureSerializer(Serializer):
                 "Could not base64 decode the payload because of an exception",
                 original_error=e,
             )
+
         try:
-            header = Serializer.load_payload(self, json_header, serializer=json)
+            header = super().load_payload(json_header, serializer=json)
         except BadData as e:
             raise BadHeader(
                 "Could not unserialize header because it was malformed",
                 original_error=e,
             )
+
         if not isinstance(header, dict):
             raise BadHeader("Header payload is not a JSON object", header=header)
-        payload = Serializer.load_payload(self, json_payload, serializer=serializer)
+
+        payload = super().load_payload(json_payload, serializer=serializer)
+
         if return_header:
             return payload, header
+
         return payload
 
     def dump_payload(self, header, obj):
@@ -111,9 +121,12 @@ class JSONWebSignatureSerializer(Serializer):
     def make_signer(self, salt=None, algorithm=None):
         if salt is None:
             salt = self.salt
+
         key_derivation = "none" if salt is None else None
+
         if algorithm is None:
             algorithm = self.algorithm
+
         return self.signer(
             self.secret_key,
             salt=salt,
@@ -144,10 +157,13 @@ class JSONWebSignatureSerializer(Serializer):
             self.make_signer(salt, self.algorithm).unsign(want_bytes(s)),
             return_header=True,
         )
+
         if header.get("alg") != self.algorithm_name:
             raise BadHeader("Algorithm mismatch", header=header, payload=payload)
+
         if return_header:
             return payload, header
+
         return payload
 
     def loads_unsafe(self, s, salt=None, return_header=False):
@@ -170,13 +186,15 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
     DEFAULT_EXPIRES_IN = 3600
 
     def __init__(self, secret_key, expires_in=None, **kwargs):
-        JSONWebSignatureSerializer.__init__(self, secret_key, **kwargs)
+        super().__init__(secret_key, **kwargs)
+
         if expires_in is None:
             expires_in = self.DEFAULT_EXPIRES_IN
+
         self.expires_in = expires_in
 
     def make_header(self, header_fields):
-        header = JSONWebSignatureSerializer.make_header(self, header_fields)
+        header = super().make_header(header_fields)
         iat = self.now()
         exp = iat + self.expires_in
         header["iat"] = iat
@@ -184,18 +202,18 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
         return header
 
     def loads(self, s, salt=None, return_header=False):
-        payload, header = JSONWebSignatureSerializer.loads(
-            self, s, salt, return_header=True
-        )
+        payload, header = super().loads(s, salt, return_header=True)
 
         if "exp" not in header:
             raise BadSignature("Missing expiry date", payload=payload)
 
         int_date_error = BadHeader("Expiry date is not an IntDate", payload=payload)
+
         try:
             header["exp"] = int(header["exp"])
         except ValueError:
             raise int_date_error
+
         if header["exp"] < 0:
             raise int_date_error
 
@@ -208,6 +226,7 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
 
         if return_header:
             return payload, header
+
         return payload
 
     def get_issue_date(self, header):

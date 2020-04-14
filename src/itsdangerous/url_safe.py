@@ -18,9 +18,11 @@ class URLSafeSerializerMixin:
 
     def load_payload(self, payload, *args, **kwargs):
         decompress = False
+
         if payload.startswith(b"."):
             payload = payload[1:]
             decompress = True
+
         try:
             json = base64_decode(payload)
         except Exception as e:
@@ -28,6 +30,7 @@ class URLSafeSerializerMixin:
                 "Could not base64 decode the payload because of an exception",
                 original_error=e,
             )
+
         if decompress:
             try:
                 json = zlib.decompress(json)
@@ -36,18 +39,23 @@ class URLSafeSerializerMixin:
                     "Could not zlib decompress the payload before decoding the payload",
                     original_error=e,
                 )
+
         return super().load_payload(json, *args, **kwargs)
 
     def dump_payload(self, obj):
         json = super().dump_payload(obj)
         is_compressed = False
         compressed = zlib.compress(json)
+
         if len(compressed) < (len(json) - 1):
             json = compressed
             is_compressed = True
+
         base64d = base64_encode(json)
+
         if is_compressed:
             base64d = b"." + base64d
+
         return base64d
 
 

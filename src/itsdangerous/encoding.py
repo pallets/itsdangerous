@@ -8,6 +8,7 @@ from .exc import BadData
 def want_bytes(s, encoding="utf-8", errors="strict"):
     if isinstance(s, str):
         s = s.encode(encoding, errors)
+
     return s
 
 
@@ -33,7 +34,7 @@ def base64_decode(string):
 
 
 # The alphabet used by base64.urlsafe_*
-_base64_alphabet = (string.ascii_letters + string.digits + "-_=").encode("ascii")
+_base64_alphabet = f"{string.ascii_letters}{string.digits}-_=".encode("ascii")
 
 _int64_struct = struct.Struct(">Q")
 _int_to_bytes = _int64_struct.pack

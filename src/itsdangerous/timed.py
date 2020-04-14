@@ -48,11 +48,12 @@ class TimestampSigner(Signer):
         :class:`datetime.datetime` object in UTC.
         """
         try:
-            result = Signer.unsign(self, value)
+            result = super().unsign(value)
             sig_error = None
         except BadSignature as e:
             sig_error = e
             result = e.payload or b""
+
         sep = want_bytes(self.sep)
 
         # If there is no timestamp in the result there is something
@@ -63,9 +64,11 @@ class TimestampSigner(Signer):
         if sep not in result:
             if sig_error:
                 raise sig_error
+
             raise BadTimeSignature("timestamp missing", payload=result)
 
         value, timestamp = result.rsplit(sep, 1)
+
         try:
             timestamp = bytes_to_int(base64_decode(timestamp))
         except Exception:
@@ -84,6 +87,7 @@ class TimestampSigner(Signer):
         # Check timestamp is not older than max_age
         if max_age is not None:
             age = self.get_timestamp() - timestamp
+
             if age > max_age:
                 raise SignatureExpired(
                     f"Signature age {age} > {max_age} seconds",
@@ -93,6 +97,7 @@ class TimestampSigner(Signer):
 
         if return_timestamp:
             return value, self.timestamp_to_datetime(timestamp)
+
         return value
 
     def validate(self, signed_value, max_age=None):
@@ -122,12 +127,15 @@ class TimedSerializer(Serializer):
         """
         s = want_bytes(s)
         last_exception = None
+
         for signer in self.iter_unsigners(salt):
             try:
                 base64d, timestamp = signer.unsign(s, max_age, return_timestamp=True)
                 payload = self.load_payload(base64d)
+
                 if return_timestamp:
                     return payload, timestamp
+
                 return payload
             # If we get a signature expired it means we could read the
             # signature but it's invalid.  In that case we do not want to
@@ -136,6 +144,7 @@ class TimedSerializer(Serializer):
                 raise
             except BadSignature as err:
                 last_exception = err
+
         raise last_exception
 
     def loads_unsafe(self, s, max_age=None, salt=None):

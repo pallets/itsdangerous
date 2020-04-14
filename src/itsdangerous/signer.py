@@ -44,6 +44,7 @@ class HMACAlgorithm(SigningAlgorithm):
     def __init__(self, digest_method=None):
         if digest_method is None:
             digest_method = self.default_digest_method
+
         self.digest_method = digest_method
 
     def get_signature(self, key, value):
@@ -98,21 +99,29 @@ class Signer:
     ):
         self.secret_key = want_bytes(secret_key)
         self.sep = want_bytes(sep)
+
         if self.sep in _base64_alphabet:
             raise ValueError(
                 "The given separator cannot be used because it may be"
                 " contained in the signature itself. Alphanumeric"
                 " characters and `-_=` must not be used."
             )
+
         self.salt = "itsdangerous.Signer" if salt is None else salt
+
         if key_derivation is None:
             key_derivation = self.default_key_derivation
+
         self.key_derivation = key_derivation
+
         if digest_method is None:
             digest_method = self.default_digest_method
+
         self.digest_method = digest_method
+
         if algorithm is None:
             algorithm = HMACAlgorithm(self.digest_method)
+
         self.algorithm = algorithm
 
     def derive_key(self):
@@ -123,6 +132,7 @@ class Signer:
         secret keys.
         """
         salt = want_bytes(self.salt)
+
         if self.key_derivation == "concat":
             return self.digest_method(salt + self.secret_key).digest()
         elif self.key_derivation == "django-concat":
@@ -150,22 +160,28 @@ class Signer:
     def verify_signature(self, value, sig):
         """Verifies the signature for the given value."""
         key = self.derive_key()
+
         try:
             sig = base64_decode(sig)
         except Exception:
             return False
+
         return self.algorithm.verify_signature(key, value, sig)
 
     def unsign(self, signed_value):
         """Unsigns the given string."""
         signed_value = want_bytes(signed_value)
         sep = want_bytes(self.sep)
+
         if sep not in signed_value:
-            raise BadSignature("No %r found in value" % self.sep)
+            raise BadSignature(f"No {self.sep!r} found in value")
+
         value, sig = signed_value.rsplit(sep, 1)
+
         if self.verify_signature(value, sig):
             return value
-        raise BadSignature("Signature %r does not match" % sig, payload=value)
+
+        raise BadSignature(f"Signature {sig!r} does not match", payload=value)
 
     def validate(self, signed_value):
         """Only validates the given signed value. Returns ``True`` if

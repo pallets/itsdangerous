@@ -8,7 +8,7 @@ class BadData(Exception):
     message = None
 
     def __init__(self, message):
-        super().__init__(self, message)
+        super().__init__(message)
         self.message = message
 
     def __str__(self):
@@ -19,7 +19,7 @@ class BadSignature(BadData):
     """Raised if a signature does not match."""
 
     def __init__(self, message, payload=None):
-        BadData.__init__(self, message)
+        super().__init__(message)
 
         #: The payload that failed the signature test. In some
         #: situations you might still want to inspect this, even if
@@ -35,7 +35,7 @@ class BadTimeSignature(BadSignature):
     """
 
     def __init__(self, message, payload=None, date_signed=None):
-        BadSignature.__init__(self, message, payload)
+        super().__init__(message, payload)
 
         #: If the signature expired this exposes the date of when the
         #: signature was created. This can be helpful in order to
@@ -60,7 +60,7 @@ class BadHeader(BadSignature):
     """
 
     def __init__(self, message, payload=None, header=None, original_error=None):
-        BadSignature.__init__(self, message, payload)
+        super().__init__(message, payload)
 
         #: If the header is actually available but just malformed it
         #: might be stored here.
@@ -81,7 +81,7 @@ class BadPayload(BadData):
     """
 
     def __init__(self, message, original_error=None):
-        BadData.__init__(self, message)
+        super().__init__(message)
 
         #: If available, the error that indicates why the payload was
         #: not valid. This might be ``None``.
