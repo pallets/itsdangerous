@@ -60,11 +60,8 @@ Links
 
 *   Website: https://palletsprojects.com/p/itsdangerous/
 *   Documentation: https://itsdangerous.palletsprojects.com/
-*   License: `BSD-3-Clause`_
 *   Releases: https://pypi.org/project/itsdangerous/
 *   Code: https://github.com/pallets/itsdangerous
 *   Issue tracker: https://github.com/pallets/itsdangerous/issues
 *   Test status: https://dev.azure.com/pallets/itsdangerous/_build
 *   Official chat: https://discord.gg/t6rrQZH
-
-.. _BSD-3-Clause: https://github.com/pallets/itsdangerous/blob/master/LICENSE.rst
