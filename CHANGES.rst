@@ -17,6 +17,8 @@ Unreleased
 -   If a signature has an age less than 0, it will raise
     ``SignatureExpired`` rather than appearing valid. This can happen if
     the timestamp offset is changed. :issue:`126`
+-   ``BadTimeSignature.date_signed`` is always a ``datetime`` object
+    rather than an ``int`` in some cases. :issue:`124`
 
 
 Version 1.1.0
