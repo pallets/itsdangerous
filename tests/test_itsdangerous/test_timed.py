@@ -64,6 +64,13 @@ class TestTimestampSigner(FreezeMixin, TestSigner):
 
         assert "Malformed" in str(exc_info.value)
 
+    def test_future_age(self, signer):
+        signed = signer.sign("value")
+
+        with freeze_time("1971-05-31"):
+            with pytest.raises(SignatureExpired):
+                signer.unsign(signed, max_age=10)
+
 
 class TestTimedSerializer(FreezeMixin, TestSerializer):
     @pytest.fixture()
