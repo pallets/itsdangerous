@@ -60,7 +60,6 @@ Table of Contents
     exceptions
     timed
     url_safe
-    jws
     encoding
     license
     changes

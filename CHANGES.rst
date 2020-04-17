@@ -4,6 +4,9 @@ Version 2.0.0
 Unreleased
 
 -   Drop support for Python 2 and 3.5.
+-   JWS support (``JSONWebSignatureSerializer``,
+    ``TimedJSONWebSignatureSerializer``) is deprecated. Use a dedicated
+    JWS/JWT library such as authlib instead. :issue:`129`
 -   Importing ``itsdangerous.json`` is deprecated. Import Python's
     ``json`` module instead. :pr:`152`
 -   Simplejson is no longer used if it is installed. To use a different
