@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from datetime import timezone
 
 from .encoding import base64_decode
 from .encoding import base64_encode
@@ -27,10 +28,14 @@ class TimestampSigner(Signer):
         return int(time.time())
 
     def timestamp_to_datetime(self, ts):
-        """Used to convert the timestamp from :meth:`get_timestamp` into
-        a datetime object.
+        """Convert the timestamp from :meth:`get_timestamp` into an
+        aware :class`datetime.datetime` in UTC.
+
+        .. versionchanged:: 2.0
+            The timestamp is returned as a timezone-aware ``datetime``
+            in UTC rather than a naive ``datetime`` assumed to be UTC.
         """
-        return datetime.utcfromtimestamp(ts)
+        return datetime.fromtimestamp(ts, tz=timezone.utc)
 
     def sign(self, value):
         """Signs the given string and also attaches time information."""
@@ -44,8 +49,12 @@ class TimestampSigner(Signer):
         """Works like the regular :meth:`.Signer.unsign` but can also
         validate the time. See the base docstring of the class for
         the general behavior. If ``return_timestamp`` is ``True`` the
-        timestamp of the signature will be returned as a naive
+        timestamp of the signature will be returned as an aware
         :class:`datetime.datetime` object in UTC.
+
+        .. versionchanged:: 2.0
+            The timestamp is returned as a timezone-aware ``datetime``
+            in UTC rather than a naive ``datetime`` assumed to be UTC.
         """
         try:
             result = super().unsign(value)

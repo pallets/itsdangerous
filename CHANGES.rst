@@ -4,6 +4,9 @@ Version 2.0.0
 Unreleased
 
 -   Drop support for Python 2 and 3.5.
+-   ``datetime`` values are timezone-aware with ``timezone.utc``. Code
+    using ``TimestampSigner.unsign(return_timestamp=True)`` or
+    ``BadTimeSignature.date_signed`` may need to change. :issue:`150`
 
 
 Version 1.1.0

@@ -1,6 +1,7 @@
 import hashlib
 import time
 from datetime import datetime
+from datetime import timezone
 from decimal import Decimal
 from numbers import Real
 
@@ -230,10 +231,18 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
         return payload
 
     def get_issue_date(self, header):
+        """If the header contains the ``iat`` field, return the date the
+        signature was issued, as a timezone-aware
+        :class:`datetime.datetime` in UTC.
+
+        .. versionchanged:: 2.0
+            The timestamp is returned as a timezone-aware ``datetime``
+            in UTC rather than a naive ``datetime`` assumed to be UTC.
+        """
         rv = header.get("iat")
 
         if isinstance(rv, (Real, Decimal)):
-            return datetime.utcfromtimestamp(int(rv))
+            return datetime.fromtimestamp(int(rv), tz=timezone.utc)
 
     def now(self):
         return int(time.time())
