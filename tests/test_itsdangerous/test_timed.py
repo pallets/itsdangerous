@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 from functools import partial
 
 import pytest
@@ -17,7 +18,7 @@ from test_itsdangerous.test_signer import TestSigner
 class FreezeMixin:
     @pytest.fixture()
     def ts(self):
-        return datetime(2011, 6, 24, 0, 9, 5)
+        return datetime(2011, 6, 24, 0, 9, 5, tzinfo=timezone.utc)
 
     @pytest.fixture(autouse=True)
     def freeze(self, ts):

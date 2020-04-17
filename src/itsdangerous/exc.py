@@ -41,6 +41,9 @@ class BadTimeSignature(BadSignature):
         #: signature was created. This can be helpful in order to
         #: tell the user how long a link has been gone stale.
         #:
+        #: .. versionchanged:: 2.0
+        #:     The datetime value is timezone-aware rather than naive.
+        #:
         #: .. versionadded:: 0.14
         self.date_signed = date_signed
 
