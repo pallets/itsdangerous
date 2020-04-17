@@ -1,5 +1,4 @@
 from datetime import timedelta
-from functools import partial
 
 import pytest
 
@@ -17,7 +16,11 @@ from test_itsdangerous.test_timed import TestTimedSerializer
 class TestJWSSerializer(TestSerializer):
     @pytest.fixture()
     def serializer_factory(self):
-        return partial(JSONWebSignatureSerializer, secret_key="secret-key")
+        def factory(secret_key="secret-key", **kwargs):
+            with pytest.deprecated_call():
+                return JSONWebSignatureSerializer(secret_key=secret_key, **kwargs)
+
+        return factory
 
     test_signer_cls = None
     test_signer_kwargs = None
@@ -68,9 +71,13 @@ class TestJWSSerializer(TestSerializer):
 class TestTimedJWSSerializer(TestJWSSerializer, TestTimedSerializer):
     @pytest.fixture()
     def serializer_factory(self):
-        return partial(
-            TimedJSONWebSignatureSerializer, secret_key="secret-key", expires_in=10
-        )
+        def factory(secret_key="secret-key", expires_in=10, **kwargs):
+            with pytest.deprecated_call():
+                return TimedJSONWebSignatureSerializer(
+                    secret_key=secret_key, expires_in=expires_in, **kwargs
+                )
+
+        return factory
 
     def test_default_expires_in(self, serializer_factory):
         serializer = serializer_factory(expires_in=None)

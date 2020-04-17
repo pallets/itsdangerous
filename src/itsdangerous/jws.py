@@ -1,5 +1,6 @@
 import hashlib
 import time
+import warnings
 from datetime import datetime
 from datetime import timezone
 from decimal import Decimal
@@ -22,6 +23,9 @@ from .signer import NoneAlgorithm
 class JSONWebSignatureSerializer(Serializer):
     """This serializer implements JSON Web Signature (JWS) support. Only
     supports the JWS Compact Serialization.
+
+    .. deprecated:: 2.0
+        Use a dedicated library such as authlib.
     """
 
     jws_algorithms = {
@@ -46,6 +50,12 @@ class JSONWebSignatureSerializer(Serializer):
         signer_kwargs=None,
         algorithm_name=None,
     ):
+        warnings.warn(
+            "JWS support is deprecated and will be removed in 2.1. Use"
+            " a dedicated JWS/JWT library such as authlib.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(
             secret_key=secret_key,
             salt=salt,

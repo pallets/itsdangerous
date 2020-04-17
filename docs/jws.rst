@@ -1,7 +1,16 @@
+:orphan:
+
 .. module:: itsdangerous.jws
 
 JSON Web Signature (JWS)
 ========================
+
+.. warning::
+    .. deprecated:: 2.0
+        ItsDangerous will no longer support JWS in version 2.1. Use a
+        dedicated JWS/JWT library such as `authlib`_.
+
+.. _authlib: https://authlib.org/
 
 JSON Web Signatures (JWS) work similarly to the existing URL safe
 serializer but will emit headers according to `draft-ietf-jose-json-web
