@@ -1,6 +1,6 @@
 import hashlib
+import json
 
-from ._json import json
 from .encoding import want_bytes
 from .exc import BadPayload
 from .exc import BadSignature
@@ -19,10 +19,6 @@ class Serializer:
     underlying implementation for parsing and loading you have to
     override the :meth:`load_payload` and :meth:`dump_payload`
     functions.
-
-    This implementation uses simplejson if available for dumping and
-    loading and will fall back to the standard library's json module if
-    it's not available.
 
     You do not need to subclass this class in order to switch out or
     customize the :class:`.Signer`. You can instead pass a different

@@ -4,6 +4,10 @@ Version 2.0.0
 Unreleased
 
 -   Drop support for Python 2 and 3.5.
+-   Importing ``itsdangerous.json`` is deprecated. Import Python's
+    ``json`` module instead. :pr:`152`
+-   Simplejson is no longer used if it is installed. To use a different
+    library, pass it as ``Serializer(serializer=...)``. :issue:`146`
 -   ``datetime`` values are timezone-aware with ``timezone.utc``. Code
     using ``TimestampSigner.unsign(return_timestamp=True)`` or
     ``BadTimeSignature.date_signed`` may need to change. :issue:`150`

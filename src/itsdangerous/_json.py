@@ -1,7 +1,5 @@
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import json
+from types import ModuleType
 
 
 class _CompactJSON:
@@ -16,3 +14,19 @@ class _CompactJSON:
         kwargs.setdefault("ensure_ascii", False)
         kwargs.setdefault("separators", (",", ":"))
         return json.dumps(obj, **kwargs)
+
+
+class DeprecatedJSON(ModuleType):
+    def __getattribute__(self, item):
+        import warnings
+
+        warnings.warn(
+            "Importing 'itsdangerous.json' is deprecated and will be"
+            " removed in 2.1. Use Python's 'json' module instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return getattr(json, item)
+
+
+deprecated_json = DeprecatedJSON("json")
