@@ -86,6 +86,9 @@ class TimestampSigner(Signer):
         # Signature is *not* okay. Raise a proper error now that we have
         # split the value and the timestamp.
         if sig_error is not None:
+            if timestamp is not None:
+                timestamp = self.timestamp_to_datetime(timestamp)
+
             raise BadTimeSignature(str(sig_error), payload=value, date_signed=timestamp)
 
         # Signature was okay but the timestamp is actually not there or
