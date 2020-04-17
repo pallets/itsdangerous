@@ -6,7 +6,6 @@ from decimal import Decimal
 from numbers import Real
 
 from ._json import _CompactJSON
-from ._json import json
 from .encoding import base64_decode
 from .encoding import base64_encode
 from .encoding import want_bytes
@@ -87,7 +86,7 @@ class JSONWebSignatureSerializer(Serializer):
             )
 
         try:
-            header = super().load_payload(json_header, serializer=json)
+            header = super().load_payload(json_header, serializer=_CompactJSON)
         except BadData as e:
             raise BadHeader(
                 "Could not unserialize header because it was malformed",

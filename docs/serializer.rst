@@ -25,9 +25,8 @@ the data.
     s.loads('[1, 2, 3, 4].r7R9RhGgDPvvWl3iNzLuIIfELmo')
     [1, 2, 3, 4]
 
-By default, data is serialized to JSON. If simplejson is installed, it
-is preferred over the built-in :mod:`json` module. This internal
-serializer can be changed by subclassing.
+By default, data is serialized to JSON with the built-in :mod:`json`
+module. This internal serializer can be changed by subclassing.
 
 To record and validate the age of the signature, see :doc:`/timed`.
 To serialize to a format that is safe to use in URLs, see
