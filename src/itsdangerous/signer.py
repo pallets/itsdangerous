@@ -98,10 +98,16 @@ class Signer:
         algorithm=None,
     ):
         if isinstance(secret_key, list):
-            self.secret_keys = [want_bytes(s) for s in secret_key]
+            secret_keys = [want_bytes(s) for s in secret_key]
         else:
-            self.secret_keys = [want_bytes(secret_key)]
+            secret_keys = [want_bytes(secret_key)]
 
+        #: The list of secret keys to try for verifying signatures, from
+        #: oldest to newest. The newest (last) key is used for signing.
+        #:
+        #: This allows a key rotation system to keep a list of allowed
+        #: keys and remove expired ones.
+        self.secret_keys = secret_keys
         self.sep = want_bytes(sep)
 
         if self.sep in _base64_alphabet:
@@ -127,6 +133,13 @@ class Signer:
             algorithm = HMACAlgorithm(self.digest_method)
 
         self.algorithm = algorithm
+
+    @property
+    def secret_key(self):
+        """The newest (last) entry in the :attr:`secret_keys` list. This
+        is for compatibility from before key rotation support was added.
+        """
+        return self.secret_keys[-1]
 
     def derive_key(self, secret_key=None):
         """This method is called to derive the key. The default key
@@ -173,7 +186,7 @@ class Signer:
         except Exception:
             return False
 
-        for secret_key in self.secret_keys[::-1]:
+        for secret_key in reversed(self.secret_keys):
             key = self.derive_key(secret_key)
 
             if self.algorithm.verify_signature(key, value, sig):

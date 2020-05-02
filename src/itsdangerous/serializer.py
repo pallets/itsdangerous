@@ -83,10 +83,16 @@ class Serializer:
         fallback_signers=None,
     ):
         if isinstance(secret_key, list):
-            self.secret_keys = [want_bytes(s) for s in secret_key]
+            secret_keys = [want_bytes(s) for s in secret_key]
         else:
-            self.secret_keys = [want_bytes(secret_key)]
+            secret_keys = [want_bytes(secret_key)]
 
+        #: The list of secret keys to try for verifying signatures, from
+        #: oldest to newest. The newest (last) key is used for signing.
+        #:
+        #: This allows a key rotation system to keep a list of allowed
+        #: keys and remove expired ones.
+        self.secret_keys = secret_keys
         self.salt = want_bytes(salt)
 
         if serializer is None:
@@ -106,6 +112,13 @@ class Serializer:
 
         self.fallback_signers = fallback_signers
         self.serializer_kwargs = serializer_kwargs or {}
+
+    @property
+    def secret_key(self):
+        """The newest (last) entry in the :attr:`secret_keys` list. This
+        is for compatibility from before key rotation support was added.
+        """
+        return self.secret_keys[-1]
 
     def load_payload(self, payload, serializer=None):
         """Loads the encoded object. This function raises
