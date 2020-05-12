@@ -3,7 +3,7 @@
 Serialization Interface
 =======================
 
-The :doc:`/signer` only signs strings. To sign other types, the
+The :doc:`/signer` only signs bytes. To sign other types, the
 :class:`Serializer` class provides a ``dumps``/``loads`` interface
 similar to Python's :mod:`json` module, which serializes the object to a
 string then signs that.
@@ -31,59 +31,6 @@ module. This internal serializer can be changed by subclassing.
 To record and validate the age of the signature, see :doc:`/timed`.
 To serialize to a format that is safe to use in URLs, see
 :doc:`/url_safe`.
-
-
-.. _the-salt:
-
-The Salt
---------
-
-All classes also accept a salt argument. The name might be misleading
-because usually if you think of salts in cryptography you would expect
-the salt to be something that is stored alongside the resulting signed
-string as a way to prevent rainbow table lookups. Such salts are usually
-public.
-
-In ItsDangerous, like in the original Django implementation, the salt
-serves a different purpose. You could describe it as namespacing. It's
-still not critical if you disclose it because without the secret key it
-does not help an attacker.
-
-Let's assume that you have two links you want to sign. You have the
-activation link on your system which can activate a user account and you
-have an upgrade link that can upgrade a user's account to a paid account
-which you send out via email. If in both cases all you sign is the user
-ID a user could reuse the variable part in the URL from the activation
-link to upgrade the account. Now you could either put more information
-in there which you sign (like the intention: upgrade or activate), but
-you could also use different salts:
-
-.. code-block:: python
-
-    from itsdangerous.url_safe import URLSafeSerializer
-    s1 = URLSafeSerializer("secret-key", salt="activate")
-    s1.dumps(42)
-    'NDI.MHQqszw6Wc81wOBQszCrEE_RlzY'
-    s2 = URLSafeSerializer("secret-key", salt="upgrade")
-    s2.dumps(42)
-    'NDI.c0MpsD6gzpilOAeUPra3NShPXsE'
-
-The second serializer can't load data dumped with the first because the
-salts differ:
-
-.. code-block:: python
-
-    s2.loads(s1.dumps(42))
-    Traceback (most recent call last):
-      ...
-    itsdangerous.exc.BadSignature: Signature "MHQqszw6Wc81wOBQszCrEE_RlzY" does not match
-
-Only the serializer with the same salt can load the data:
-
-.. code-block:: python
-
-    s2.loads(s2.dumps(42))
-    42
 
 
 Responding to Failure
@@ -125,6 +72,38 @@ wrong you can also use :meth:`~Serializer.loads_unsafe`:
 
 The first item in the returned tuple is a boolean that indicates if the
 signature was correct.
+
+
+Fallback Signers
+----------------
+
+You may want to upgrade the signing parameters without invalidating
+existing signatures immediately. For example, you may decide that you
+want to use a different digest method. New signatures should use the new
+method, but old signatures should still validate.
+
+A list of ``fallback_signers`` can be given that will be tried if
+unsigning with the current signer fails. Each item in the list can be:
+
+-   A dict of ``signer_kwargs`` to instantiate the ``signer`` class
+    passed to the serializer.
+-   A :class:`~itsdangerous.signer.Signer` class to instantiated with
+    the ``secret_key``, ``salt``, and ``signer_kwargs`` passed to the
+    serializer.
+-   A tuple of ``(signer_class, signer_kwargs)`` to instantiate the
+    given class with the given args.
+
+For example, this is a serializer that signs using SHA-512, but will
+unsign using either SHA-512 or SHA-1:
+
+.. code-block:: python
+
+    s = Serializer(
+        signer_kwargs={"digest_method": hashlib.sha512},
+        fallback_signers=[{"digest_method": hashlib.sha1}]
+    )
+
+
 
 API
 ---

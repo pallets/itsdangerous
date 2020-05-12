@@ -33,7 +33,7 @@ unsigning will raise a :exc:`~itsdangerous.exc.BadSignature` exception:
     s.unsign(b"different string.wh6tMHxLgJqB6oY1uT73iMlyrOA")
     Traceback (most recent call last):
       ...
-    itsdangerous.exc.BadSignature: Signature "wh6tMHxLgJqB6oY1uT73iMlyrOA" does not match
+    BadSignature: Signature does not match
 
 To record and validate the age of a signature, see :doc:`/timed`.
 

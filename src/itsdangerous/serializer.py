@@ -13,63 +13,63 @@ def is_text_serializer(serializer):
 
 
 class Serializer:
-    """This class provides a serialization interface on top of the
-    signer. It provides a similar API to json/pickle and other modules
-    but is structured differently internally. If you want to change the
-    underlying implementation for parsing and loading you have to
-    override the :meth:`load_payload` and :meth:`dump_payload`
-    functions.
+    """A serializer wraps a :class:`~itsdangerous.signer.Signer` to
+    enable serializing and securely signing data other than bytes. It
+    can unsign to verify that the data hasn't been changed.
 
-    You do not need to subclass this class in order to switch out or
-    customize the :class:`.Signer`. You can instead pass a different
-    class to the constructor as well as keyword arguments as a dict that
-    should be forwarded.
+    The serializer provides :meth:`dumps` and :meth:`loads`, similar to
+    :mod:`json`, and by default uses :mod:`json` internally to serialize
+    the data to bytes.
 
-    .. code-block:: python
+    The secret key should be a random string of ``bytes`` and should not
+    be saved to code or version control. Different salts should be used
+    to distinguish signing in different contexts. See :doc:`/concepts`
+    for information about the security of the secret key and salt.
 
-        s = Serializer(signer_kwargs={'key_derivation': 'hmac'})
+    :param secret_key: The secret key to sign and verify with. Can be a
+        list of keys, oldest to newest, to support key rotation.
+    :param salt: Extra key to combine with ``secret_key`` to distinguish
+        signatures in different contexts.
+    :param serializer: An object that provides ``dumps`` and ``loads``
+        methods for serializing data to a string. Defaults to
+        :attr:`default_serializer`, which defaults to :mod:`json`.
+    :param serializer_kwargs: Keyword arguments to pass when calling
+        ``serializer.dumps``.
+    :param signer: A ``Signer`` class to instantiate when signing data.
+        Defaults to :attr:`default_signer`, which defaults to
+        :class:`~itsdangerous.signer.Signer`.
+    :param signer_kwargs: Keyword arguments to pass when instantiating
+        the ``Signer`` class.
+    :param fallback_signers: List of signer parameters to try when
+        unsigning with the default signer fails. Each item can be a dict
+        of ``signer_kwargs``, a ``Signer`` class, or a tuple of
+        ``(signer, signer_kwargs)``. Defaults to
+        :attr:`default_fallback_signers`.
 
-    You may want to upgrade the signing parameters without invalidating
-    existing signatures that are in use. Fallback signatures can be
-    given that will be tried if unsigning with the current signer fails.
+    .. versionchanged:: 2.0.0
+        Added support for key rotation by passing a list to
+        ``secret_key``.
 
-    Fallback signers can be defined by providing a list of
-    ``fallback_signers``. Each item can be one of the following: a
-    signer class (which is instantiated with ``signer_kwargs``,
-    ``salt``, and ``secret_key``), a tuple
-    ``(signer_class, signer_kwargs)``, or a dict of ``signer_kwargs``.
-
-    For example, this is a serializer that signs using SHA-512, but will
-    unsign using either SHA-512 or SHA1:
-
-    .. code-block:: python
-
-        s = Serializer(
-            signer_kwargs={"digest_method": hashlib.sha512},
-            fallback_signers=[{"digest_method": hashlib.sha1}]
-        )
-
-    .. versionchanged:: 0.14:
-        The ``signer`` and ``signer_kwargs`` parameters were added to
-        the constructor.
-
-    .. versionchanged:: 1.1.0:
+    .. versionchanged:: 1.1.0
         Added support for ``fallback_signers`` and configured a default
         SHA-512 fallback. This fallback is for users who used the yanked
         1.0.0 release which defaulted to SHA-512.
+
+    .. versionchanged:: 0.14
+        The ``signer`` and ``signer_kwargs`` parameters were added to
+        the constructor.
     """
 
-    #: If a serializer module or class is not passed to the constructor
-    #: this one is picked up. This currently defaults to :mod:`json`.
+    #: The default serialization module to use to serialize data to a
+    #: string internally. The default is :mod:`json`, but can be changed
+    #: to any object that provides ``dumps`` and ``loads`` methods.
     default_serializer = json
 
-    #: The default :class:`Signer` class that is being used by this
-    #: serializer.
-    #:
-    #: .. versionadded:: 0.14
+    #: The default ``Signer`` class to instantiate when signing data.
+    #: The default is :class:`itsdangerous.signer.Signer`.
     default_signer = Signer
 
-    #: The default fallback signers.
+    #: The default fallback signers to try when unsigning fails.
     default_fallback_signers = [{"digest_method": hashlib.sha512}]
 
     def __init__(
