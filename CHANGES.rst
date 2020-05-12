@@ -19,6 +19,9 @@ Unreleased
     the timestamp offset is changed. :issue:`126`
 -   ``BadTimeSignature.date_signed`` is always a ``datetime`` object
     rather than an ``int`` in some cases. :issue:`124`
+-   Added support for key rotation. A list of keys can be passed as
+    ``secret_key``, oldest to newest. The newest key is used for
+    signing, all keys are tried for unsigning. :pr:`141`
 
 
 Version 1.1.0

@@ -4,9 +4,9 @@ Signing With Timestamps
 =======================
 
 If you want to expire signatures you can use the
-:class:`TimestampSigner` class which will adds timestamp information and
-signs it. On unsigning you can validate that the timestamp did not
-expire:
+:class:`TimestampSigner` class which adds timestamp information and
+signs it. On unsigning you can validate that the timestamp is not older
+than a given age.
 
 .. code-block:: python
 
