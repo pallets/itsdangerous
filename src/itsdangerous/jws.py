@@ -57,7 +57,7 @@ class JSONWebSignatureSerializer(Serializer):
             stacklevel=2,
         )
         super().__init__(
-            secret_key=secret_key,
+            secret_key,
             salt=salt,
             serializer=serializer,
             serializer_kwargs=serializer_kwargs,
@@ -138,7 +138,7 @@ class JSONWebSignatureSerializer(Serializer):
             algorithm = self.algorithm
 
         return self.signer(
-            self.secret_key,
+            self.secret_keys,
             salt=salt,
             sep=".",
             key_derivation=key_derivation,

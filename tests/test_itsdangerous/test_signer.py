@@ -91,6 +91,16 @@ class TestSigner:
         if algorithm is None:
             assert signer.algorithm.digest_method == signer.digest_method
 
+    def test_secret_keys(self):
+        signer = Signer("a")
+        signed = signer.sign("my string")
+        assert isinstance(signed, bytes)
+
+        signer = Signer(["a", "b"])
+        assert signer.validate(signed)
+        out = signer.unsign(signed)
+        assert out == b"my string"
+
 
 def test_abstract_algorithm():
     alg = SigningAlgorithm()

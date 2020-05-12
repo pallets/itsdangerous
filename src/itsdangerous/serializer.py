@@ -82,7 +82,17 @@ class Serializer:
         signer_kwargs=None,
         fallback_signers=None,
     ):
-        self.secret_key = want_bytes(secret_key)
+        if isinstance(secret_key, list):
+            secret_keys = [want_bytes(s) for s in secret_key]
+        else:
+            secret_keys = [want_bytes(secret_key)]
+
+        #: The list of secret keys to try for verifying signatures, from
+        #: oldest to newest. The newest (last) key is used for signing.
+        #:
+        #: This allows a key rotation system to keep a list of allowed
+        #: keys and remove expired ones.
+        self.secret_keys = secret_keys
         self.salt = want_bytes(salt)
 
         if serializer is None:
@@ -102,6 +112,13 @@ class Serializer:
 
         self.fallback_signers = fallback_signers
         self.serializer_kwargs = serializer_kwargs or {}
+
+    @property
+    def secret_key(self):
+        """The newest (last) entry in the :attr:`secret_keys` list. This
+        is for compatibility from before key rotation support was added.
+        """
+        return self.secret_keys[-1]
 
     def load_payload(self, payload, serializer=None):
         """Loads the encoded object. This function raises
@@ -141,7 +158,7 @@ class Serializer:
         """
         if salt is None:
             salt = self.salt
-        return self.signer(self.secret_key, salt=salt, **self.signer_kwargs)
+        return self.signer(self.secret_keys, salt=salt, **self.signer_kwargs)
 
     def iter_unsigners(self, salt=None):
         """Iterates over all signers to be tried for unsigning. Starts
@@ -162,7 +179,8 @@ class Serializer:
             else:
                 kwargs = self.signer_kwargs
 
-            yield fallback(self.secret_key, salt=salt, **kwargs)
+            for secret_key in self.secret_keys:
+                yield fallback(secret_key, salt=salt, **kwargs)
 
     def dumps(self, obj, salt=None):
         """Returns a signed string serialized with the internal

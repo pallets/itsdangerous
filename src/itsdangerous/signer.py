@@ -97,7 +97,17 @@ class Signer:
         digest_method=None,
         algorithm=None,
     ):
-        self.secret_key = want_bytes(secret_key)
+        if isinstance(secret_key, list):
+            secret_keys = [want_bytes(s) for s in secret_key]
+        else:
+            secret_keys = [want_bytes(secret_key)]
+
+        #: The list of secret keys to try for verifying signatures, from
+        #: oldest to newest. The newest (last) key is used for signing.
+        #:
+        #: This allows a key rotation system to keep a list of allowed
+        #: keys and remove expired ones.
+        self.secret_keys = secret_keys
         self.sep = want_bytes(sep)
 
         if self.sep in _base64_alphabet:
@@ -124,25 +134,37 @@ class Signer:
 
         self.algorithm = algorithm
 
-    def derive_key(self):
+    @property
+    def secret_key(self):
+        """The newest (last) entry in the :attr:`secret_keys` list. This
+        is for compatibility from before key rotation support was added.
+        """
+        return self.secret_keys[-1]
+
+    def derive_key(self, secret_key=None):
         """This method is called to derive the key. The default key
         derivation choices can be overridden here. Key derivation is not
         intended to be used as a security method to make a complex key
         out of a short password. Instead you should use large random
         secret keys.
         """
+        if secret_key is None:
+            secret_key = self.secret_keys[-1]
+        else:
+            secret_key = want_bytes(secret_key)
+
         salt = want_bytes(self.salt)
 
         if self.key_derivation == "concat":
-            return self.digest_method(salt + self.secret_key).digest()
+            return self.digest_method(salt + secret_key).digest()
         elif self.key_derivation == "django-concat":
-            return self.digest_method(salt + b"signer" + self.secret_key).digest()
+            return self.digest_method(salt + b"signer" + secret_key).digest()
         elif self.key_derivation == "hmac":
-            mac = hmac.new(self.secret_key, digestmod=self.digest_method)
+            mac = hmac.new(secret_key, digestmod=self.digest_method)
             mac.update(salt)
             return mac.digest()
         elif self.key_derivation == "none":
-            return self.secret_key
+            return secret_key
         else:
             raise TypeError("Unknown key derivation method")
 
@@ -159,14 +181,18 @@ class Signer:
 
     def verify_signature(self, value, sig):
         """Verifies the signature for the given value."""
-        key = self.derive_key()
-
         try:
             sig = base64_decode(sig)
         except Exception:
             return False
 
-        return self.algorithm.verify_signature(key, value, sig)
+        for secret_key in reversed(self.secret_keys):
+            key = self.derive_key(secret_key)
+
+            if self.algorithm.verify_signature(key, value, sig):
+                return True
+
+        return False
 
     def unsign(self, signed_value):
         """Unsigns the given string."""
