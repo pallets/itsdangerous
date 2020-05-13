@@ -1,4 +1,3 @@
-import hashlib
 import json
 
 from .encoding import want_bytes
@@ -50,6 +49,10 @@ class Serializer:
         Added support for key rotation by passing a list to
         ``secret_key``.
 
+    .. versionchanged:: 2.0.0
+        Removed the default SHA-512 fallback signer from
+        ``default_fallback_signers``.
+
     .. versionchanged:: 1.1.0
         Added support for ``fallback_signers`` and configured a default
         SHA-512 fallback. This fallback is for users who used the yanked
@@ -70,7 +73,7 @@ class Serializer:
     default_signer = Signer
 
     #: The default fallback signers to try when unsigning fails.
-    default_fallback_signers = [{"digest_method": hashlib.sha512}]
+    default_fallback_signers = []
 
     def __init__(
         self,
