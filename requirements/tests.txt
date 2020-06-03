@@ -11,7 +11,7 @@ packaging==20.3           # via pytest
 pluggy==0.13.1            # via pytest
 py==1.8.1                 # via pytest
 pyparsing==2.4.7          # via packaging
-pytest==5.4.2             # via -r requirements/tests.in
+pytest==5.4.3             # via -r requirements/tests.in
 python-dateutil==2.8.1    # via freezegun
 six==1.14.0               # via freezegun, packaging, python-dateutil
 wcwidth==0.1.9            # via pytest
