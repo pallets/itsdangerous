@@ -13,3 +13,4 @@ __pycache__/
 .coverage.*
 /htmlcov/
 /docs/_build/
+/.mypy_cache/

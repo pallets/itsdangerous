@@ -1,4 +1,6 @@
 -r docs.in
 -r tests.in
+mypy
+pip-tools
 pre-commit
 tox

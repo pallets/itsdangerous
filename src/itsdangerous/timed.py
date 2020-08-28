@@ -1,4 +1,6 @@
 import time
+import typing
+import typing as _t
 from datetime import datetime
 from datetime import timezone
 
@@ -13,6 +15,10 @@ from .exc import SignatureExpired
 from .serializer import Serializer
 from .signer import Signer
 
+_t_str_bytes = _t.Union[str, bytes]
+_t_opt_str_bytes = _t.Optional[_t_str_bytes]
+_t_opt_int = _t.Optional[int]
+
 
 class TimestampSigner(Signer):
     """Works like the regular :class:`.Signer` but also records the time
@@ -21,13 +27,13 @@ class TimestampSigner(Signer):
     unsigning failed because the signature is expired.
     """
 
-    def get_timestamp(self):
+    def get_timestamp(self) -> int:
         """Returns the current timestamp. The function must return an
         integer.
         """
         return int(time.time())
 
-    def timestamp_to_datetime(self, ts):
+    def timestamp_to_datetime(self, ts: int) -> datetime:
         """Convert the timestamp from :meth:`get_timestamp` into an
         aware :class`datetime.datetime` in UTC.
 
@@ -37,7 +43,7 @@ class TimestampSigner(Signer):
         """
         return datetime.fromtimestamp(ts, tz=timezone.utc)
 
-    def sign(self, value):
+    def sign(self, value: _t_str_bytes) -> bytes:
         """Signs the given string and also attaches time information."""
         value = want_bytes(value)
         timestamp = base64_encode(int_to_bytes(self.get_timestamp()))
@@ -45,7 +51,33 @@ class TimestampSigner(Signer):
         value = value + sep + timestamp
         return value + sep + self.get_signature(value)
 
-    def unsign(self, value, max_age=None, return_timestamp=False):
+    # Ignore overlapping signatures check, return_timestamp is the only
+    # parameter that affects the return type.
+
+    @typing.overload
+    def unsign(  # type: ignore
+        self,
+        signed_value: _t_str_bytes,
+        max_age: _t_opt_int = None,
+        return_timestamp: "_t.Literal[False]" = False,
+    ) -> bytes:
+        ...
+
+    @typing.overload
+    def unsign(
+        self,
+        signed_value: _t_str_bytes,
+        max_age: _t_opt_int = None,
+        return_timestamp: "_t.Literal[True]" = True,
+    ) -> _t.Tuple[bytes, datetime]:
+        ...
+
+    def unsign(
+        self,
+        signed_value: _t_str_bytes,
+        max_age: _t_opt_int = None,
+        return_timestamp: bool = False,
+    ) -> _t.Union[_t.Tuple[bytes, datetime], bytes]:
         """Works like the regular :meth:`.Signer.unsign` but can also
         validate the time. See the base docstring of the class for
         the general behavior. If ``return_timestamp`` is ``True`` the
@@ -57,7 +89,7 @@ class TimestampSigner(Signer):
             in UTC rather than a naive ``datetime`` assumed to be UTC.
         """
         try:
-            result = super().unsign(value)
+            result = super().unsign(signed_value)
             sig_error = None
         except BadSignature as e:
             sig_error = e
@@ -76,50 +108,52 @@ class TimestampSigner(Signer):
 
             raise BadTimeSignature("timestamp missing", payload=result)
 
-        value, timestamp = result.rsplit(sep, 1)
+        value, ts_bytes = result.rsplit(sep, 1)
+        ts_int: _t_opt_int = None
+        ts_dt: _t.Optional[datetime] = None
 
         try:
-            timestamp = bytes_to_int(base64_decode(timestamp))
+            ts_int = bytes_to_int(base64_decode(ts_bytes))
         except Exception:
-            timestamp = None
+            pass
 
         # Signature is *not* okay. Raise a proper error now that we have
         # split the value and the timestamp.
         if sig_error is not None:
-            if timestamp is not None:
-                timestamp = self.timestamp_to_datetime(timestamp)
+            if ts_int is not None:
+                ts_dt = self.timestamp_to_datetime(ts_int)
 
-            raise BadTimeSignature(str(sig_error), payload=value, date_signed=timestamp)
+            raise BadTimeSignature(str(sig_error), payload=value, date_signed=ts_dt)
 
         # Signature was okay but the timestamp is actually not there or
         # malformed. Should not happen, but we handle it anyway.
-        if timestamp is None:
+        if ts_int is None:
             raise BadTimeSignature("Malformed timestamp", payload=value)
 
         # Check timestamp is not older than max_age
         if max_age is not None:
-            age = self.get_timestamp() - timestamp
+            age = self.get_timestamp() - ts_int
 
             if age > max_age:
                 raise SignatureExpired(
                     f"Signature age {age} > {max_age} seconds",
                     payload=value,
-                    date_signed=self.timestamp_to_datetime(timestamp),
+                    date_signed=self.timestamp_to_datetime(ts_int),
                 )
 
             if age < 0:
                 raise SignatureExpired(
                     f"Signature age {age} < 0 seconds",
                     payload=value,
-                    date_signed=self.timestamp_to_datetime(timestamp),
+                    date_signed=self.timestamp_to_datetime(ts_int),
                 )
 
         if return_timestamp:
-            return value, self.timestamp_to_datetime(timestamp)
+            return value, self.timestamp_to_datetime(ts_int)
 
         return value
 
-    def validate(self, signed_value, max_age=None):
+    def validate(self, signed_value: _t_str_bytes, max_age: _t_opt_int = None) -> bool:
         """Only validates the given signed value. Returns ``True`` if
         the signature exists and is valid."""
         try:
@@ -134,9 +168,23 @@ class TimedSerializer(Serializer):
     :class:`.Signer`.
     """
 
-    default_signer = TimestampSigner
+    default_signer: _t.Type[TimestampSigner] = TimestampSigner
 
-    def loads(self, s, max_age=None, return_timestamp=False, salt=None):
+    def iter_unsigners(
+        self, salt: _t_opt_str_bytes = None
+    ) -> _t.Iterator[TimestampSigner]:
+        return _t.cast("_t.Iterator[TimestampSigner]", super().iter_unsigners(salt))
+
+    # TODO: Signature is incompatible because parameters were added
+    #  before salt.
+
+    def loads(  # type: ignore
+        self,
+        s: _t_str_bytes,
+        max_age: _t_opt_int = None,
+        return_timestamp: bool = False,
+        salt: _t_opt_str_bytes = None,
+    ) -> _t.Any:
         """Reverse of :meth:`dumps`, raises :exc:`.BadSignature` if the
         signature validation fails. If a ``max_age`` is provided it will
         ensure the signature is not older than that time in seconds. In
@@ -149,24 +197,28 @@ class TimedSerializer(Serializer):
 
         for signer in self.iter_unsigners(salt):
             try:
-                base64d, timestamp = signer.unsign(s, max_age, return_timestamp=True)
+                base64d, timestamp = signer.unsign(
+                    s, max_age=max_age, return_timestamp=True
+                )
                 payload = self.load_payload(base64d)
 
                 if return_timestamp:
                     return payload, timestamp
 
                 return payload
-            # If we get a signature expired it means we could read the
-            # signature but it's invalid.  In that case we do not want to
-            # try the next signer.
             except SignatureExpired:
+                # The signature was unsigned successfully but was
+                # expired. Do not try the next signer.
                 raise
             except BadSignature as err:
                 last_exception = err
 
-        raise last_exception
+        raise _t.cast(BadSignature, last_exception)
 
-    def loads_unsafe(self, s, max_age=None, salt=None):
-        load_kwargs = {"max_age": max_age}
-        load_payload_kwargs = {}
-        return self._loads_unsafe_impl(s, salt, load_kwargs, load_payload_kwargs)
+    def loads_unsafe(  # type: ignore
+        self,
+        s: _t_str_bytes,
+        max_age: _t_opt_int = None,
+        salt: _t_opt_str_bytes = None,
+    ) -> _t.Tuple[bool, _t.Any]:
+        return self._loads_unsafe_impl(s, salt, load_kwargs={"max_age": max_age})

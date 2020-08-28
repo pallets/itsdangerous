@@ -6,9 +6,9 @@ from functools import partial
 import pytest
 from freezegun import freeze_time
 
-from itsdangerous import Signer
 from itsdangerous.exc import BadTimeSignature
 from itsdangerous.exc import SignatureExpired
+from itsdangerous.signer import Signer
 from itsdangerous.timed import TimedSerializer
 from itsdangerous.timed import TimestampSigner
 from test_itsdangerous.test_serializer import TestSerializer
