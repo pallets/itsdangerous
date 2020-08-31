@@ -113,7 +113,7 @@ class Serializer:
         if signer is None:
             signer = self.default_signer
 
-        self.signer = signer
+        self.signer: _t_signer = signer
         self.signer_kwargs: _t_kwargs = signer_kwargs or {}
 
         if fallback_signers is None:
