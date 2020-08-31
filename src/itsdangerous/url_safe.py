@@ -1,3 +1,4 @@
+import typing as _t
 import zlib
 
 from ._json import _CompactJSON
@@ -8,7 +9,7 @@ from .serializer import Serializer
 from .timed import TimedSerializer
 
 
-class URLSafeSerializerMixin:
+class URLSafeSerializerMixin(Serializer):
     """Mixed in with a regular serializer it will attempt to zlib
     compress the string to make it shorter if necessary. It will also
     base64 encode the string so that it can safely be placed in a URL.
@@ -16,7 +17,13 @@ class URLSafeSerializerMixin:
 
     default_serializer = _CompactJSON
 
-    def load_payload(self, payload, *args, **kwargs):
+    def load_payload(
+        self,
+        payload: bytes,
+        *args: _t.Any,
+        serializer: _t.Optional[_t.Any] = None,
+        **kwargs: _t.Any,
+    ) -> _t.Any:
         decompress = False
 
         if payload.startswith(b"."):
@@ -42,7 +49,7 @@ class URLSafeSerializerMixin:
 
         return super().load_payload(json, *args, **kwargs)
 
-    def dump_payload(self, obj):
+    def dump_payload(self, obj: _t.Any) -> bytes:
         json = super().dump_payload(obj)
         is_compressed = False
         compressed = zlib.compress(json)

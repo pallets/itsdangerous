@@ -2,8 +2,8 @@ from functools import partial
 
 import pytest
 
-from itsdangerous import URLSafeSerializer
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous.url_safe import URLSafeSerializer
+from itsdangerous.url_safe import URLSafeTimedSerializer
 from test_itsdangerous.test_serializer import TestSerializer
 from test_itsdangerous.test_timed import TestTimedSerializer
 

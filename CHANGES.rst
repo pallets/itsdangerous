@@ -24,6 +24,7 @@ Unreleased
     signing, all keys are tried for unsigning. :pr:`141`
 -   Removed the default SHA-512 fallback signer from
     ``default_fallback_signers``. :issue:`155`
+-   Add type information for static typing tools. :pr:`186`
 
 
 Version 1.1.0

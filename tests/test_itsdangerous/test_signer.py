@@ -106,4 +106,4 @@ def test_abstract_algorithm():
     alg = SigningAlgorithm()
 
     with pytest.raises(NotImplementedError):
-        alg.get_signature("a", "b")
+        alg.get_signature(b"a", b"b")
