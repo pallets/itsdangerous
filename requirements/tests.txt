@@ -5,7 +5,7 @@
 #    pip-compile requirements/tests.in
 #
 attrs==19.3.0             # via pytest
-freezegun==0.3.15         # via -r requirements/tests.in
+freezegun==1.0.0          # via -r requirements/tests.in
 iniconfig==1.0.0          # via pytest
 more-itertools==8.3.0     # via pytest
 packaging==20.3           # via pytest
@@ -14,5 +14,5 @@ py==1.9.0                 # via pytest
 pyparsing==2.4.7          # via packaging
 pytest==6.0.1             # via -r requirements/tests.in
 python-dateutil==2.8.1    # via freezegun
-six==1.14.0               # via freezegun, packaging, python-dateutil
+six==1.14.0               # via packaging, python-dateutil
 toml==0.10.1              # via pytest
