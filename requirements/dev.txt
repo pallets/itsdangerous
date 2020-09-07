@@ -15,7 +15,7 @@ click==7.1.2              # via pip-tools
 distlib==0.3.0            # via virtualenv
 docutils==0.16            # via sphinx
 filelock==3.0.12          # via tox, virtualenv
-freezegun==0.3.15         # via -r requirements/tests.in
+freezegun==1.0.0          # via -r requirements/tests.in
 identify==1.4.15          # via pre-commit
 idna==2.9                 # via requests
 imagesize==1.2.0          # via sphinx
@@ -39,7 +39,7 @@ python-dateutil==2.8.1    # via freezegun
 pytz==2020.1              # via babel
 pyyaml==5.3.1             # via pre-commit
 requests==2.23.0          # via sphinx
-six==1.14.0               # via freezegun, packaging, pip-tools, python-dateutil, tox, virtualenv
+six==1.14.0               # via packaging, pip-tools, python-dateutil, tox, virtualenv
 snowballstemmer==2.0.0    # via sphinx
 sphinx-issues==1.2.0      # via -r requirements/docs.in
 sphinx==3.2.1             # via -r requirements/docs.in, pallets-sphinx-themes, sphinx-issues, sphinxcontrib-log-cabinet
