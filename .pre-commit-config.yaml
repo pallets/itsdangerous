@@ -9,7 +9,7 @@ repos:
     hooks:
       - id: reorder-python-imports
         args: ["--application-directories", "src:tests"]
-  - repo: https://github.com/ambv/black
+  - repo: https://github.com/psf/black
     rev: 20.8b1
     hooks:
       - id: black
