@@ -28,7 +28,7 @@ filelock==3.0.12
     # via
     #   tox
     #   virtualenv
-freezegun==1.0.0
+freezegun==1.1.0
     # via -r requirements/tests.in
 identify==1.4.15
     # via pre-commit
