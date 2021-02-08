@@ -4,17 +4,17 @@
 #
 #    pip-compile requirements/tests.in
 #
-attrs==19.3.0
+attrs==20.3.0
     # via pytest
 freezegun==1.1.0
     # via -r requirements/tests.in
-iniconfig==1.0.0
+iniconfig==1.1.1
     # via pytest
-packaging==20.3
+packaging==20.9
     # via pytest
 pluggy==0.13.1
     # via pytest
-py==1.9.0
+py==1.10.0
     # via pytest
 pyparsing==2.4.7
     # via packaging
@@ -22,9 +22,7 @@ pytest==6.2.2
     # via -r requirements/tests.in
 python-dateutil==2.8.1
     # via freezegun
-six==1.14.0
-    # via
-    #   packaging
-    #   python-dateutil
-toml==0.10.1
+six==1.15.0
+    # via python-dateutil
+toml==0.10.2
     # via pytest
