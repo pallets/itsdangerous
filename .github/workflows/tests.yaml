@@ -16,15 +16,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {name: Linux, python: '3.8', os: ubuntu-latest, tox: py38}
+          - {name: Linux, python: '3.9', os: ubuntu-latest, tox: py39}
+          - {name: '3.8', python: '3.8', os: ubuntu-latest, tox: py38}
           - {name: '3.7', python: '3.7', os: ubuntu-latest, tox: py37}
           - {name: '3.6', python: '3.6', os: ubuntu-latest, tox: py36}
           - {name: 'PyPy', python: pypy3, os: ubuntu-latest, tox: pypy3}
-          - {name: Style, python: '3.8', os: ubuntu-latest, tox: style}
-          - {name: Typing, python: '3.8', os: ubuntu-latest, tox: typing}
-          - {name: Docs, python: '3.8', os: ubuntu-latest, tox: docs}
-          - {name: Windows, python: '3.8', os: windows-latest, tox: py38}
-          - {name: Mac, python: '3.8', os: macos-latest, tox: py38}
+          - {name: Typing, python: '3.9', os: ubuntu-latest, tox: typing}
+          - {name: Docs, python: '3.9', os: ubuntu-latest, tox: docs}
+          - {name: Windows, python: '3.9', os: windows-latest, tox: py39}
+          - {name: Mac, python: '3.9', os: macos-latest, tox: py39}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -44,13 +44,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.vars.outputs.pip }}
-          key: pip|${{ runner.os }}|${{ steps.vars.outputs.py }}|${{ hashFiles('setup.py') }}|${{ hashFiles('requirements/*.txt') }}
-      - name: cache pre-commit
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit|${{ steps.vars.outputs.py }}|${{ hashFiles('.pre-commit-config.yaml') }}
-        if: matrix.tox == 'style'
+          key: pip|${{ runner.os }}|${{ steps.vars.ouputs.py }}|${{ hashFiles('setup.py') }}|${{ hashFiles('requirements/*.txt') }}
       - name: cache mypy
         uses: actions/cache@v2
         with:
