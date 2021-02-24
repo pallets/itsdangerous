@@ -19,6 +19,9 @@ _t_str_bytes = _t.Union[str, bytes]
 _t_opt_str_bytes = _t.Optional[_t_str_bytes]
 _t_opt_int = _t.Optional[int]
 
+if _t.TYPE_CHECKING:
+    import typing_extensions as _te
+
 
 class TimestampSigner(Signer):
     """Works like the regular :class:`.Signer` but also records the time
@@ -59,7 +62,7 @@ class TimestampSigner(Signer):
         self,
         signed_value: _t_str_bytes,
         max_age: _t_opt_int = None,
-        return_timestamp: "_t.Literal[False]" = False,
+        return_timestamp: "_te.Literal[False]" = False,
     ) -> bytes:
         ...
 
@@ -68,7 +71,7 @@ class TimestampSigner(Signer):
         self,
         signed_value: _t_str_bytes,
         max_age: _t_opt_int = None,
-        return_timestamp: "_t.Literal[True]" = True,
+        return_timestamp: "_te.Literal[True]" = True,
     ) -> _t.Tuple[bytes, datetime]:
         ...
 
