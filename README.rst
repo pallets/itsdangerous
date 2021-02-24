@@ -58,9 +58,11 @@ users, and allow the maintainers to devote more time to the projects,
 Links
 -----
 
-*   Website: https://palletsprojects.com/p/itsdangerous/
-*   Documentation: https://itsdangerous.palletsprojects.com/
-*   Releases: https://pypi.org/project/itsdangerous/
-*   Code: https://github.com/pallets/itsdangerous
-*   Issue tracker: https://github.com/pallets/itsdangerous/issues
-*   Official chat: https://discord.gg/t6rrQZH
+-   Documentation: https://itsdangerous.palletsprojects.com/
+-   Changes: https://itsdangerous.palletsprojects.com/changes/
+-   PyPI Releases: https://pypi.org/project/ItsDangerous/
+-   Source Code: https://github.com/pallets/itsdangerous/
+-   Issue Tracker: https://github.com/pallets/itsdnagerous/issues/
+-   Website: https://palletsprojects.com/p/itsdangerous/
+-   Twitter: https://twitter.com/PalletsTeam
+-   Chat: https://discord.gg/pallets

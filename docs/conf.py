@@ -29,11 +29,13 @@ html_theme = "flask"
 html_theme_options = {"index_sidebar_logo": False}
 html_context = {
     "project_links": [
-        ProjectLink("Donate to Pallets", "https://palletsprojects.com/donate"),
-        ProjectLink("Website", "https://palletsprojects.com/p/itsdangerous/"),
-        ProjectLink("PyPI releases", "https://pypi.org/project/itsdangerous/"),
+        ProjectLink("Donate", "https://palletsprojects.com/donate"),
+        ProjectLink("PyPI Releases", "https://pypi.org/project/itsdangerous/"),
         ProjectLink("Source Code", "https://github.com/pallets/itsdangerous/"),
         ProjectLink("Issue Tracker", "https://github.com/pallets/itsdangerous/issues/"),
+        ProjectLink("Website", "https://palletsprojects.com/p/itsdangerous/"),
+        ProjectLink("Twitter", "https://twitter.com/PalletsTeam"),
+        ProjectLink("Chat", "https://discord.gg/pallets"),
     ]
 }
 html_sidebars = {
