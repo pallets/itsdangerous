@@ -56,15 +56,15 @@ class Serializer:
         ``(signer, signer_kwargs)``. Defaults to
         :attr:`default_fallback_signers`.
 
-    .. versionchanged:: 2.0.0
+    .. versionchanged:: 2.0
         Added support for key rotation by passing a list to
         ``secret_key``.
 
-    .. versionchanged:: 2.0.0
+    .. versionchanged:: 2.0
         Removed the default SHA-512 fallback signer from
         ``default_fallback_signers``.
 
-    .. versionchanged:: 1.1.0
+    .. versionchanged:: 1.1
         Added support for ``fallback_signers`` and configured a default
         SHA-512 fallback. This fallback is for users who used the yanked
         1.0.0 release which defaulted to SHA-512.

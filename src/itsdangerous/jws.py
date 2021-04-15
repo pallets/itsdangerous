@@ -25,7 +25,8 @@ class JSONWebSignatureSerializer(Serializer):
     supports the JWS Compact Serialization.
 
     .. deprecated:: 2.0
-        Use a dedicated library such as authlib.
+        Will be removed in ItsDangerous 2.1. Use a dedicated library
+        such as authlib.
     """
 
     jws_algorithms = {
@@ -51,8 +52,9 @@ class JSONWebSignatureSerializer(Serializer):
         algorithm_name=None,
     ):
         warnings.warn(
-            "JWS support is deprecated and will be removed in 2.1. Use"
-            " a dedicated JWS/JWT library such as authlib.",
+            "JWS support is deprecated and will be removed in"
+            " ItsDangerous 2.1. Use a dedicated JWS/JWT library such as"
+            " authlib.",
             DeprecationWarning,
             stacklevel=2,
         )

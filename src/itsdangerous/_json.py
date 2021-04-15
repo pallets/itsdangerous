@@ -23,7 +23,8 @@ class DeprecatedJSON(ModuleType):
 
         warnings.warn(
             "Importing 'itsdangerous.json' is deprecated and will be"
-            " removed in 2.1. Use Python's 'json' module instead.",
+            " removed in ItsDangerous 2.1. Use Python's 'json' module"
+            " instead.",
             DeprecationWarning,
             stacklevel=2,
         )
