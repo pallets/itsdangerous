@@ -22,7 +22,7 @@ py==1.10.0
     # via pytest
 pyparsing==2.4.7
     # via packaging
-pytest==6.2.2
+pytest==6.2.3
     # via -r requirements/tests.in
 python-dateutil==2.8.1
     # via freezegun
@@ -30,7 +30,7 @@ six==1.15.0
     # via python-dateutil
 toml==0.10.2
     # via pytest
-typed-ast==1.4.2
+typed-ast==1.4.3
     # via mypy
 typing-extensions==3.7.4.3
     # via mypy
