@@ -1,7 +1,7 @@
 Version 2.0.0
 -------------
 
-Unreleased
+Released 2021-05-11
 
 -   Drop support for Python 2 and 3.5.
 -   JWS support (``JSONWebSignatureSerializer``,
