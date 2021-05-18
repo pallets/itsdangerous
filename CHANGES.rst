@@ -4,10 +4,21 @@ Version 2.1.0
 Unreleased
 
 
-Version 2.0.1
+Version 2.0.2
 -------------
 
 Unreleased
+
+
+Version 2.0.1
+-------------
+
+Released 2021-05-18
+
+-   Mark top-level names as exported so type checking understands
+    imports in user projects. :pr:`240`
+-   The ``salt`` argument to ``Serializer`` and ``Signer`` can be
+    ``None`` again. :issue:`237`
 
 
 Version 2.0.0

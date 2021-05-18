@@ -120,7 +120,7 @@ class Signer:
     def __init__(
         self,
         secret_key: _t_secret_key,
-        salt: _t_str_bytes = b"itsdangerous.Signer",
+        salt: _t_opt_str_bytes = b"itsdangerous.Signer",
         sep: _t_str_bytes = b".",
         key_derivation: _t.Optional[str] = None,
         digest_method: _t.Optional[_t.Any] = None,
@@ -141,7 +141,12 @@ class Signer:
                 " digits, and '-_=' must not be used."
             )
 
-        self.salt: bytes = want_bytes(salt)
+        if salt is not None:
+            salt = want_bytes(salt)
+        else:
+            salt = b"itsdangerous.Signer"
+
+        self.salt = salt
 
         if key_derivation is None:
             key_derivation = self.default_key_derivation
