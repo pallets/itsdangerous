@@ -5,6 +5,8 @@ Unreleased
 
 -   Mark top-level names as exported so type checking understands
     imports in user projects. :pr:`240`
+-   The ``salt`` argument to ``Serializer`` and ``Signer`` can be
+    ``None`` again. :issue:`237`
 
 
 Version 2.0.0

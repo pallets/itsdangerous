@@ -89,7 +89,7 @@ class Serializer:
     def __init__(
         self,
         secret_key: _t_secret_key,
-        salt: _t_str_bytes = b"itsdangerous",
+        salt: _t_opt_str_bytes = b"itsdangerous",
         serializer: _t.Any = None,
         serializer_kwargs: _t_opt_kwargs = None,
         signer: _t.Optional[_t_signer] = None,
@@ -102,7 +102,12 @@ class Serializer:
         #: This allows a key rotation system to keep a list of allowed
         #: keys and remove expired ones.
         self.secret_keys: _t.List[bytes] = _make_keys_list(secret_key)
-        self.salt: bytes = want_bytes(salt)
+
+        if salt is not None:
+            salt = want_bytes(salt)
+            # if salt is None then the signer's default is used
+
+        self.salt = salt
 
         if serializer is None:
             serializer = self.default_serializer
