@@ -1,7 +1,8 @@
 Version 2.1.0
 -------------
 
-Unreleased
+-   Add the ability to specify the timestamp used when
+    signing. :pr:`250`
 
 
 Version 2.0.2

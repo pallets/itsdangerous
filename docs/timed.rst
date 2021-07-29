@@ -21,6 +21,17 @@ than a given age.
       ...
     itsdangerous.exc.SignatureExpired: Signature age 15 > 5 seconds
 
+If desired, for example when testing code that triggers on
+SignatureExpired errors you can specify the timestamp used when
+signing,
+
+.. code-block:: python
+
+    from itsdangerous import TimestampSigner
+    ts = int(datetime(2021, 7, 29, 10, 45).timestamp())
+    s = TimestampSigner('secret-key', timestamp=ts)
+    string = s.sign('foo')
+
 .. autoclass:: TimestampSigner
     :members:
 

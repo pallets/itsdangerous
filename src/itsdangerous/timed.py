@@ -28,7 +28,19 @@ class TimestampSigner(Signer):
     of the signing and can be used to expire signatures. The
     :meth:`unsign` method can raise :exc:`.SignatureExpired` if the
     unsigning failed because the signature is expired.
+
+    :param timestamp: A specific timestamp to use when signing, optional
+        by default get_timestamp is used.
+
+    .. versionchanged:: 2.1
+        Added support for using specific timestamps when signing.
     """
+
+    def __init__(
+        self, *args: _t.Any, timestamp: _t.Optional[int] = None, **kwargs: _t.Any
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self._timestamp = timestamp
 
     def get_timestamp(self) -> int:
         """Returns the current timestamp. The function must return an
@@ -49,9 +61,12 @@ class TimestampSigner(Signer):
     def sign(self, value: _t_str_bytes) -> bytes:
         """Signs the given string and also attaches time information."""
         value = want_bytes(value)
-        timestamp = base64_encode(int_to_bytes(self.get_timestamp()))
+        timestamp = self._timestamp
+        if timestamp is None:
+            timestamp = self.get_timestamp()
+        encoded_timestamp = base64_encode(int_to_bytes(timestamp))
         sep = want_bytes(self.sep)
-        value = value + sep + timestamp
+        value = value + sep + encoded_timestamp
         return value + sep + self.get_signature(value)
 
     # Ignore overlapping signatures check, return_timestamp is the only

@@ -83,6 +83,12 @@ class TestTimestampSigner(FreezeMixin, TestSigner):
 
         assert isinstance(exc_info.value.date_signed, datetime)
 
+    def test_specific_timestamp(self, signer):
+        ts = datetime(2021, 7, 29, 10, 45, tzinfo=timezone.utc)
+        other = TimestampSigner("secret-key", timestamp=int(ts.timestamp()))
+        signed = other.sign("value")
+        assert signer.unsign(signed, return_timestamp=True) == (b"value", ts)
+
 
 class TestTimedSerializer(FreezeMixin, TestSerializer):
     @pytest.fixture()
