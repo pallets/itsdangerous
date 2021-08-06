@@ -8,7 +8,7 @@ back safe and sound. Data is cryptographically signed to ensure that a
 token has not been tampered with.
 
 It's possible to customize how data is serialized. Data is compressed as
-needed. A timestamp can be added and verified automatically while
+needed. Timestamp can be added and verified automatically while
 loading a token.
 
 
@@ -22,6 +22,14 @@ Install and update using `pip`_:
     pip install -U itsdangerous
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
+
+Install from source `github`:
+
+.. code-block:: text
+
+    git clone https://github.com/pallets/itsdangerous.git
+    cd itsdangerous/
+    python setup.py install
 
 
 A Simple Example
