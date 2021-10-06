@@ -87,7 +87,7 @@ class JSONWebSignatureSerializer(Serializer):
             raise BadHeader(
                 "Could not base64 decode the header because of an exception",
                 original_error=e,
-            )
+            ) from e
 
         try:
             json_payload = base64_decode(base64d_payload)
@@ -95,7 +95,7 @@ class JSONWebSignatureSerializer(Serializer):
             raise BadPayload(
                 "Could not base64 decode the payload because of an exception",
                 original_error=e,
-            )
+            ) from e
 
         try:
             header = super().load_payload(json_header, serializer=_CompactJSON)
@@ -103,7 +103,7 @@ class JSONWebSignatureSerializer(Serializer):
             raise BadHeader(
                 "Could not unserialize header because it was malformed",
                 original_error=e,
-            )
+            ) from e
 
         if not isinstance(header, dict):
             raise BadHeader("Header payload is not a JSON object", header=header)
@@ -128,7 +128,7 @@ class JSONWebSignatureSerializer(Serializer):
         try:
             return self.jws_algorithms[algorithm_name]
         except KeyError:
-            raise NotImplementedError("Algorithm not supported")
+            raise NotImplementedError("Algorithm not supported") from None
 
     def make_signer(self, salt=None, algorithm=None):
         if salt is None:
@@ -223,8 +223,8 @@ class TimedJSONWebSignatureSerializer(JSONWebSignatureSerializer):
 
         try:
             header["exp"] = int(header["exp"])
-        except ValueError:
-            raise int_date_error
+        except ValueError as e:
+            raise int_date_error from e
 
         if header["exp"] < 0:
             raise int_date_error
