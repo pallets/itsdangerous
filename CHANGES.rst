@@ -3,7 +3,13 @@ Version 2.1.0
 
 Unreleased
 
- -   Drop support for Python 3.6. :pr:`272`
+-   Drop support for Python 3.6. :pr:`272`
+-   Remove previously deprecated code. :pr:`273`
+
+    -   JWS functionality: Use a dedicated library such as Authlib
+        instead.
+    -   ``import itsdangerous.json``: Import ``json`` from the standard
+        library instead.
 
 
 Version 2.0.2
