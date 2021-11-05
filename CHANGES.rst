@@ -3,6 +3,8 @@ Version 2.1.0
 
 Unreleased
 
+ -   Drop support for Python 3.6. :pr:`272`
+
 
 Version 2.0.2
 -------------
