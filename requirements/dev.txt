@@ -42,7 +42,7 @@ jinja2==3.0.2
     # via sphinx
 markupsafe==2.0.1
     # via jinja2
-mypy==0.910
+mypy==0.930
     # via -r requirements/typing.in
 mypy-extensions==0.4.3
     # via mypy
@@ -117,12 +117,13 @@ sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 toml==0.10.2
     # via
-    #   mypy
     #   pre-commit
     #   pytest
     #   tox
 tomli==1.2.2
-    # via pep517
+    # via
+    #   mypy
+    #   pep517
 tox==3.24.4
     # via -r requirements/dev.in
 typing-extensions==3.10.0.2
