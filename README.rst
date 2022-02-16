@@ -62,7 +62,7 @@ Links
 -   Changes: https://itsdangerous.palletsprojects.com/changes/
 -   PyPI Releases: https://pypi.org/project/ItsDangerous/
 -   Source Code: https://github.com/pallets/itsdangerous/
--   Issue Tracker: https://github.com/pallets/itsdnagerous/issues/
+-   Issue Tracker: https://github.com/pallets/itsdangerous/issues/
 -   Website: https://palletsprojects.com/p/itsdangerous/
 -   Twitter: https://twitter.com/PalletsTeam
 -   Chat: https://discord.gg/pallets
