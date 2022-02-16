@@ -36,6 +36,10 @@ pre-commit==2.17.0
     # via -r requirements/dev.in
 pyyaml==6.0
     # via pre-commit
+toml==0.10.2
+    # via
+    #   pre-commit
+    #   tox
 toposort==1.7
     # via pip-compile-multi
 tox==3.24.5
