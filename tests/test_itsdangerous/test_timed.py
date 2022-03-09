@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -59,6 +60,18 @@ class TestTimestampSigner(FreezeMixin, TestSigner):
     def test_malformed_timestamp(self, signer):
         other = Signer("secret-key")
         signed = other.sign(b"value.____________")
+
+        with pytest.raises(BadTimeSignature) as exc_info:
+            signer.unsign(signed)
+
+        assert "Malformed" in str(exc_info.value)
+        assert exc_info.value.date_signed is None
+
+    @pytest.mark.skipif(
+        sys.platform == "win32", reason="Freezegun Invalid argument occurs on Windows"
+    )
+    def test_malformed_future_timestamp(self, signer):
+        signed = b"value.TgPVoaGhoQ.AGBfQ6G6cr07byTRt0zAdPljHOY"
 
         with pytest.raises(BadTimeSignature) as exc_info:
             signer.unsign(signed)
