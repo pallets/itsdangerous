@@ -38,7 +38,8 @@ class TimestampSigner(Signer):
 
     def timestamp_to_datetime(self, ts: int) -> datetime:
         """Convert the timestamp from :meth:`get_timestamp` into an
-        aware :class`datetime.datetime` in UTC.
+        aware :class`datetime.datetime` in UTC. Raises :exc:`.ValueError`
+        if the timestamp is too far in the past or future for Python.
 
         .. versionchanged:: 2.0
             The timestamp is returned as a timezone-aware ``datetime``
@@ -124,7 +125,12 @@ class TimestampSigner(Signer):
         # split the value and the timestamp.
         if sig_error is not None:
             if ts_int is not None:
-                ts_dt = self.timestamp_to_datetime(ts_int)
+                try:
+                    ts_dt = self.timestamp_to_datetime(ts_int)
+                except ValueError as exc:
+                    raise BadTimeSignature(
+                        "Malformed timestamp", payload=value
+                    ) from exc
 
             raise BadTimeSignature(str(sig_error), payload=value, date_signed=ts_dt)
 
