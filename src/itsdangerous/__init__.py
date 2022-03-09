@@ -16,4 +16,4 @@ from .timed import TimestampSigner as TimestampSigner
 from .url_safe import URLSafeSerializer as URLSafeSerializer
 from .url_safe import URLSafeTimedSerializer as URLSafeTimedSerializer
 
-__version__ = "2.1.1.dev0"
+__version__ = "2.1.1"
