@@ -66,6 +66,15 @@ class TestTimestampSigner(FreezeMixin, TestSigner):
         assert "Malformed" in str(exc_info.value)
         assert exc_info.value.date_signed is None
 
+    def test_malformed_future_timestamp(self, signer):
+        signed = b"value.TgPVoaGhoQ.AGBfQ6G6cr07byTRt0zAdPljHOY"
+
+        with pytest.raises(BadTimeSignature) as exc_info:
+            signer.unsign(signed)
+
+        assert "Malformed" in str(exc_info.value)
+        assert exc_info.value.date_signed is None
+
     def test_future_age(self, signer):
         signed = signer.sign("value")
 
