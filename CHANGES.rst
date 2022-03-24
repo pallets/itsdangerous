@@ -1,7 +1,7 @@
 Version 2.1.2
 -------------
 
-Unreleased
+Released 2022-03-24
 
 -   Handle date overflow in timed unsign on 32-bit systems. :pr:`299`
 
