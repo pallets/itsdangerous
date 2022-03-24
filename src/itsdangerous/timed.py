@@ -126,8 +126,9 @@ class TimestampSigner(Signer):
             if ts_int is not None:
                 try:
                     ts_dt = self.timestamp_to_datetime(ts_int)
-                except (ValueError, OSError) as exc:
+                except (ValueError, OSError, OverflowError) as exc:
                     # Windows raises OSError
+                    # 32-bit raises OverflowError
                     raise BadTimeSignature(
                         "Malformed timestamp", payload=value
                     ) from exc
