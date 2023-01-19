@@ -212,7 +212,9 @@ class Serializer:
 
         return rv
 
-    def dump(self, obj: _t.Any, f: _t.IO, salt: _t_opt_str_bytes = None) -> None:
+    def dump(
+        self, obj: _t.Any, f: _t.IO[_t.Any], salt: _t_opt_str_bytes = None
+    ) -> None:
         """Like :meth:`dumps` but dumps into a file. The file handle has
         to be compatible with what the internal serializer expects.
         """
@@ -235,7 +237,7 @@ class Serializer:
 
         raise _t.cast(BadSignature, last_exception)
 
-    def load(self, f: _t.IO, salt: _t_opt_str_bytes = None) -> _t.Any:
+    def load(self, f: _t.IO[_t.Any], salt: _t_opt_str_bytes = None) -> _t.Any:
         """Like :meth:`loads` but loads from a file."""
         return self.loads(f.read(), salt)
 
@@ -287,7 +289,9 @@ class Serializer:
             except BadPayload:
                 return False, None
 
-    def load_unsafe(self, f: _t.IO, salt: _t_opt_str_bytes = None) -> _t_load_unsafe:
+    def load_unsafe(
+        self, f: _t.IO[_t.Any], salt: _t_opt_str_bytes = None
+    ) -> _t_load_unsafe:
         """Like :meth:`loads_unsafe` but loads from a file.
 
         .. versionadded:: 0.15
