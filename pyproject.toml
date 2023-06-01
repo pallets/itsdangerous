@@ -4,7 +4,6 @@ description = "Safely pass data to untrusted environments and back."
 readme = "README.rst"
 license = {text = "BSD-3-Clause"}
 maintainers = [{name = "Pallets", email = "contact@palletsprojects.com"}]
-authors = [{name = "Armin Ronacher", email = "armin.ronacher@active-4.com"}]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -21,7 +20,6 @@ Documentation = "https://itsdangerous.palletsprojects.com/"
 Changes = "https://itsdangerous.palletsprojects.com/changes/"
 "Source Code" = "https://github.com/pallets/itsdangerous/"
 "Issue Tracker" = "https://github.com/pallets/itsdangerous/issues/"
-Twitter = "https://twitter.com/PalletsTeam"
 Chat = "https://discord.gg/pallets"
 
 [build-system]
@@ -33,7 +31,13 @@ version = {attr = "itsdangerous.__version__"}
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    # change in Python 3.12 beta causes warning from inside pytest
+    "ignore:ast:DeprecationWarning",
+    # dateutil using datetime.utcfromtimestamp
+    "ignore:datetime.utcfromtimestamp:DeprecationWarning:dateutil.tz.tz",
+]
 
 [tool.coverage.run]
 branch = true
