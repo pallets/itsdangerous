@@ -33,8 +33,6 @@ version = {attr = "itsdangerous.__version__"}
 testpaths = ["tests"]
 filterwarnings = [
     "error",
-    # change in Python 3.12 beta causes warning from inside pytest
-    "ignore:ast:DeprecationWarning",
     # dateutil using datetime.utcfromtimestamp
     "ignore:datetime.utcfromtimestamp:DeprecationWarning:dateutil.tz.tz",
 ]
