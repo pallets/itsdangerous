@@ -1,8 +1,0 @@
-include CHANGES.rst
-include tox.ini
-include requirements/*.txt
-graft docs
-prune docs/_build
-graft tests
-include src/itsdangerous/py.typed
-global-exclude *.pyc

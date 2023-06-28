@@ -5,6 +5,7 @@ Unreleased
 
 -   Use modern packaging metadata with ``pyproject.toml`` instead of ``setup.cfg``.
     :pr:`326`
+-   Use ``flit_core`` instead of ``setuptools`` as build backend.
 
 
 Version 2.1.2
