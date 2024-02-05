@@ -63,8 +63,7 @@ class TimestampSigner(Signer):
         signed_value: _t_str_bytes,
         max_age: _t_opt_int = None,
         return_timestamp: "_te.Literal[False]" = False,
-    ) -> bytes:
-        ...
+    ) -> bytes: ...
 
     @typing.overload
     def unsign(
@@ -72,8 +71,7 @@ class TimestampSigner(Signer):
         signed_value: _t_str_bytes,
         max_age: _t_opt_int = None,
         return_timestamp: "_te.Literal[True]" = True,
-    ) -> _t.Tuple[bytes, datetime]:
-        ...
+    ) -> _t.Tuple[bytes, datetime]: ...
 
     def unsign(
         self,
