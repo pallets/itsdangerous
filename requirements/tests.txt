@@ -5,17 +5,17 @@
 #
 #    pip-compile-multi
 #
-freezegun==1.2.2
+freezegun==1.4.0
     # via -r requirements/tests.in
 iniconfig==2.0.0
     # via pytest
-packaging==23.1
+packaging==24.0
     # via pytest
-pluggy==1.2.0
+pluggy==1.4.0
     # via pytest
-pytest==7.4.0
+pytest==8.1.1
     # via -r requirements/tests.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via freezegun
 six==1.16.0
     # via python-dateutil

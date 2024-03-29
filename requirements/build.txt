@@ -5,9 +5,9 @@
 #
 #    pip-compile-multi
 #
-build==0.10.0
+build==1.2.1
     # via -r requirements/build.in
-packaging==23.1
+packaging==24.0
     # via build
 pyproject-hooks==1.0.0
     # via build
