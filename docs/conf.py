@@ -10,18 +10,25 @@ release, version = get_version("itsdangerous")
 
 # General --------------------------------------------------------------
 
-master_doc = "index"
+default_role = "code"
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
-    "pallets_sphinx_themes",
     "sphinxcontrib.log_cabinet",
-    "sphinx_issues",
+    "pallets_sphinx_themes",
 ]
 autoclass_content = "both"
+autodoc_member_order = "bysource"
 autodoc_typehints = "description"
-intersphinx_mapping = {"python": ("https://docs.python.org/3/", None)}
-issues_github_path = "pallets/itsdangerous"
+autodoc_preserve_defaults = True
+extlinks = {
+    "issue": ("https://github.com/pallets/itsdangerous/issues/%s", "#%s"),
+    "pr": ("https://github.com/pallets/itsdangerous/pull/%s", "#%s"),
+}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+}
 
 # HTML -----------------------------------------------------------------
 
@@ -46,9 +53,3 @@ html_favicon = "_static/itsdangerous-logo-sidebar.png"
 html_logo = "_static/itsdangerous-logo-sidebar.png"
 html_title = f"{project} Documentation ({version})"
 html_show_sourcelink = False
-
-# LaTeX ----------------------------------------------------------------
-
-latex_documents = [
-    (master_doc, f"{project}-{version}.tex", html_title, author, "manual")
-]
