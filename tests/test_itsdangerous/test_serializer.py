@@ -18,13 +18,11 @@ from itsdangerous.signer import Signer
 
 
 @overload
-def coerce_str(ref: str, s: str) -> str:
-    ...
+def coerce_str(ref: str, s: str) -> str: ...
 
 
 @overload
-def coerce_str(ref: bytes, s: str) -> bytes:
-    ...
+def coerce_str(ref: bytes, s: str) -> bytes: ...
 
 
 def coerce_str(ref: Union[str, bytes], s: str) -> Union[str, bytes]:

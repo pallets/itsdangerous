@@ -4,9 +4,8 @@ about: Report a bug in ItsDangerous (not other projects which depend on ItsDange
 ---
 
 <!--
-This issue tracker is a tool to address bugs in ItsDangerous itself.
-Please use Pallets Discord or Stack Overflow for questions about your
-own code.
+This issue tracker is a tool to address bugs in ItsDangerous itself. Please use
+GitHub Discussions or the Pallets Discord for questions about your own code.
 
 Replace this comment with a clear outline of what the bug is.
 -->
