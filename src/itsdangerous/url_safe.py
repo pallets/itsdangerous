@@ -1,4 +1,6 @@
-import typing as _t
+from __future__ import annotations
+
+import typing as t
 import zlib
 
 from ._json import _CompactJSON
@@ -20,10 +22,10 @@ class URLSafeSerializerMixin(Serializer):
     def load_payload(
         self,
         payload: bytes,
-        *args: _t.Any,
-        serializer: _t.Optional[_t.Any] = None,
-        **kwargs: _t.Any,
-    ) -> _t.Any:
+        *args: t.Any,
+        serializer: t.Any | None = None,
+        **kwargs: t.Any,
+    ) -> t.Any:
         decompress = False
 
         if payload.startswith(b"."):
@@ -49,7 +51,7 @@ class URLSafeSerializerMixin(Serializer):
 
         return super().load_payload(json, *args, **kwargs)
 
-    def dump_payload(self, obj: _t.Any) -> bytes:
+    def dump_payload(self, obj: t.Any) -> bytes:
         json = super().dump_payload(obj)
         is_compressed = False
         compressed = zlib.compress(json)
