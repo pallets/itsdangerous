@@ -1,5 +1,6 @@
 [project]
 name = "itsdangerous"
+version = "2.2.0.dev"
 description = "Safely pass data to untrusted environments and back."
 readme = "README.md"
 license = { file = "LICENSE.txt" }
@@ -13,7 +14,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 requires-python = ">=3.7"
-dynamic = ["version"]
 
 [project.urls]
 Donate = "https://palletsprojects.com/donate"
