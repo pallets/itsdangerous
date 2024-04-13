@@ -17,8 +17,6 @@ from .exc import SignatureExpired
 from .serializer import Serializer
 from .signer import Signer
 
-_TAnyStr = t.TypeVar("_TAnyStr", str, bytes, covariant=True)
-
 
 class TimestampSigner(Signer):
     """Works like the regular :class:`.Signer` but also records the time
@@ -168,7 +166,7 @@ class TimestampSigner(Signer):
             return False
 
 
-class TimedSerializer(Serializer[_TAnyStr]):
+class TimedSerializer(Serializer[t.AnyStr]):
     """Uses :class:`TimestampSigner` instead of the default
     :class:`.Signer`.
     """

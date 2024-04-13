@@ -10,12 +10,10 @@ from .exc import BadSignature
 from .signer import _make_keys_list
 from .signer import Signer
 
-_TAnyStr = t.TypeVar("_TAnyStr", str, bytes, covariant=True)
 
-
-class _PDataSerializer(t.Protocol[_TAnyStr]):
-    def loads(self, payload: str | bytes) -> t.Any: ...
-    def dumps(self, obj: t.Any, **kwargs: t.Any) -> _TAnyStr: ...
+class _PDataSerializer(t.Protocol[t.AnyStr]):
+    def loads(self, s: t.AnyStr) -> t.Any: ...
+    def dumps(self, obj: t.Any, *args: t.Any, **kwargs: t.Any) -> t.AnyStr: ...
 
 
 def is_text_serializer(serializer: _PDataSerializer[t.Any]) -> bool:
@@ -23,7 +21,7 @@ def is_text_serializer(serializer: _PDataSerializer[t.Any]) -> bool:
     return isinstance(serializer.dumps({}), str)
 
 
-class Serializer(t.Generic[_TAnyStr]):
+class Serializer(t.Generic[t.AnyStr]):
     """A serializer wraps a :class:`~itsdangerous.signer.Signer` to
     enable serializing and securely signing data other than bytes. It
     can unsign to verify that the data hasn't been changed.
@@ -78,7 +76,7 @@ class Serializer(t.Generic[_TAnyStr]):
     #: The default serialization module to use to serialize data to a
     #: string internally. The default is :mod:`json`, but can be changed
     #: to any object that provides ``dumps`` and ``loads`` methods.
-    default_serializer: _PDataSerializer[_TAnyStr] = json  # type: ignore[assignment]
+    default_serializer: _PDataSerializer[t.Any] = json  # pyright: ignore
 
     #: The default ``Signer`` class to instantiate when signing data.
     #: The default is :class:`itsdangerous.signer.Signer`.
@@ -108,10 +106,10 @@ class Serializer(t.Generic[_TAnyStr]):
 
     @t.overload
     def __init__(
-        self: Serializer[_TAnyStr],
+        self: Serializer[t.AnyStr],
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
         salt: str | bytes | None = b"itsdangerous",
-        serializer: _PDataSerializer[_TAnyStr] = ...,
+        serializer: _PDataSerializer[t.AnyStr] = ...,
         serializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
@@ -125,7 +123,7 @@ class Serializer(t.Generic[_TAnyStr]):
         self,
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
         salt: str | bytes | None = b"itsdangerous",
-        serializer: _PDataSerializer[_TAnyStr] | None = None,
+        serializer: _PDataSerializer[t.AnyStr] | None = None,
         serializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
@@ -150,7 +148,7 @@ class Serializer(t.Generic[_TAnyStr]):
         if serializer is None:
             serializer = self.default_serializer
 
-        self.serializer: _PDataSerializer[_TAnyStr] = serializer
+        self.serializer: _PDataSerializer[t.AnyStr] = serializer
         self.is_text_serializer: bool = is_text_serializer(serializer)
 
         if signer is None:
@@ -175,7 +173,7 @@ class Serializer(t.Generic[_TAnyStr]):
         return self.secret_keys[-1]
 
     def load_payload(
-        self, payload: bytes, serializer: _PDataSerializer[_TAnyStr] | None = None
+        self, payload: bytes, serializer: _PDataSerializer[t.Any] | None = None
     ) -> t.Any:
         """Loads the encoded object. This function raises
         :class:`.BadPayload` if the payload is not valid. The
@@ -192,9 +190,9 @@ class Serializer(t.Generic[_TAnyStr]):
 
         try:
             if is_text:
-                return use_serializer.loads(payload.decode("utf-8"))
+                return use_serializer.loads(payload.decode("utf-8"))  # type: ignore[arg-type]
 
-            return use_serializer.loads(payload)
+            return use_serializer.loads(payload)  # type: ignore[arg-type]
         except Exception as e:
             raise BadPayload(
                 "Could not load the payload because an exception"
@@ -240,7 +238,7 @@ class Serializer(t.Generic[_TAnyStr]):
             for secret_key in self.secret_keys:
                 yield fallback(secret_key, salt=salt, **kwargs)
 
-    def dumps(self, obj: t.Any, salt: str | bytes | None = None) -> _TAnyStr:
+    def dumps(self, obj: t.Any, salt: str | bytes | None = None) -> t.AnyStr:
         """Returns a signed string serialized with the internal
         serializer. The return value can be either a byte or unicode
         string depending on the format of the internal serializer.
