@@ -8,7 +8,7 @@ Unreleased
     :pr:`326`
 -   Use ``flit_core`` instead of ``setuptools`` as build backend.
 -   Deprecate the ``__version__`` attribute. Use feature detection, or
-    ``importlib.metadata.version("itsdangerous")``, instead. :issue:`2770`
+    ``importlib.metadata.version("itsdangerous")``, instead. :issue:`371`
 
 
 Version 2.1.2
