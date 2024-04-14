@@ -14,6 +14,7 @@ from .encoding import want_bytes
 from .exc import BadSignature
 from .exc import BadTimeSignature
 from .exc import SignatureExpired
+from .serializer import _TSerialized
 from .serializer import Serializer
 from .signer import Signer
 
@@ -166,7 +167,7 @@ class TimestampSigner(Signer):
             return False
 
 
-class TimedSerializer(Serializer[t.AnyStr]):
+class TimedSerializer(Serializer[_TSerialized]):
     """Uses :class:`TimestampSigner` instead of the default
     :class:`.Signer`.
     """
