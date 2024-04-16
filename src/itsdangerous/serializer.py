@@ -10,20 +10,36 @@ from .exc import BadSignature
 from .signer import _make_keys_list
 from .signer import Signer
 
-_TAnyStr = t.TypeVar("_TAnyStr", str, bytes, covariant=True)
+if t.TYPE_CHECKING:
+    import typing_extensions as te
+
+    # This should be either be str or bytes. To avoid having to specify the
+    # bound type, it falls back to a union if structural matching fails.
+    _TSerialized = te.TypeVar(
+        "_TSerialized", bound=t.Union[str, bytes], default=t.Union[str, bytes]
+    )
+else:
+    # Still available at runtime on Python < 3.13, but without the default.
+    _TSerialized = t.TypeVar("_TSerialized", bound=t.Union[str, bytes])
 
 
-class _PDataSerializer(t.Protocol[_TAnyStr]):
-    def loads(self, payload: str | bytes) -> t.Any: ...
-    def dumps(self, obj: t.Any, **kwargs: t.Any) -> _TAnyStr: ...
+class _PDataSerializer(t.Protocol[_TSerialized]):
+    def loads(self, payload: _TSerialized, /) -> t.Any: ...
+    # A signature with additional arguments is not handled correctly by type
+    # checkers right now, so an overload is used below for serializers that
+    # don't match this strict protocol.
+    def dumps(self, obj: t.Any, /) -> _TSerialized: ...
 
 
-def is_text_serializer(serializer: _PDataSerializer[t.Any]) -> bool:
+# Use TypeIs once it's available in typing_extensions or 3.13.
+def is_text_serializer(
+    serializer: _PDataSerializer[t.Any],
+) -> te.TypeGuard[_PDataSerializer[str]]:
     """Checks whether a serializer generates text or binary."""
     return isinstance(serializer.dumps({}), str)
 
 
-class Serializer(t.Generic[_TAnyStr]):
+class Serializer(t.Generic[_TSerialized]):
     """A serializer wraps a :class:`~itsdangerous.signer.Signer` to
     enable serializing and securely signing data other than bytes. It
     can unsign to verify that the data hasn't been changed.
@@ -78,7 +94,7 @@ class Serializer(t.Generic[_TAnyStr]):
     #: The default serialization module to use to serialize data to a
     #: string internally. The default is :mod:`json`, but can be changed
     #: to any object that provides ``dumps`` and ``loads`` methods.
-    default_serializer: _PDataSerializer[_TAnyStr] = json  # type: ignore[assignment]
+    default_serializer: _PDataSerializer[t.Any] = json
 
     #: The default ``Signer`` class to instantiate when signing data.
     #: The default is :class:`itsdangerous.signer.Signer`.
@@ -89,14 +105,13 @@ class Serializer(t.Generic[_TAnyStr]):
         dict[str, t.Any] | tuple[type[Signer], dict[str, t.Any]] | type[Signer]
     ] = []
 
-    # Tell type checkers that the default type is Serializer[str] if no
-    # data serializer is provided.
+    # Serializer[str] if no data serializer is provided, or if it returns str.
     @t.overload
     def __init__(
         self: Serializer[str],
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
         salt: str | bytes | None = b"itsdangerous",
-        serializer: None = None,
+        serializer: None | _PDataSerializer[str] = None,
         serializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
@@ -106,12 +121,65 @@ class Serializer(t.Generic[_TAnyStr]):
         | None = None,
     ): ...
 
+    # Serializer[bytes] with a bytes data serializer positional argument.
     @t.overload
     def __init__(
-        self: Serializer[_TAnyStr],
+        self: Serializer[bytes],
+        secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
+        salt: str | bytes | None,
+        serializer: _PDataSerializer[bytes],
+        serializer_kwargs: dict[str, t.Any] | None = None,
+        signer: type[Signer] | None = None,
+        signer_kwargs: dict[str, t.Any] | None = None,
+        fallback_signers: list[
+            dict[str, t.Any] | tuple[type[Signer], dict[str, t.Any]] | type[Signer]
+        ]
+        | None = None,
+    ): ...
+
+    # Serializer[bytes] with a bytes data serializer keyword argument.
+    @t.overload
+    def __init__(
+        self: Serializer[bytes],
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
         salt: str | bytes | None = b"itsdangerous",
-        serializer: _PDataSerializer[_TAnyStr] = ...,
+        *,
+        serializer: _PDataSerializer[bytes],
+        serializer_kwargs: dict[str, t.Any] | None = None,
+        signer: type[Signer] | None = None,
+        signer_kwargs: dict[str, t.Any] | None = None,
+        fallback_signers: list[
+            dict[str, t.Any] | tuple[type[Signer], dict[str, t.Any]] | type[Signer]
+        ]
+        | None = None,
+    ): ...
+
+    # Fall back with a positional argument. If the strict signature of
+    # _PDataSerializer doesn't match, fall back to a union, requiring the user
+    # to specify the type.
+    @t.overload
+    def __init__(
+        self,
+        secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
+        salt: str | bytes | None,
+        serializer: t.Any,
+        serializer_kwargs: dict[str, t.Any] | None = None,
+        signer: type[Signer] | None = None,
+        signer_kwargs: dict[str, t.Any] | None = None,
+        fallback_signers: list[
+            dict[str, t.Any] | tuple[type[Signer], dict[str, t.Any]] | type[Signer]
+        ]
+        | None = None,
+    ): ...
+
+    # Fall back with a keyword argument.
+    @t.overload
+    def __init__(
+        self,
+        secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
+        salt: str | bytes | None = b"itsdangerous",
+        *,
+        serializer: t.Any,
         serializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
@@ -125,7 +193,7 @@ class Serializer(t.Generic[_TAnyStr]):
         self,
         secret_key: str | bytes | cabc.Iterable[str] | cabc.Iterable[bytes],
         salt: str | bytes | None = b"itsdangerous",
-        serializer: _PDataSerializer[_TAnyStr] | None = None,
+        serializer: t.Any | None = None,
         serializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
@@ -150,7 +218,7 @@ class Serializer(t.Generic[_TAnyStr]):
         if serializer is None:
             serializer = self.default_serializer
 
-        self.serializer: _PDataSerializer[_TAnyStr] = serializer
+        self.serializer: _PDataSerializer[_TSerialized] = serializer
         self.is_text_serializer: bool = is_text_serializer(serializer)
 
         if signer is None:
@@ -175,7 +243,7 @@ class Serializer(t.Generic[_TAnyStr]):
         return self.secret_keys[-1]
 
     def load_payload(
-        self, payload: bytes, serializer: _PDataSerializer[_TAnyStr] | None = None
+        self, payload: bytes, serializer: _PDataSerializer[t.Any] | None = None
     ) -> t.Any:
         """Loads the encoded object. This function raises
         :class:`.BadPayload` if the payload is not valid. The
@@ -192,9 +260,9 @@ class Serializer(t.Generic[_TAnyStr]):
 
         try:
             if is_text:
-                return use_serializer.loads(payload.decode("utf-8"))
+                return use_serializer.loads(payload.decode("utf-8"))  # type: ignore[arg-type]
 
-            return use_serializer.loads(payload)
+            return use_serializer.loads(payload)  # type: ignore[arg-type]
         except Exception as e:
             raise BadPayload(
                 "Could not load the payload because an exception"
@@ -240,7 +308,7 @@ class Serializer(t.Generic[_TAnyStr]):
             for secret_key in self.secret_keys:
                 yield fallback(secret_key, salt=salt, **kwargs)
 
-    def dumps(self, obj: t.Any, salt: str | bytes | None = None) -> _TAnyStr:
+    def dumps(self, obj: t.Any, salt: str | bytes | None = None) -> _TSerialized:
         """Returns a signed string serialized with the internal
         serializer. The return value can be either a byte or unicode
         string depending on the format of the internal serializer.
