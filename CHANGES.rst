@@ -9,6 +9,10 @@ Unreleased
 -   Use ``flit_core`` instead of ``setuptools`` as build backend.
 -   Deprecate the ``__version__`` attribute. Use feature detection, or
     ``importlib.metadata.version("itsdangerous")``, instead. :issue:`371`
+-   ``Serializer`` and the return type of ``dumps`` is generic for type checking.
+    By default it is ``Serializer[str]`` and ``dumps`` returns a ``str``. If a
+    different ``serializer`` argument is given, it will try to infer the return
+    type of its ``dumps`` method. :issue:`347`
 
 
 Version 2.1.2
