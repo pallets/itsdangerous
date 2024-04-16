@@ -37,13 +37,21 @@ class NoneAlgorithm(SigningAlgorithm):
         return b""
 
 
+def _lazy_sha1(string: bytes = b"") -> t.Any:
+    """Don't access ``hashlib.sha1`` until runtime. FIPS builds may not include
+    SHA-1, in which case the import and use as a default would fail before the
+    developer can configure something else.
+    """
+    return hashlib.sha1(string)
+
+
 class HMACAlgorithm(SigningAlgorithm):
     """Provides signature generation using HMACs."""
 
     #: The digest method to use with the MAC algorithm. This defaults to
     #: SHA1, but can be changed to any other function in the hashlib
     #: module.
-    default_digest_method: t.Any = staticmethod(hashlib.sha1)
+    default_digest_method: t.Any = staticmethod(_lazy_sha1)
 
     def __init__(self, digest_method: t.Any = None):
         if digest_method is None:
@@ -109,7 +117,7 @@ class Signer:
     #: doesn't apply when used intermediately in HMAC.
     #:
     #: .. versionadded:: 0.14
-    default_digest_method: t.Any = staticmethod(hashlib.sha1)
+    default_digest_method: t.Any = staticmethod(_lazy_sha1)
 
     #: The default scheme to use to derive the signing key from the
     #: secret key and salt. The default is ``django-concat``. Possible

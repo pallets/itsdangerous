@@ -14,6 +14,7 @@ import pytest
 from itsdangerous.exc import BadPayload
 from itsdangerous.exc import BadSignature
 from itsdangerous.serializer import Serializer
+from itsdangerous.signer import _lazy_sha1
 from itsdangerous.signer import Signer
 
 
@@ -177,7 +178,7 @@ class TestSerializer:
         )
 
         unsigners = serializer.iter_unsigners()
-        assert next(unsigners).digest_method == hashlib.sha1
+        assert next(unsigners).digest_method == _lazy_sha1
 
         for signer in unsigners:
             assert signer.digest_method == hashlib.sha256

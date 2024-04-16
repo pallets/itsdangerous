@@ -13,6 +13,9 @@ Unreleased
     By default it is ``Serializer[str]`` and ``dumps`` returns a ``str``. If a
     different ``serializer`` argument is given, it will try to infer the return
     type of its ``dumps`` method. :issue:`347`
+-   The default ``hashlib.sha1`` may not be available in FIPS builds. Don't
+    access it at import time so the developer has time to change the default.
+    :issue:`375`
 
 
 Version 2.1.2
