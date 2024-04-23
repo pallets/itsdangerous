@@ -4,7 +4,7 @@
 #
 #    pip-compile tests.in
 #
-freezegun==1.4.0
+freezegun==1.5.0
     # via -r tests.in
 iniconfig==2.0.0
     # via pytest
