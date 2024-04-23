@@ -16,7 +16,7 @@ packaging==24.0
     # via pytest
 pluggy==1.4.0
     # via pytest
-pyright==1.1.358
+pyright==1.1.359
     # via -r typing.in
 pytest==8.1.1
     # via -r typing.in
