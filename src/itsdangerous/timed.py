@@ -54,7 +54,7 @@ class TimestampSigner(Signer):
     # parameter that affects the return type.
 
     @t.overload
-    def unsign(  # type: ignore[overload-overlap]
+    def unsign(
         self,
         signed_value: str | bytes,
         max_age: int | None = None,
