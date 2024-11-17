@@ -3,7 +3,7 @@ name = "itsdangerous"
 version = "2.2.0"
 description = "Safely pass data to untrusted environments and back."
 readme = "README.md"
-license = { file = "LICENSE.txt" }
+license = { text = "BSD-3-Clause" }
 maintainers = [{ name = "Pallets", email = "contact@palletsprojects.com" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
