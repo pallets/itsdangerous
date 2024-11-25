@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import collections.abc as cabc
 import hashlib
 import hmac
@@ -9,6 +10,7 @@ from .encoding import _base64_alphabet
 from .encoding import base64_decode
 from .encoding import base64_encode
 from .encoding import want_bytes
+from .exc import BadData
 from .exc import BadSignature
 
 
@@ -228,7 +230,7 @@ class Signer:
         """Verifies the signature for the given value."""
         try:
             sig = base64_decode(sig)
-        except Exception:
+        except (BadData, base64.binascii.Error):
             return False
 
         value = want_bytes(value)
