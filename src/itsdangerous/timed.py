@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import base64
 import collections.abc as cabc
 import time
 import typing as t
@@ -113,7 +112,7 @@ class TimestampSigner(Signer):
 
         try:
             ts_int = bytes_to_int(base64_decode(ts_bytes))
-        except (BadData, base64.binascii.Error):
+        except BadData:
             pass
 
         # Signature is *not* okay. Raise a proper error now that we have
