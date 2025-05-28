@@ -54,7 +54,7 @@ class TimestampSigner(Signer):
     # parameter that affects the return type.
 
     @t.overload
-    def unsign(
+    def unsign(  # pyright: ignore
         self,
         signed_value: str | bytes,
         max_age: int | None = None,
@@ -172,7 +172,7 @@ class TimedSerializer(Serializer[_TSerialized]):
     :class:`.Signer`.
     """
 
-    default_signer: type[TimestampSigner] = TimestampSigner
+    default_signer: type[TimestampSigner] = TimestampSigner  # pyright: ignore
 
     def iter_unsigners(
         self, salt: str | bytes | None = None
