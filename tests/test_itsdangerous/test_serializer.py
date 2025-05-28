@@ -7,7 +7,6 @@ from typing import Any
 from typing import cast
 from typing import IO
 from typing import overload
-from typing import Union
 
 import pytest
 
@@ -26,7 +25,7 @@ def coerce_str(ref: str, s: str) -> str: ...
 def coerce_str(ref: bytes, s: str) -> bytes: ...
 
 
-def coerce_str(ref: Union[str, bytes], s: str) -> Union[str, bytes]:
+def coerce_str(ref: str | bytes, s: str) -> str | bytes:
     if isinstance(ref, bytes):
         return s.encode("utf8")
 
