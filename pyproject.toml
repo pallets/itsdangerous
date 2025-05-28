@@ -13,7 +13,7 @@ classifiers = [
     "Programming Language :: Python",
     "Typing :: Typed",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 
 [project.urls]
 Donate = "https://palletsprojects.com/donate"
@@ -41,7 +41,7 @@ gha-update = [
 ]
 pre-commit = [
     "pre-commit",
-    "pre-commit-uv ; python_full_version >= '3.9'",
+    "pre-commit-uv",
 ]
 tests = [
     "freezegun",
@@ -96,14 +96,14 @@ exclude_also = [
 ]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 files = ["src"]
 show_error_codes = true
 pretty = true
 strict = true
 
 [tool.pyright]
-pythonVersion = "3.8"
+pythonVersion = "3.10"
 include = ["src"]
 typeCheckingMode = "standard"
 
@@ -137,7 +137,7 @@ tag-only = [
 
 [tool.tox]
 env_list = [
-    "py3.13", "py3.12", "py3.11", "py3.10", "py3.9", "py3.8",
+    "py3.13", "py3.12", "py3.11", "py3.10",
     "pypy311",
     "style",
     "typing",

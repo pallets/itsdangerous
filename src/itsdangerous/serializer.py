@@ -15,12 +15,10 @@ if t.TYPE_CHECKING:
 
     # This should be either be str or bytes. To avoid having to specify the
     # bound type, it falls back to a union if structural matching fails.
-    _TSerialized = te.TypeVar(
-        "_TSerialized", bound=t.Union[str, bytes], default=t.Union[str, bytes]
-    )
+    _TSerialized = te.TypeVar("_TSerialized", bound=str | bytes, default=str | bytes)
 else:
     # Still available at runtime on Python < 3.13, but without the default.
-    _TSerialized = t.TypeVar("_TSerialized", bound=t.Union[str, bytes])
+    _TSerialized = t.TypeVar("_TSerialized", bound=str | bytes)
 
 
 class _PDataSerializer(t.Protocol[_TSerialized]):

@@ -3,6 +3,8 @@ Version 2.3.0
 
 Unreleased
 
+-   Drop support for Python 3.8 and 3.9.
+
 
 Version 2.2.0
 -------------
