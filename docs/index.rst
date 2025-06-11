@@ -3,9 +3,9 @@
 ItsDangerous
 ============
 
-.. image:: _static/itsdangerous-logo.png
+.. image:: _static/itsdangerous-horizontal.svg
     :align: center
-    :target: https://palletsprojects.com/p/itsdangerous/
+    :height: 200px
 
 Sometimes you want to send some data to untrusted environments, then get
 it back later. To do this safely, the data must be signed to detect
