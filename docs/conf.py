@@ -49,7 +49,7 @@ html_sidebars = {
 }
 singlehtml_sidebars = {"index": ["project.html", "localtoc.html", "ethicalads.html"]}
 html_static_path = ["_static"]
-html_favicon = "_static/itsdangerous-logo-sidebar.png"
-html_logo = "_static/itsdangerous-logo-sidebar.png"
+html_favicon = "_static/itsdangerous-icon.svg"
+html_logo = "_static/itsdangerous-vertical.svg"
 html_title = f"{project} Documentation ({version})"
 html_show_sourcelink = False
