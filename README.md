@@ -1,4 +1,4 @@
-<div align="center"><img src="https://raw.githubusercontent.com/pallets/itsdangerous/refs/heads/stable/docs/_static/itsdangerous-horizontal.svg" alt="" height="150"></div>
+<div align="center"><img src="https://raw.githubusercontent.com/pallets/itsdangerous/refs/heads/stable/docs/_static/itsdangerous-name.svg" alt="" height="150"></div>
 
 # ItsDangerous
 

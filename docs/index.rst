@@ -3,7 +3,7 @@
 ItsDangerous
 ============
 
-.. image:: _static/itsdangerous-horizontal.svg
+.. image:: _static/itsdangerous-name.svg
     :align: center
     :height: 200px
 
