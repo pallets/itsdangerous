@@ -120,6 +120,9 @@ a validation error.
 
 .. code-block:: python
 
+    #import Serializer
+    from itsdangerous.serializer import Serializer
+
     SECRET_KEYS = ["2b9cd98e", "169d7886", "b6af09f5"]
 
     # sign some data with the latest key
