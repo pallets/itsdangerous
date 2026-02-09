@@ -6,6 +6,7 @@ import zlib
 from ._json import _CompactJSON
 from .encoding import base64_decode
 from .encoding import base64_encode
+from .encoding import want_bytes
 from .exc import BadPayload
 from .serializer import _PDataSerializer
 from .serializer import Serializer
@@ -67,6 +68,19 @@ class URLSafeSerializerMixin(Serializer[str]):
             base64d = b"." + base64d
 
         return base64d
+
+    def dumps(self, obj: t.Any, salt: str | bytes | None = None) -> str:
+        """Returns a URL-safe, signed string. The payload is always
+        base64-encoded, so this method always returns :class:`str`
+        regardless of the underlying serializer.
+        """
+        payload = want_bytes(self.dump_payload(obj))
+        rv = self.make_signer(salt).sign(payload)
+
+        if isinstance(rv, bytes):
+            return rv.decode("utf-8")
+
+        return rv
 
 
 class URLSafeSerializer(URLSafeSerializerMixin, Serializer[str]):
