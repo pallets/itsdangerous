@@ -152,6 +152,57 @@ class TestSerializer:
 
         assert serializer.loads(serializer.dumps({(): 1})) == {}
 
+    def test_deserializer_kwargs(self, serializer_factory):
+        """deserializer_kwargs are passed to the serializer's loads method.
+
+        Regression test for https://github.com/pallets/itsdangerous/issues/389
+        """
+        from decimal import Decimal
+
+        serializer = serializer_factory(
+            deserializer_kwargs={"parse_float": Decimal},
+        )
+
+        try:
+            serializer.serializer.loads(
+                serializer.serializer.dumps({"price": 19.99}),
+                parse_float=Decimal,
+            )
+        except TypeError:
+            # Serializer (e.g. pickle) does not support this kwarg; skip.
+            return
+
+        signed = serializer.dumps({"price": 19.99})
+        result = serializer.loads(signed)
+        assert isinstance(result["price"], Decimal)
+
+    def test_deserializer_kwargs_not_used_for_override_serializer(
+        self, serializer_factory
+    ):
+        """deserializer_kwargs should not be passed when a custom serializer
+        is provided to load_payload.
+
+        Regression test for https://github.com/pallets/itsdangerous/issues/389
+        """
+        from decimal import Decimal
+
+        serializer = serializer_factory(
+            deserializer_kwargs={"parse_float": Decimal},
+        )
+
+        try:
+            serializer.serializer.loads(
+                serializer.serializer.dumps({"price": 19.99}),
+                parse_float=Decimal,
+            )
+        except TypeError:
+            return
+
+        payload = serializer.dump_payload({"price": 19.99})
+        # When an explicit serializer is passed, deserializer_kwargs are not used.
+        result = serializer.load_payload(payload, serializer=serializer.serializer)
+        assert isinstance(result["price"], float)
+
     def test_fallback_signers(self, serializer_factory, value: Any):
         serializer = serializer_factory(signer_kwargs={"digest_method": hashlib.sha256})
         signed = serializer.dumps(value)
