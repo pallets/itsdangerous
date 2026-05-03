@@ -26,8 +26,9 @@ def base64_encode(string: str | bytes) -> bytes:
 
 
 def base64_decode(string: str | bytes) -> bytes:
-    """Base64 decode a URL-safe string of bytes or text. The result is
-    bytes.
+    """Base64 decode a URL-safe string of bytes or ASCII text. The
+    result is bytes. Non-ASCII text is invalid and will raise
+    :exc:`.BadData`.
     """
     try:
         string = want_bytes(string, encoding="ascii")
