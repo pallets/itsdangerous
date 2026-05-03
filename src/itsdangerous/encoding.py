@@ -29,12 +29,11 @@ def base64_decode(string: str | bytes) -> bytes:
     """Base64 decode a URL-safe string of bytes or text. The result is
     bytes.
     """
-    string = want_bytes(string, encoding="ascii", errors="ignore")
-    string += b"=" * (-len(string) % 4)
-
     try:
+        string = want_bytes(string, encoding="ascii")
+        string += b"=" * (-len(string) % 4)
         return base64.urlsafe_b64decode(string)
-    except (TypeError, ValueError) as e:
+    except (TypeError, ValueError, UnicodeError) as e:
         raise BadData("Invalid base64-encoded data") from e
 
 

@@ -27,6 +27,11 @@ def test_base64_bad():
         base64_decode("12345")
 
 
+def test_base64_non_ascii():
+    with pytest.raises(BadData):
+        base64_decode("abc😀")
+
+
 @pytest.mark.parametrize(
     ("value", "expect"), ((0, b""), (192, b"\xc0"), (18446744073709551615, b"\xff" * 8))
 )
