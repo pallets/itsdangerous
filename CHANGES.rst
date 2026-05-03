@@ -5,6 +5,10 @@ Unreleased
 
 -   Drop support for Python 3.8 and 3.9.
 -   Remove previously deprecated code.
+-   Added ``deserializer_kwargs`` parameter to :class:`~itsdangerous.serializer.Serializer`
+    to support passing keyword arguments to the deserializer. If not provided,
+    ``serializer_kwargs`` is used for both serialization and deserialization.
+    :issue:`389`
 
 
 Version 2.2.0

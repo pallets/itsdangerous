@@ -143,7 +143,9 @@ class TestSerializer:
         assert other.dumps("value") != serializer.dumps("value")
 
     def test_serializer_kwargs(self, serializer_factory):
-        serializer = serializer_factory(serializer_kwargs={"skipkeys": True})
+        serializer = serializer_factory(
+            serializer_kwargs={"skipkeys": True}, deserializer_kwargs={}
+        )
 
         try:
             serializer.serializer.dumps(None, skipkeys=True)
