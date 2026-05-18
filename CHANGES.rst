@@ -5,6 +5,8 @@ Unreleased
 
 -   Drop support for Python 3.8 and 3.9.
 -   Remove previously deprecated code.
+-   Keep :func:`base64_decode` strict on Python 3.15 by rejecting
+    non-base64 characters instead of ignoring them. :issue:`420`
 
 
 Version 2.2.0
