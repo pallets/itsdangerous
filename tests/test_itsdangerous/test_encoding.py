@@ -27,6 +27,12 @@ def test_base64_bad():
         base64_decode("12345")
 
 
+@pytest.mark.parametrize("value", ("aGk☃", "aGk!"))
+def test_base64_invalid_characters_are_bad(value):
+    with pytest.raises(BadData):
+        base64_decode(value)
+
+
 @pytest.mark.parametrize(
     ("value", "expect"), ((0, b""), (192, b"\xc0"), (18446744073709551615, b"\xff" * 8))
 )
