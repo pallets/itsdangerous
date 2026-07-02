@@ -33,7 +33,7 @@ def base64_decode(string: str | bytes) -> bytes:
     string += b"=" * (-len(string) % 4)
 
     try:
-        return base64.urlsafe_b64decode(string)
+        return base64.b64decode(string, altchars=b"-_", validate=True)
     except (TypeError, ValueError) as e:
         raise BadData("Invalid base64-encoded data") from e
 

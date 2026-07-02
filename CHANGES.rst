@@ -5,6 +5,8 @@ Unreleased
 
 -   Drop support for Python 3.8 and 3.9.
 -   Remove previously deprecated code.
+-   Keep URL-safe base64 decoding strict when non-alphabet characters are
+    present. :issue:`420`
 
 
 Version 2.2.0

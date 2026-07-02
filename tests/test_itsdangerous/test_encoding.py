@@ -22,9 +22,10 @@ def test_base64(value):
     assert dec == want_bytes(value)
 
 
-def test_base64_bad():
+@pytest.mark.parametrize("value", ("12345", "AAAA.AAAA"))
+def test_base64_bad(value):
     with pytest.raises(BadData):
-        base64_decode("12345")
+        base64_decode(value)
 
 
 @pytest.mark.parametrize(
