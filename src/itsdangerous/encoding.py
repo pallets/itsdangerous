@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import string
 import struct
+import sys
 import typing as t
 
 from .exc import BadData
@@ -33,7 +34,10 @@ def base64_decode(string: str | bytes) -> bytes:
     string += b"=" * (-len(string) % 4)
 
     try:
-        return base64.urlsafe_b64decode(string)
+        if sys.version_info >= (3, 15):
+            return base64.urlsafe_b64decode(string, padded=True)
+        else:
+            return base64.urlsafe_b64decode(string)
     except (TypeError, ValueError) as e:
         raise BadData("Invalid base64-encoded data") from e
 
