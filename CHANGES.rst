@@ -5,6 +5,8 @@ Unreleased
 
 -   Drop support for Python 3.8 and 3.9.
 -   Remove previously deprecated code.
+-   Fix raising ``BadData`` on payload without padding on Python 3.15.
+    :issue:`420`
 
 
 Version 2.2.0
