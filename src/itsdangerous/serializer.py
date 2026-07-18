@@ -325,11 +325,14 @@ class Serializer(t.Generic[_TSerialized]):
         """
         f.write(self.dumps(obj, salt))
 
-    def loads(
-        self, s: str | bytes, salt: str | bytes | None = None, **kwargs: t.Any
-    ) -> t.Any:
+    def loads(self, s: str | bytes, salt: str | bytes | None = None) -> t.Any:
         """Reverse of :meth:`dumps`. Raises :exc:`.BadSignature` if the
         signature validation fails.
+
+        .. versionchanged:: 2.3
+            Removed unused ``**kwargs``. Passing unexpected keyword
+            arguments such as ``max_age`` (only valid on timed serializers)
+            now raises :exc:`TypeError` instead of being silently ignored.
         """
         s = want_bytes(s)
         last_exception = None

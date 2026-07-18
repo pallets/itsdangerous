@@ -51,6 +51,23 @@ class TestSerializer:
     def test_serializer(self, serializer: Serializer, value: Any):
         assert serializer.loads(serializer.dumps(value)) == value
 
+    def test_loads_rejects_unexpected_kwargs(
+        self, serializer: Serializer, value: Any
+    ) -> None:
+        """Non-timed serializers must not silently ignore max_age.
+
+        Accidentally swapping URLSafeTimedSerializer for URLSafeSerializer
+        while still passing max_age would otherwise accept expired tokens.
+        """
+        import inspect
+
+        if "max_age" in inspect.signature(type(serializer).loads).parameters:
+            pytest.skip("timed serializer accepts max_age")
+
+        signed = serializer.dumps(value)
+        with pytest.raises(TypeError, match="unexpected keyword argument"):
+            serializer.loads(signed, max_age=-1)  # type: ignore[call-arg]
+
     @pytest.mark.parametrize(
         "transform",
         (
