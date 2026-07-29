@@ -75,11 +75,8 @@ class URLSafeSerializer(URLSafeSerializerMixin, Serializer[str]):
     alphabet as well as ``'_'``, ``'-'`` and ``'.'``.
     """
 
-    @t.overload
-    def loads(self, s: str | bytes, salt: str | bytes | None = None) -> t.Any: ...
-
-    def loads(
-        self, s: str | bytes, salt: str | bytes | None = None, **kwargs: t.Any
+    def loads(  # type: ignore[override]
+        self, s: str | bytes, salt: str | bytes | None = None
     ) -> t.Any:
         """Reverse of :meth:`dumps` without timed-load arguments.
 
@@ -87,13 +84,6 @@ class URLSafeSerializer(URLSafeSerializerMixin, Serializer[str]):
         :class:`URLSafeTimedSerializer`, such as ``max_age``, fail instead of
         being silently ignored.
         """
-        if kwargs:
-            unexpected = next(iter(kwargs))
-            raise TypeError(
-                "URLSafeSerializer.loads() got an unexpected keyword argument "
-                f"{unexpected!r}"
-            )
-
         return super().loads(s, salt)
 
 
