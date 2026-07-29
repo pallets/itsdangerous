@@ -22,3 +22,11 @@ class TestURLSafeTimedSerializer(TestURLSafeSerializer, TestTimedSerializer):
     @pytest.fixture()
     def serializer_factory(self):
         return partial(URLSafeTimedSerializer, secret_key="secret-key")
+
+
+def test_url_safe_serializer_rejects_timed_arguments():
+    serializer = URLSafeSerializer("secret-key")
+    signed = serializer.dumps("value")
+
+    with pytest.raises(TypeError, match="max_age"):
+        serializer.loads(signed, max_age=60)
