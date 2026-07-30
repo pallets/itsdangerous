@@ -330,7 +330,17 @@ class Serializer(t.Generic[_TSerialized]):
     ) -> t.Any:
         """Reverse of :meth:`dumps`. Raises :exc:`.BadSignature` if the
         signature validation fails.
+
+        Unexpected keyword arguments are rejected so callers cannot
+        accidentally pass timed-serializer options such as ``max_age``
+        to an untimed serializer (issue #429).
         """
+        if kwargs:
+            unexpected = ", ".join(sorted(kwargs))
+            raise TypeError(
+                f"{type(self).__name__}.loads() got unexpected keyword "
+                f"argument(s): {unexpected}"
+            )
         s = want_bytes(s)
         last_exception = None
 
