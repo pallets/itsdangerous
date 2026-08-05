@@ -15,6 +15,7 @@ from itsdangerous.exc import BadSignature
 from itsdangerous.serializer import Serializer
 from itsdangerous.signer import _lazy_sha1
 from itsdangerous.signer import Signer
+from itsdangerous.url_safe import URLSafeSerializer
 
 
 @overload
@@ -108,6 +109,13 @@ class TestSerializer:
 
         serializer.signer = BadUnsign
         assert serializer.loads_unsafe(bad_signed) == (False, None)
+
+    def test_loads_rejects_unsupported_kwargs(self):
+        serializer = URLSafeSerializer("secret_key")
+        signed = serializer.dumps("value")
+
+        with pytest.raises(TypeError, match="unexpected keyword argument 'max_age'"):
+            serializer.loads(signed, max_age=-1)  # type: ignore[call-arg]
 
     def test_file(self, serializer: Serializer, value: Any):
         f = cast(
