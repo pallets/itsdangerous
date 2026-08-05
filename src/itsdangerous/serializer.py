@@ -325,9 +325,7 @@ class Serializer(t.Generic[_TSerialized]):
         """
         f.write(self.dumps(obj, salt))
 
-    def loads(
-        self, s: str | bytes, salt: str | bytes | None = None
-    ) -> t.Any:
+    def loads(self, s: str | bytes, salt: str | bytes | None = None) -> t.Any:
         """Reverse of :meth:`dumps`. Raises :exc:`.BadSignature` if the
         signature validation fails.
         """
