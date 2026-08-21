@@ -51,6 +51,13 @@ class TestSerializer:
     def test_serializer(self, serializer: Serializer, value: Any):
         assert serializer.loads(serializer.dumps(value)) == value
 
+    def test_loads_rejects_max_age(self):
+        serializer = Serializer("secret_key")
+        signed = serializer.dumps("value")
+
+        with pytest.raises(TypeError):
+            serializer.loads(signed, max_age=-1)  # type: ignore[call-arg]
+
     @pytest.mark.parametrize(
         "transform",
         (

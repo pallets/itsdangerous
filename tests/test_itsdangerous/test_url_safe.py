@@ -17,6 +17,13 @@ class TestURLSafeSerializer(TestSerializer):
     def value(self, request):
         return request.param
 
+    def test_loads_rejects_max_age(self):
+        serializer = URLSafeSerializer("secret-key")
+        signed = serializer.dumps("value")
+
+        with pytest.raises(TypeError):
+            serializer.loads(signed, max_age=-1)  # type: ignore[call-arg]
+
 
 class TestURLSafeTimedSerializer(TestURLSafeSerializer, TestTimedSerializer):
     @pytest.fixture()
