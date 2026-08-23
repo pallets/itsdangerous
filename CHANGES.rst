@@ -3,8 +3,9 @@ Version 2.3.0
 
 Unreleased
 
--   Drop support for Python 3.8 and 3.9.
--   Remove previously deprecated code.
+-   Add ``deserializer_kwargs`` to ``Serializer``. These are passed to
+    ``serializer.loads`` during ``load_payload``, matching
+    ``serializer_kwargs`` for ``dumps``. :issue:`389`
 
 
 Version 2.2.0

@@ -152,6 +152,36 @@ class TestSerializer:
 
         assert serializer.loads(serializer.dumps({(): 1})) == {}
 
+    def test_deserializer_kwargs(self, serializer_factory):
+        class Codec:
+            def dumps(self, obj, prefix=""):
+                return ";".join(f"{prefix}{k}={v}" for k, v in obj.items())
+
+            def loads(self, s, prefix=""):
+                out = {}
+                if not s:
+                    return out
+                for item in s.split(";"):
+                    key, value = item.split("=", 1)
+                    if prefix and key.startswith(prefix):
+                        key = key[len(prefix) :]
+                    out[int(key) if key.isdigit() else key] = value
+                return out
+
+        data = {0: "foo", 1: "bar"}
+        both = serializer_factory(
+            serializer=Codec(),
+            serializer_kwargs={"prefix": "id:"},
+            deserializer_kwargs={"prefix": "id:"},
+        )
+        assert both.loads(both.dumps(data)) == data
+
+        dumps_only = serializer_factory(
+            serializer=Codec(),
+            serializer_kwargs={"prefix": "id:"},
+        )
+        assert dumps_only.loads(dumps_only.dumps(data)) == {"id:0": "foo", "id:1": "bar"}
+
     def test_fallback_signers(self, serializer_factory, value: Any):
         serializer = serializer_factory(signer_kwargs={"digest_method": hashlib.sha256})
         signed = serializer.dumps(value)

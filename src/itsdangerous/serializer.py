@@ -60,6 +60,11 @@ class Serializer(t.Generic[_TSerialized]):
         :attr:`default_serializer`, which defaults to :mod:`json`.
     :param serializer_kwargs: Keyword arguments to pass when calling
         ``serializer.dumps``.
+    :param deserializer_kwargs: Keyword arguments to pass when calling
+        ``serializer.loads``. These are stored separately because
+        ``dumps`` and ``loads`` often accept different options (for
+        example ``json.dumps(..., skipkeys=True)`` is not valid for
+        ``json.loads``).
     :param signer: A ``Signer`` class to instantiate when signing data.
         Defaults to :attr:`default_signer`, which defaults to
         :class:`~itsdangerous.signer.Signer`.
@@ -70,6 +75,9 @@ class Serializer(t.Generic[_TSerialized]):
         of ``signer_kwargs``, a ``Signer`` class, or a tuple of
         ``(signer, signer_kwargs)``. Defaults to
         :attr:`default_fallback_signers`.
+
+    .. versionchanged:: 2.3
+        Added ``deserializer_kwargs``, passed to ``serializer.loads``.
 
     .. versionchanged:: 2.0
         Added support for key rotation by passing a list to
@@ -111,6 +119,7 @@ class Serializer(t.Generic[_TSerialized]):
         salt: str | bytes | None = b"itsdangerous",
         serializer: None | _PDataSerializer[str] = None,
         serializer_kwargs: dict[str, t.Any] | None = None,
+        deserializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
         fallback_signers: list[
@@ -127,6 +136,7 @@ class Serializer(t.Generic[_TSerialized]):
         salt: str | bytes | None,
         serializer: _PDataSerializer[bytes],
         serializer_kwargs: dict[str, t.Any] | None = None,
+        deserializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
         fallback_signers: list[
@@ -144,6 +154,7 @@ class Serializer(t.Generic[_TSerialized]):
         *,
         serializer: _PDataSerializer[bytes],
         serializer_kwargs: dict[str, t.Any] | None = None,
+        deserializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
         fallback_signers: list[
@@ -162,6 +173,7 @@ class Serializer(t.Generic[_TSerialized]):
         salt: str | bytes | None,
         serializer: t.Any,
         serializer_kwargs: dict[str, t.Any] | None = None,
+        deserializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
         fallback_signers: list[
@@ -179,6 +191,7 @@ class Serializer(t.Generic[_TSerialized]):
         *,
         serializer: t.Any,
         serializer_kwargs: dict[str, t.Any] | None = None,
+        deserializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
         fallback_signers: list[
@@ -193,6 +206,7 @@ class Serializer(t.Generic[_TSerialized]):
         salt: str | bytes | None = b"itsdangerous",
         serializer: t.Any | None = None,
         serializer_kwargs: dict[str, t.Any] | None = None,
+        deserializer_kwargs: dict[str, t.Any] | None = None,
         signer: type[Signer] | None = None,
         signer_kwargs: dict[str, t.Any] | None = None,
         fallback_signers: list[
@@ -232,6 +246,7 @@ class Serializer(t.Generic[_TSerialized]):
             dict[str, t.Any] | tuple[type[Signer], dict[str, t.Any]] | type[Signer]
         ] = fallback_signers
         self.serializer_kwargs: dict[str, t.Any] = serializer_kwargs or {}
+        self.deserializer_kwargs: dict[str, t.Any] = deserializer_kwargs or {}
 
     @property
     def secret_key(self) -> bytes:
@@ -252,15 +267,17 @@ class Serializer(t.Generic[_TSerialized]):
         if serializer is None:
             use_serializer = self.serializer
             is_text = self.is_text_serializer
+            loads_kwargs = self.deserializer_kwargs
         else:
             use_serializer = serializer
             is_text = is_text_serializer(serializer)
+            loads_kwargs = {}
 
         try:
             if is_text:
-                return use_serializer.loads(payload.decode("utf-8"))  # type: ignore[arg-type]
+                return use_serializer.loads(payload.decode("utf-8"), **loads_kwargs)  # type: ignore[arg-type]
 
-            return use_serializer.loads(payload)  # type: ignore[arg-type]
+            return use_serializer.loads(payload, **loads_kwargs)  # type: ignore[arg-type]
         except Exception as e:
             raise BadPayload(
                 "Could not load the payload because an exception"
