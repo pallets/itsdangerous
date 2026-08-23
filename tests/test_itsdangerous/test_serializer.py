@@ -180,7 +180,10 @@ class TestSerializer:
             serializer=Codec(),
             serializer_kwargs={"prefix": "id:"},
         )
-        assert dumps_only.loads(dumps_only.dumps(data)) == {"id:0": "foo", "id:1": "bar"}
+        assert dumps_only.loads(dumps_only.dumps(data)) == {
+            "id:0": "foo",
+            "id:1": "bar",
+        }
 
     def test_fallback_signers(self, serializer_factory, value: Any):
         serializer = serializer_factory(signer_kwargs={"digest_method": hashlib.sha256})
