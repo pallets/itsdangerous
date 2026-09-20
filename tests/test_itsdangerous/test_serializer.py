@@ -183,6 +183,17 @@ class TestSerializer:
             assert signer.digest_method == hashlib.sha256
 
 
+def test_untimed_loads_rejects_max_age():
+    """Untimed serializers must not silently ignore TimedSerializer kwargs.
+
+    See https://github.com/pallets/itsdangerous/issues/429
+    """
+    serializer = Serializer("secret_key")
+    signed = serializer.dumps({"id": 42})
+    with pytest.raises(TypeError, match="unexpected keyword argument"):
+        serializer.loads(signed, max_age=-1)
+
+
 def test_digests():
     factory = partial(Serializer, secret_key="dev key", salt="dev salt")
     default_value = factory(signer_kwargs={}).dumps([42])
