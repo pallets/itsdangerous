@@ -5,6 +5,9 @@ Unreleased
 
 -   Drop support for Python 3.8 and 3.9.
 -   Remove previously deprecated code.
+-   ``Serializer.loads`` no longer accepts arbitrary keyword arguments that
+    were silently ignored. Passing an unexpected argument such as ``max_age``
+    to a non-timed serializer raises ``TypeError``. :issue:`429`
 
 
 Version 2.2.0

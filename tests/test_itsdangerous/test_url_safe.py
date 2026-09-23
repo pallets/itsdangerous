@@ -8,6 +8,14 @@ from test_itsdangerous.test_serializer import TestSerializer
 from test_itsdangerous.test_timed import TestTimedSerializer
 
 
+def test_loads_rejects_unexpected_kwargs():
+    serializer = URLSafeSerializer("secret-key")
+    signed = serializer.dumps("value")
+
+    with pytest.raises(TypeError, match="unexpected keyword argument 'max_age'"):
+        serializer.loads(signed, max_age=-1)
+
+
 class TestURLSafeSerializer(TestSerializer):
     @pytest.fixture()
     def serializer_factory(self):
