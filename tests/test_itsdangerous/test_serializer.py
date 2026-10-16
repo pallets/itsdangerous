@@ -194,3 +194,11 @@ def test_digests():
         "[42].MKCz_0nXQqv7wKpfHZcRtJRmpT2T5uvs9YQsJEhJimqxc"
         "9bCLxG31QzS5uC8OVBI1i6jyOLAFNoKaF5ckO9L5Q"
     )
+
+
+def test_loads_unexpected_kwargs():
+    serializer = Serializer("secret_key")
+    signed = serializer.dumps("value")
+
+    with pytest.raises(TypeError, match="unexpected keyword argument"):
+        serializer.loads(signed, max_age=10)  # type: ignore[call-arg]

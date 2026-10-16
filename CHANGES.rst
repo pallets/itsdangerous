@@ -3,6 +3,8 @@ Version 2.3.0
 
 Unreleased
 
+-   ``Serializer.loads`` no longer accepts unexpected keyword arguments, raising
+    a ``TypeError`` instead of silently ignoring them. :issue:`429`
 -   Drop support for Python 3.8 and 3.9.
 -   Remove previously deprecated code.
 
